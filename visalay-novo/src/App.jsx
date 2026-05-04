@@ -13,7 +13,7 @@ function App() {
   const [erroAcesso, setErroAcesso] = useState(false);
   const [abaAtiva, setAbaAtiva] = useState('ativas'); 
 
-  // --- NOVOS ESTADOS PARA O BANCO DE DADOS ---
+  // --- ESTADOS DO BANCO DE DADOS ---
   const [emprestimos, setEmprestimos] = useState([]);
   const [devolucoes, setDevolucoes] = useState([]);
 
@@ -54,21 +54,25 @@ function App() {
   // ==========================================
   const buscarDadosDoBanco = async () => {
     try {
+      // Busca Empréstimos
       const resEmprestimos = await fetch(`${API_URL}/listar/Emprestimos`);
       const dadosEmprestimos = await resEmprestimos.json();
-      setEmprestimos(dadosEmprestimos);
-
+      
+      // Busca Devoluções
       const resDevolucoes = await fetch(`${API_URL}/listar/Devolucoes`);
       const dadosDevolucoes = await resDevolucoes.json();
-      setDevolucoes(dadosDevolucoes);
 
-      console.log("✅ CONECTADO! Os dados vieram do Supabase/API:", {
-        emprestimos: dadosEmprestimos, 
-        devolucoes: dadosDevolucoes
-      });
+      console.log("✅ DADOS RECEBIDOS:", { emprestimos: dadosEmprestimos, devolucoes: dadosDevolucoes });
+
+      // GARANTIA: Verifica se a API mandou um array diretamente ou dentro de uma propriedade
+      const listaEmprestimos = Array.isArray(dadosEmprestimos) ? dadosEmprestimos : (dadosEmprestimos.data || []);
+      const listaDevolucoes = Array.isArray(dadosDevolucoes) ? dadosDevolucoes : (dadosDevolucoes.data || []);
+
+      setEmprestimos(listaEmprestimos);
+      setDevolucoes(listaDevolucoes);
       
     } catch (error) {
-      console.error("Erro ao buscar dados da API:", error);
+      console.error("❌ Erro ao buscar dados da API:", error);
     }
   };
 
@@ -80,8 +84,6 @@ function App() {
   // ==========================================
   // 5. EFEITOS (UseEffect)
   // ==========================================
-  
-  // Efeito 1: Controlar o tempo da mensagem de boas vindas
   useEffect(() => {
     if (exibirMensagemBoasVindas) {
       const timer = setTimeout(() => setExibirMensagemBoasVindas(false), 3000);
@@ -89,7 +91,6 @@ function App() {
     }
   }, [exibirMensagemBoasVindas]);
 
-  // Efeito 2: Buscar dados na API assim que logar
   useEffect(() => {
     if (logado && !exibirMensagemBoasVindas) {
       buscarDadosDoBanco();
@@ -104,7 +105,6 @@ function App() {
       <div style={{ backgroundColor: '#a0a0a0', minHeight: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', fontFamily: 'sans-serif' }}>
         <Header />
         
-        {/* CABEÇALHO DO PAINEL */}
         <div style={{ backgroundColor: 'white', padding: '15px 30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #ff00ff' }}>
           <h2 style={{ color: '#4b0082', margin: 0 }}>PAINEL DO ALMOXARIFADO</h2>
           <button 
@@ -115,7 +115,6 @@ function App() {
           </button>
         </div>
 
-        {/* NAVEGAÇÃO POR ABAS */}
         <nav style={{ display: 'flex', backgroundColor: '#4b0082', padding: '0 20px', gap: '5px', overflowX: 'auto' }}>
           <button onClick={() => setAbaAtiva('ativas')} style={{ padding: '15px 20px', border: 'none', backgroundColor: abaAtiva === 'ativas' ? '#ff00ff' : 'transparent', color: 'white', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' }}>FERRAMENTAS ATIVAS</button>
           <button onClick={() => setAbaAtiva('retiradas')} style={{ padding: '15px 20px', border: 'none', backgroundColor: abaAtiva === 'retiradas' ? '#ff00ff' : 'transparent', color: 'white', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' }}>TELA DE RETIRADAS</button>
@@ -139,14 +138,19 @@ function App() {
                   </tr>
                 </thead>
                 <tbody>
-                  {emprestimos
-                    .filter(emp => emp.ferramenta_status === 'Emprestado')
-                    .map(emp => (
-                      <tr key={`ativa-${emp.emprestimo_id}`} style={{ borderBottom: '1px solid #eee' }}>
-                        <td style={{ padding: '12px' }}>{emp.tipo_ferramenta}</td>
-                        <td style={{ padding: '12px' }}><strong>{emp.nome_operador}</strong></td>
-                      </tr>
-                    ))}
+                  {emprestimos.length === 0 ? (
+                    <tr><td colSpan="2" style={{ padding: '12px', textAlign: 'center' }}>Nenhuma ferramenta ativa no momento.</td></tr>
+                  ) : (
+                    emprestimos
+                      // Flexibilizei o filtro caso o nome da coluna de status no seu banco seja diferente
+                      .filter(emp => emp.ferramenta_status === 'Emprestado' || emp.status === 'Emprestado' || !emp.data_devolucao)
+                      .map((emp, index) => (
+                        <tr key={`ativa-${emp.id || emp.emprestimo_id || index}`} style={{ borderBottom: '1px solid #eee' }}>
+                          <td style={{ padding: '12px' }}>{emp.tipo_ferramenta || emp.ferramenta || 'Não informado'}</td>
+                          <td style={{ padding: '12px' }}><strong>{emp.nome_operador || emp.operador || 'Não informado'}</strong></td>
+                        </tr>
+                      ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -166,16 +170,20 @@ function App() {
                   </tr>
                 </thead>
                 <tbody>
-                  {emprestimos.map(emp => (
-                    <tr key={`hist-${emp.emprestimo_id}`} style={{ borderBottom: '1px solid #eee' }}>
-                      <td style={{ padding: '12px' }}>{emp.tipo_ferramenta}</td>
-                      <td style={{ padding: '12px' }}>{emp.nome_operador}</td>
-                      <td style={{ padding: '12px' }}>{emp.setor_operador}</td>
-                      <td style={{ padding: '12px' }}>
-                         {new Date(emp.data_retirada).toLocaleString()}
-                      </td>
-                    </tr>
-                  ))}
+                  {emprestimos.length === 0 ? (
+                    <tr><td colSpan="4" style={{ padding: '12px', textAlign: 'center' }}>Nenhum registro de retirada.</td></tr>
+                  ) : (
+                    emprestimos.map((emp, index) => (
+                      <tr key={`hist-${emp.id || emp.emprestimo_id || index}`} style={{ borderBottom: '1px solid #eee' }}>
+                        <td style={{ padding: '12px' }}>{emp.tipo_ferramenta || emp.ferramenta || '-'}</td>
+                        <td style={{ padding: '12px' }}>{emp.nome_operador || emp.operador || '-'}</td>
+                        <td style={{ padding: '12px' }}>{emp.setor_operador || emp.setor || '-'}</td>
+                        <td style={{ padding: '12px' }}>
+                           {emp.data_retirada ? new Date(emp.data_retirada).toLocaleString() : 'Data não registrada'}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -195,16 +203,20 @@ function App() {
                   </tr>
                 </thead>
                 <tbody>
-                  {devolucoes.map(dev => (
-                    <tr key={`dev-${dev.devolucao_id}`} style={{ borderBottom: '1px solid #eee' }}>
-                      <td style={{ padding: '12px' }}>{dev.tipo_ferramenta}</td>
-                      <td style={{ padding: '12px', fontWeight: 'bold' }}>{dev.nome_operador}</td>
-                      <td style={{ padding: '12px' }}>{dev.setor_operador}</td>
-                      <td style={{ padding: '12px', color: '#28a745', fontWeight: 'bold' }}>
-                        {new Date(dev.data_devolucao).toLocaleString()}
-                      </td>
-                    </tr>
-                  ))}
+                  {devolucoes.length === 0 ? (
+                    <tr><td colSpan="4" style={{ padding: '12px', textAlign: 'center' }}>Nenhum registro de devolução.</td></tr>
+                  ) : (
+                    devolucoes.map((dev, index) => (
+                      <tr key={`dev-${dev.id || dev.devolucao_id || index}`} style={{ borderBottom: '1px solid #eee' }}>
+                        <td style={{ padding: '12px' }}>{dev.tipo_ferramenta || dev.ferramenta || '-'}</td>
+                        <td style={{ padding: '12px', fontWeight: 'bold' }}>{dev.nome_operador || dev.operador || '-'}</td>
+                        <td style={{ padding: '12px' }}>{dev.setor_operador || dev.setor || '-'}</td>
+                        <td style={{ padding: '12px', color: '#28a745', fontWeight: 'bold' }}>
+                          {dev.data_devolucao ? new Date(dev.data_devolucao).toLocaleString() : 'Data não registrada'}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -265,8 +277,14 @@ function App() {
                     <tr style={{ backgroundColor: '#f8f9fa' }}><th style={{ padding: '12px' }}>Equipamento</th><th style={{ padding: '12px' }}>Quem Retirou</th></tr>
                   </thead>
                   <tbody>
-                    <tr><td style={{ padding: '12px' }}>Furadeira Industrial</td><td style={{ padding: '12px' }}>Carlos Eduardo</td></tr>
-                    <tr><td style={{ padding: '12px' }}>Gerador Honda</td><td style={{ padding: '12px' }}>Marcos Vinícius</td></tr>
+                    {emprestimos
+                      .filter(emp => emp.ferramenta_status === 'Emprestado' || emp.status === 'Emprestado')
+                      .map((emp, index) => (
+                        <tr key={`fora-${emp.id || emp.emprestimo_id || index}`}>
+                          <td style={{ padding: '12px' }}>{emp.tipo_ferramenta || emp.ferramenta || 'N/A'}</td>
+                          <td style={{ padding: '12px' }}>{emp.nome_operador || emp.operador || 'N/A'}</td>
+                        </tr>
+                      ))}
                   </tbody>
                 </table>
               </div>
@@ -292,7 +310,6 @@ function App() {
             </div>
         ) : (
           <>
-            {/* TELA 1: SELEÇÃO INICIAL */}
             {!perfil && (
               <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)', textAlign: 'center', width: '350px' }}>
                 <h2 style={{ color: '#4b0082' }}>VisAlay</h2>
@@ -301,7 +318,6 @@ function App() {
               </div>
             )}
 
-            {/* TELA 2: LOGIN FUNCIONÁRIO (Webcam) */}
             {perfil === 'funcionario' && (
               <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '25px', textAlign: 'center', width: '400px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
                 <button onClick={() => {setPerfil(null); setErroAcesso(false);}} style={{ float: 'left', border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px' }}>←</button>
@@ -314,7 +330,6 @@ function App() {
               </div>
             )}
 
-            {/* TELA 3: LOGIN GESTOR/RH */}
             {perfil === 'rh' && (
               <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '25px', textAlign: 'center', width: '380px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
                 <button onClick={() => {setPerfil(null); setMetodoRH(null);}} style={{ float: 'left', border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px' }}>←</button>
