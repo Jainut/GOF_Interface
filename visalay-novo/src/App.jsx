@@ -3,7 +3,9 @@ import Webcam from 'react-webcam';
 import Header from './Header.jsx';
 
 function App() {
-  // --- ESTADOS DO SISTEMA ---
+  // ==========================================
+  // 1. ESTADOS DO SISTEMA
+  // ==========================================
   const [perfil, setPerfil] = useState(null); 
   const [metodoRH, setMetodoRH] = useState(null); 
   const [logado, setLogado] = useState(false); 
@@ -11,7 +13,15 @@ function App() {
   const [erroAcesso, setErroAcesso] = useState(false);
   const [abaAtiva, setAbaAtiva] = useState('ativas'); 
 
-  // --- DADOS ADICIONADOS PARA OS NOVOS TÓPICOS ---
+  // --- NOVOS ESTADOS PARA O BANCO DE DADOS ---
+  const [emprestimos, setEmprestimos] = useState([]);
+  const [devolucoes, setDevolucoes] = useState([]);
+
+  // ==========================================
+  // 2. DADOS LOCAIS (MOCK) E CONFIGURAÇÕES
+  // ==========================================
+  const API_URL = ''; 
+
   const alertasAnomalias = [
     { id: 1, tipo: 'Atraso', msg: 'Furadeira Bosch não devolvida por Carlos Eduardo.', hora: '17:05h' },
     { id: 2, tipo: 'Acesso', msg: 'Tentativa de login não reconhecido no terminal 02.', hora: '18:20h' }
@@ -22,7 +32,9 @@ function App() {
     { id: 2, nome: 'Gerador Honda', saude: '28%', mediaQuebra: '40 dias', status: 'Crítico' }
   ];
 
-  // --- ESTILOS PADRONIZADOS ---
+  // ==========================================
+  // 3. ESTILOS
+  // ==========================================
   const btnPerfilStyle = { 
     backgroundColor: '#4b0082', 
     color: 'white', 
@@ -37,11 +49,39 @@ function App() {
     transition: '0.3s'
   };
 
+  // ==========================================
+  // 4. FUNÇÕES
+  // ==========================================
+  const buscarDadosDoBanco = async () => {
+    try {
+      const resEmprestimos = await fetch(`${API_URL}/listar/Emprestimos`);
+      const dadosEmprestimos = await resEmprestimos.json();
+      setEmprestimos(dadosEmprestimos);
+
+      const resDevolucoes = await fetch(`${API_URL}/listar/Devolucoes`);
+      const dadosDevolucoes = await resDevolucoes.json();
+      setDevolucoes(dadosDevolucoes);
+
+      console.log("✅ CONECTADO! Os dados vieram do Supabase/API:", {
+        emprestimos: dadosEmprestimos, 
+        devolucoes: dadosDevolucoes
+      });
+      
+    } catch (error) {
+      console.error("Erro ao buscar dados da API:", error);
+    }
+  };
+
   const realizarLoginSucesso = () => {
     setExibirMensagemBoasVindas(true);
     setLogado(true);
   };
 
+  // ==========================================
+  // 5. EFEITOS (UseEffect)
+  // ==========================================
+  
+  // Efeito 1: Controlar o tempo da mensagem de boas vindas
   useEffect(() => {
     if (exibirMensagemBoasVindas) {
       const timer = setTimeout(() => setExibirMensagemBoasVindas(false), 3000);
@@ -49,8 +89,15 @@ function App() {
     }
   }, [exibirMensagemBoasVindas]);
 
+  // Efeito 2: Buscar dados na API assim que logar
+  useEffect(() => {
+    if (logado && !exibirMensagemBoasVindas) {
+      buscarDadosDoBanco();
+    }
+  }, [logado, exibirMensagemBoasVindas]);
+
   // ==========================================
-  // TELA DO PAINEL ADMINISTRATIVO (PÓS-LOGIN)
+  // 6. RENDERIZAÇÃO: PAINEL ADMINISTRATIVO
   // ==========================================
   if (logado && !exibirMensagemBoasVindas) {
     return (
@@ -68,7 +115,7 @@ function App() {
           </button>
         </div>
 
-        {/* NAVEGAÇÃO POR ABAS (COM OS NOVOS TÓPICOS ADICIONADOS) */}
+        {/* NAVEGAÇÃO POR ABAS */}
         <nav style={{ display: 'flex', backgroundColor: '#4b0082', padding: '0 20px', gap: '5px', overflowX: 'auto' }}>
           <button onClick={() => setAbaAtiva('ativas')} style={{ padding: '15px 20px', border: 'none', backgroundColor: abaAtiva === 'ativas' ? '#ff00ff' : 'transparent', color: 'white', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' }}>FERRAMENTAS ATIVAS</button>
           <button onClick={() => setAbaAtiva('retiradas')} style={{ padding: '15px 20px', border: 'none', backgroundColor: abaAtiva === 'retiradas' ? '#ff00ff' : 'transparent', color: 'white', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' }}>TELA DE RETIRADAS</button>
@@ -92,8 +139,14 @@ function App() {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr style={{ borderBottom: '1px solid #eee' }}><td style={{ padding: '12px' }}>Furadeira Industrial Bosch</td><td style={{ padding: '12px' }}><strong>Carlos Eduardo</strong></td></tr>
-                  <tr style={{ borderBottom: '1px solid #eee' }}><td style={{ padding: '12px' }}>Gerador Portátil Honda</td><td style={{ padding: '12px' }}><strong>Marcos Vinícius</strong></td></tr>
+                  {emprestimos
+                    .filter(emp => emp.ferramenta_status === 'Emprestado')
+                    .map(emp => (
+                      <tr key={`ativa-${emp.emprestimo_id}`} style={{ borderBottom: '1px solid #eee' }}>
+                        <td style={{ padding: '12px' }}>{emp.tipo_ferramenta}</td>
+                        <td style={{ padding: '12px' }}><strong>{emp.nome_operador}</strong></td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
@@ -109,13 +162,20 @@ function App() {
                     <th style={{ padding: '12px', borderBottom: '2px solid #dee2e6' }}>Ferramenta</th>
                     <th style={{ padding: '12px' }}>Responsável</th>
                     <th style={{ padding: '12px' }}>Setor</th>
-                    <th style={{ padding: '12px' }}>Horário</th>
+                    <th style={{ padding: '12px' }}>Data/Hora</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr style={{ borderBottom: '1px solid #eee' }}><td style={{ padding: '12px' }}>Furadeira Industrial Bosch</td><td style={{ padding: '12px' }}>Carlos Eduardo</td><td style={{ padding: '12px' }}>Elétrica</td><td style={{ padding: '12px' }}>08:15h</td></tr>
-                  <tr style={{ borderBottom: '1px solid #eee' }}><td style={{ padding: '12px' }}>Multímetro Fluke 87V</td><td style={{ padding: '12px' }}>Ana Beatriz</td><td style={{ padding: '12px' }}>Manutenção</td><td style={{ padding: '12px' }}>09:30h</td></tr>
-                  <tr style={{ borderBottom: '1px solid #eee' }}><td style={{ padding: '12px' }}>Gerador Portátil Honda</td><td style={{ padding: '12px' }}>Marcos Vinícius</td><td style={{ padding: '12px' }}>Obras</td><td style={{ padding: '12px' }}>10:00h</td></tr>
+                  {emprestimos.map(emp => (
+                    <tr key={`hist-${emp.emprestimo_id}`} style={{ borderBottom: '1px solid #eee' }}>
+                      <td style={{ padding: '12px' }}>{emp.tipo_ferramenta}</td>
+                      <td style={{ padding: '12px' }}>{emp.nome_operador}</td>
+                      <td style={{ padding: '12px' }}>{emp.setor_operador}</td>
+                      <td style={{ padding: '12px' }}>
+                         {new Date(emp.data_retirada).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -131,18 +191,26 @@ function App() {
                     <th style={{ padding: '12px', borderBottom: '2px solid #dee2e6' }}>Ferramenta</th>
                     <th style={{ padding: '12px' }}>Responsável</th>
                     <th style={{ padding: '12px' }}>Setor</th>
-                    <th style={{ padding: '12px' }}>Retirada</th>
-                    <th style={{ padding: '12px' }}>Devolução</th>
+                    <th style={{ padding: '12px' }}>Data/Hora Devolução</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr style={{ borderBottom: '1px solid #eee' }}><td style={{ padding: '12px' }}>Multímetro Fluke 87V</td><td style={{ padding: '12px', fontWeight: 'bold' }}>Ana Beatriz</td><td style={{ padding: '12px' }}>Manutenção</td><td style={{ padding: '12px' }}>09:30h</td><td style={{ padding: '12px', color: '#28a745', fontWeight: 'bold' }}>10:45h</td></tr>
+                  {devolucoes.map(dev => (
+                    <tr key={`dev-${dev.devolucao_id}`} style={{ borderBottom: '1px solid #eee' }}>
+                      <td style={{ padding: '12px' }}>{dev.tipo_ferramenta}</td>
+                      <td style={{ padding: '12px', fontWeight: 'bold' }}>{dev.nome_operador}</td>
+                      <td style={{ padding: '12px' }}>{dev.setor_operador}</td>
+                      <td style={{ padding: '12px', color: '#28a745', fontWeight: 'bold' }}>
+                        {new Date(dev.data_devolucao).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
           )}
 
-          {/* NOVO TÓPICO: ABA MANUTENÇÃO */}
+          {/* 4. ABA MANUTENÇÃO */}
           {abaAtiva === 'manutencao' && (
             <div style={{ backgroundColor: 'white', borderRadius: '15px', padding: '25px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
               <h3 style={{ color: '#007bff', marginTop: 0 }}>📊 Saúde e Manutenção Preventiva</h3>
@@ -162,7 +230,7 @@ function App() {
             </div>
           )}
 
-          {/* NOVO TÓPICO: ABA ALERTAS */}
+          {/* 5. ABA ALERTAS */}
           {abaAtiva === 'alertas' && (
             <div style={{ backgroundColor: 'white', borderRadius: '15px', padding: '25px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
               <h3 style={{ color: '#d9534f', marginTop: 0 }}>🚨 Central de Alertas e Anomalias</h3>
@@ -174,7 +242,7 @@ function App() {
             </div>
           )}
 
-          {/* 4. ABA ALMOXARIFADO */}
+          {/* 6. ABA ALMOXARIFADO */}
           {abaAtiva === 'almoxarifado' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
               <div style={{ backgroundColor: 'white', borderRadius: '15px', padding: '25px', borderLeft: '8px solid #28a745', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}>
@@ -210,7 +278,7 @@ function App() {
   }
 
   // ==========================================
-  // TELAS DE LOGIN
+  // 7. RENDERIZAÇÃO: TELAS DE LOGIN
   // ==========================================
   return (
     <div style={{ backgroundColor: '#a0a0a0', minHeight: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', fontFamily: 'sans-serif' }}>
@@ -224,7 +292,7 @@ function App() {
             </div>
         ) : (
           <>
-            {/* 1. SELEÇÃO INICIAL */}
+            {/* TELA 1: SELEÇÃO INICIAL */}
             {!perfil && (
               <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)', textAlign: 'center', width: '350px' }}>
                 <h2 style={{ color: '#4b0082' }}>VisAlay</h2>
@@ -233,7 +301,7 @@ function App() {
               </div>
             )}
 
-            {/* 2. LOGIN FUNCIONÁRIO (Webcam) */}
+            {/* TELA 2: LOGIN FUNCIONÁRIO (Webcam) */}
             {perfil === 'funcionario' && (
               <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '25px', textAlign: 'center', width: '400px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
                 <button onClick={() => {setPerfil(null); setErroAcesso(false);}} style={{ float: 'left', border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px' }}>←</button>
@@ -246,6 +314,7 @@ function App() {
               </div>
             )}
 
+            {/* TELA 3: LOGIN GESTOR/RH */}
             {perfil === 'rh' && (
               <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '25px', textAlign: 'center', width: '380px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
                 <button onClick={() => {setPerfil(null); setMetodoRH(null);}} style={{ float: 'left', border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px' }}>←</button>
