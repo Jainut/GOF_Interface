@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import Header from './Header.jsx';
+import Register from './Register.jsx';
 
 function App() {
   // ==========================================
@@ -12,6 +13,7 @@ function App() {
   const [exibirMensagemBoasVindas, setExibirMensagemBoasVindas] = useState(false);
   const [erroAcesso, setErroAcesso] = useState(false);
   const [abaAtiva, setAbaAtiva] = useState('ativas'); 
+  const [fazendoRegistro, setFazendoRegistro] = useState(false);
 
   // --- ESTADOS DO BANCO DE DADOS ---
   const [emprestimos, setEmprestimos] = useState([]);
@@ -298,6 +300,9 @@ function App() {
   // ==========================================
   // 7. RENDERIZAÇÃO: TELAS DE LOGIN
   // ==========================================
+  // ==========================================
+  // 7. RENDERIZAÇÃO: TELAS DE LOGIN / REGISTRO
+  // ==========================================
   return (
     <div style={{ backgroundColor: '#a0a0a0', minHeight: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', fontFamily: 'sans-serif' }}>
       <Header />
@@ -310,49 +315,67 @@ function App() {
             </div>
         ) : (
           <>
-            {!perfil && (
-              <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)', textAlign: 'center', width: '350px' }}>
-                <h2 style={{ color: '#4b0082' }}>VisAlay</h2>
-                <button onClick={() => setPerfil('funcionario')} style={btnPerfilStyle}>SOU FUNCIONÁRIO</button>
-                <button onClick={() => setPerfil('rh')} style={btnPerfilStyle}>ADM / SUPERVISOR</button>
-              </div>
-            )}
-
-            {perfil === 'funcionario' && (
-              <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '25px', textAlign: 'center', width: '400px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
-                <button onClick={() => {setPerfil(null); setErroAcesso(false);}} style={{ float: 'left', border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px' }}>←</button>
-                <h2 style={{ color: '#4b0082' }}>Login Facial</h2>
-                {erroAcesso && <div style={{ backgroundColor: '#ffcccc', color: '#cc0000', padding: '10px', borderRadius: '8px', marginBottom: '10px' }}>ERRO: Acesso negado! <br/> Use a Área Restrita.</div>}
-                <div style={{ width: '100%', height: '250px', backgroundColor: '#000', borderRadius: '15px', overflow: 'hidden', border: '3px solid #4b0082' }}>
-                  <Webcam width="100%" height="100%" />
-                </div>
-                <button onClick={() => {setErroAcesso(true); setTimeout(()=>setErroAcesso(false), 3000)}} style={{...btnPerfilStyle, marginTop: '15px'}}>IDENTIFICAR FUNCIONÁRIO</button>
-              </div>
-            )}
-
-            {perfil === 'rh' && (
-              <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '25px', textAlign: 'center', width: '380px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
-                <button onClick={() => {setPerfil(null); setMetodoRH(null);}} style={{ float: 'left', border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px' }}>←</button>
-                <h2 style={{ color: '#4b0082' }}>Área Restrita</h2>
-                {!metodoRH ? (
-                  <>
-                    <button onClick={() => setMetodoRH('senha')} style={btnPerfilStyle}>E-mail e Senha</button>
-                    <button onClick={() => setMetodoRH('facial')} style={btnPerfilStyle}>Reconhecimento Facial</button>
-                  </>
-                ) : (
-                  <div style={{ marginTop: '20px' }}>
-                    {metodoRH === 'facial' && (
-                        <div style={{ width: '100%', height: '220px', backgroundColor: '#000', borderRadius: '15px', marginBottom: '15px', overflow: 'hidden', border: '2px solid #4b0082' }}>
-                            <Webcam width="100%" height="100%" />
-                        </div>
-                    )}
-                    {metodoRH === 'senha' && (
-                      <input type="password" placeholder="Senha do Gestor" style={{ width: '100%', padding: '12px', marginBottom: '15px', borderRadius: '8px', border: '1px solid #ccc', boxSizing: 'border-box' }} />
-                    )}
-                    <button onClick={realizarLoginSucesso} style={btnPerfilStyle}>ENTRAR COMO SUPERVISOR</button>
+            {/* TELA DE REGISTRO */}
+            {fazendoRegistro ? (
+              <Register onBack={() => setFazendoRegistro(false)} />
+            ) : (
+              <>
+                {/* ESCOLHA DE PERFIL INICIAL */}
+                {!perfil && (
+                  <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)', textAlign: 'center', width: '350px' }}>
+                    <h2 style={{ color: '#4b0082' }}>VisAlay</h2>
+                    <button onClick={() => setPerfil('funcionario')} style={btnPerfilStyle}>SOU FUNCIONÁRIO</button>
+                    <button onClick={() => setPerfil('rh')} style={btnPerfilStyle}>ADM / SUPERVISOR</button>
+                    
+                    {/* Botão para ativar o estado de registro */}
+                    <p 
+                      onClick={() => setFazendoRegistro(true)} 
+                      style={{ cursor: 'pointer', color: '#4b0082', fontSize: '14px', marginTop: '15px', textDecoration: 'underline', fontWeight: 'bold' }}
+                    >
+                      Não tem conta? Cadastre-se
+                    </p>
                   </div>
                 )}
-              </div>
+
+                {/* LOGIN FUNCIONÁRIO */}
+                {perfil === 'funcionario' && (
+                  <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '25px', textAlign: 'center', width: '400px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
+                    <button onClick={() => {setPerfil(null); setErroAcesso(false);}} style={{ float: 'left', border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px' }}>←</button>
+                    <h2 style={{ color: '#4b0082' }}>Login Facial</h2>
+                    {erroAcesso && <div style={{ backgroundColor: '#ffcccc', color: '#cc0000', padding: '10px', borderRadius: '8px', marginBottom: '10px' }}>ERRO: Acesso negado! <br/> Use a Área Restrita.</div>}
+                    <div style={{ width: '100%', height: '250px', backgroundColor: '#000', borderRadius: '15px', overflow: 'hidden', border: '3px solid #4b0082' }}>
+                      <Webcam width="100%" height="100%" />
+                    </div>
+                    <button onClick={() => {setErroAcesso(true); setTimeout(()=>setErroAcesso(false), 3000)}} style={{...btnPerfilStyle, marginTop: '15px'}}>IDENTIFICAR FUNCIONÁRIO</button>
+                  </div>
+                )}
+
+                {/* LOGIN ADM / RH */}
+                {perfil === 'rh' && (
+                  <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '25px', textAlign: 'center', width: '380px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
+                    <button onClick={() => {setPerfil(null); setMetodoRH(null);}} style={{ float: 'left', border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px' }}>←</button>
+                    <h2 style={{ color: '#4b0082' }}>Área Restrita</h2>
+                    {!metodoRH ? (
+                      <>
+                        <button onClick={() => setMetodoRH('senha')} style={btnPerfilStyle}>E-mail e Senha</button>
+                        <button onClick={() => setMetodoRH('facial')} style={btnPerfilStyle}>Reconhecimento Facial</button>
+                      </>
+                    ) : (
+                      <div style={{ marginTop: '20px' }}>
+                        {metodoRH === 'facial' && (
+                            <div style={{ width: '100%', height: '220px', backgroundColor: '#000', borderRadius: '15px', marginBottom: '15px', overflow: 'hidden', border: '2px solid #4b0082' }}>
+                                <Webcam width="100%" height="100%" />
+                            </div>
+                        )}
+                        {metodoRH === 'senha' && (
+                          <input type="password" placeholder="Senha do Gestor" style={{ width: '100%', padding: '12px', marginBottom: '15px', borderRadius: '8px', border: '1px solid #ccc', boxSizing: 'border-box' }} />
+                        )}
+                        <button onClick={realizarLoginSucesso} style={btnPerfilStyle}>ENTRAR COMO SUPERVISOR</button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
             )}
           </>
         )}
