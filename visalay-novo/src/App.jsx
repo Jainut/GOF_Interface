@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import Header from './Header.jsx';
 import Register from './Register.jsx';
+import RegistrarEmprestimo from './RegistrarEmprestimo.jsx';
 
 function App() {
   // ==========================================
@@ -124,6 +125,7 @@ function App() {
           <button onClick={() => setAbaAtiva('manutencao')} style={{ padding: '15px 20px', border: 'none', backgroundColor: abaAtiva === 'manutencao' ? '#00d4ff' : 'transparent', color: 'white', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' }}>🛠️ MANUTENÇÃO</button>
           <button onClick={() => setAbaAtiva('alertas')} style={{ padding: '15px 20px', border: 'none', backgroundColor: abaAtiva === 'alertas' ? '#d9534f' : 'transparent', color: 'white', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' }}>🚨 ALERTAS</button>
           <button onClick={() => setAbaAtiva('almoxarifado')} style={{ padding: '15px 20px', border: 'none', backgroundColor: abaAtiva === 'almoxarifado' ? '#ff00ff' : 'transparent', color: 'white', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' }}>ALMOXARIFADO</button>
+          <button onClick={() => setAbaAtiva('novo_emprestimo')} style={{ padding: '15px 20px', border: 'none', backgroundColor: abaAtiva === 'novo_emprestimo' ? '#28a745' : 'transparent', color: 'white', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' }}>➕ NOVO EMPRÉSTIMO</button>
         </nav>
 
         <main style={{ padding: '30px', flex: 1 }}>
@@ -292,6 +294,16 @@ function App() {
               </div>
             </div>
           )}
+        
+        {/* 7. ABA NOVO EMPRÉSTIMO */}
+        {abaAtiva === 'novo_emprestimo' && (
+          <RegistrarEmprestimo 
+            API_URL={API_URL} 
+            onEmprestimoRegistrado={buscarDadosDoBanco} // Atualiza a lista quando cadastrar!
+          />
+        )}
+        
+        
         </main>
       </div>
     );
