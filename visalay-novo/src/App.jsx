@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Webcam from 'react-webcam';
 import Header from './Header.jsx';
+import Register from './Register.jsx';
+import RegistrarEmprestimo from './RegistrarEmprestimo.jsx';
+import RegistrarDevolucao from './RegistrarDevolucao.jsx';
 
 function App() {
   // ==========================================
@@ -12,6 +15,7 @@ function App() {
   const [exibirMensagemBoasVindas, setExibirMensagemBoasVindas] = useState(false);
   const [erroAcesso, setErroAcesso] = useState(false);
   const [abaAtiva, setAbaAtiva] = useState('ativas'); 
+  const [fazendoRegistro, setFazendoRegistro] = useState(false);
 
   // --- ESTADOS DO BANCO DE DADOS ---
   const [emprestimos, setEmprestimos] = useState([]);
@@ -122,6 +126,7 @@ function App() {
           <button onClick={() => setAbaAtiva('manutencao')} style={{ padding: '15px 20px', border: 'none', backgroundColor: abaAtiva === 'manutencao' ? '#00d4ff' : 'transparent', color: 'white', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' }}>🛠️ MANUTENÇÃO</button>
           <button onClick={() => setAbaAtiva('alertas')} style={{ padding: '15px 20px', border: 'none', backgroundColor: abaAtiva === 'alertas' ? '#d9534f' : 'transparent', color: 'white', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' }}>🚨 ALERTAS</button>
           <button onClick={() => setAbaAtiva('almoxarifado')} style={{ padding: '15px 20px', border: 'none', backgroundColor: abaAtiva === 'almoxarifado' ? '#ff00ff' : 'transparent', color: 'white', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' }}>ALMOXARIFADO</button>
+          <button onClick={() => setAbaAtiva('novo_emprestimo')} style={{ padding: '15px 20px', border: 'none', backgroundColor: abaAtiva === 'novo_emprestimo' ? '#28a745' : 'transparent', color: 'white', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' }}>➕ NOVO EMPRÉSTIMO</button>
         </nav>
 
         <main style={{ padding: '30px', flex: 1 }}>
@@ -191,34 +196,43 @@ function App() {
 
           {/* 3. ABA TELA DE DEVOLUÇÕES */}
           {abaAtiva === 'devolucoes' && (
-            <div style={{ backgroundColor: 'white', borderRadius: '15px', padding: '25px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
-              <h3 style={{ color: '#4b0082', marginTop: 0 }}>🔄 Histórico de Devoluções</h3>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#f8f9fa' }}>
-                    <th style={{ padding: '12px', borderBottom: '2px solid #dee2e6' }}>Ferramenta</th>
-                    <th style={{ padding: '12px' }}>Responsável</th>
-                    <th style={{ padding: '12px' }}>Setor</th>
-                    <th style={{ padding: '12px' }}>Data/Hora Devolução</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {devolucoes.length === 0 ? (
-                    <tr><td colSpan="4" style={{ padding: '12px', textAlign: 'center' }}>Nenhum registro de devolução.</td></tr>
-                  ) : (
-                    devolucoes.map((dev, index) => (
-                      <tr key={`dev-${dev.id || dev.devolucao_id || index}`} style={{ borderBottom: '1px solid #eee' }}>
-                        <td style={{ padding: '12px' }}>{dev.tipo_ferramenta || dev.ferramenta || '-'}</td>
-                        <td style={{ padding: '12px', fontWeight: 'bold' }}>{dev.nome_operador || dev.operador || '-'}</td>
-                        <td style={{ padding: '12px' }}>{dev.setor_operador || dev.setor || '-'}</td>
-                        <td style={{ padding: '12px', color: '#28a745', fontWeight: 'bold' }}>
-                          {dev.data_devolucao ? new Date(dev.data_devolucao).toLocaleString() : 'Data não registrada'}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+              
+              {/* PARTE DE CIMA: Componente para realizar a devolução */}
+              <RegistrarDevolucao 
+                  API_URL={API_URL}
+                  emprestimos={emprestimos}
+                  onDevolucaoConcluida={buscarDadosDoBanco}
+              />
+
+              {/* PARTE DE BAIXO: Histórico das que já foram devolvidas */}
+              <div style={{ backgroundColor: 'white', borderRadius: '15px', padding: '25px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
+                <h3 style={{ color: '#4b0082', marginTop: 0 }}>📊 Histórico Geral de Devoluções</h3>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#f8f9fa' }}>
+                      <th style={{ padding: '12px', borderBottom: '2px solid #dee2e6' }}>Ferramenta</th>
+                      <th style={{ padding: '12px' }}>Responsável</th>
+                      <th style={{ padding: '12px' }}>Data/Hora Devolução</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {devolucoes.length === 0 ? (
+                      <tr><td colSpan="3" style={{ padding: '12px', textAlign: 'center' }}>Nenhum registro histórico.</td></tr>
+                    ) : (
+                      devolucoes.map((dev, index) => (
+                        <tr key={`dev-${dev.id || index}`} style={{ borderBottom: '1px solid #eee' }}>
+                          <td style={{ padding: '12px' }}>{dev.tipo_ferramenta}</td>
+                          <td style={{ padding: '12px' }}>{dev.nome_operador}</td>
+                          <td style={{ padding: '12px', color: '#28a745', fontWeight: 'bold' }}>
+                            {new Date(dev.data_devolucao).toLocaleString()}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
 
@@ -290,6 +304,16 @@ function App() {
               </div>
             </div>
           )}
+        
+        {/* 7. ABA NOVO EMPRÉSTIMO */}
+        {abaAtiva === 'novo_emprestimo' && (
+          <RegistrarEmprestimo 
+            API_URL={API_URL} 
+            onEmprestimoRegistrado={buscarDadosDoBanco} // Atualiza a lista quando cadastrar!
+          />
+        )}
+        
+        
         </main>
       </div>
     );
@@ -297,6 +321,9 @@ function App() {
 
   // ==========================================
   // 7. RENDERIZAÇÃO: TELAS DE LOGIN
+  // ==========================================
+  // ==========================================
+  // 7. RENDERIZAÇÃO: TELAS DE LOGIN / REGISTRO
   // ==========================================
   return (
     <div style={{ backgroundColor: '#a0a0a0', minHeight: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', fontFamily: 'sans-serif' }}>
@@ -310,49 +337,67 @@ function App() {
             </div>
         ) : (
           <>
-            {!perfil && (
-              <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)', textAlign: 'center', width: '350px' }}>
-                <h2 style={{ color: '#4b0082' }}>VisAlay</h2>
-                <button onClick={() => setPerfil('funcionario')} style={btnPerfilStyle}>SOU FUNCIONÁRIO</button>
-                <button onClick={() => setPerfil('rh')} style={btnPerfilStyle}>ADM / SUPERVISOR</button>
-              </div>
-            )}
-
-            {perfil === 'funcionario' && (
-              <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '25px', textAlign: 'center', width: '400px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
-                <button onClick={() => {setPerfil(null); setErroAcesso(false);}} style={{ float: 'left', border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px' }}>←</button>
-                <h2 style={{ color: '#4b0082' }}>Login Facial</h2>
-                {erroAcesso && <div style={{ backgroundColor: '#ffcccc', color: '#cc0000', padding: '10px', borderRadius: '8px', marginBottom: '10px' }}>ERRO: Acesso negado! <br/> Use a Área Restrita.</div>}
-                <div style={{ width: '100%', height: '250px', backgroundColor: '#000', borderRadius: '15px', overflow: 'hidden', border: '3px solid #4b0082' }}>
-                  <Webcam width="100%" height="100%" />
-                </div>
-                <button onClick={() => {setErroAcesso(true); setTimeout(()=>setErroAcesso(false), 3000)}} style={{...btnPerfilStyle, marginTop: '15px'}}>IDENTIFICAR FUNCIONÁRIO</button>
-              </div>
-            )}
-
-            {perfil === 'rh' && (
-              <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '25px', textAlign: 'center', width: '380px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
-                <button onClick={() => {setPerfil(null); setMetodoRH(null);}} style={{ float: 'left', border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px' }}>←</button>
-                <h2 style={{ color: '#4b0082' }}>Área Restrita</h2>
-                {!metodoRH ? (
-                  <>
-                    <button onClick={() => setMetodoRH('senha')} style={btnPerfilStyle}>E-mail e Senha</button>
-                    <button onClick={() => setMetodoRH('facial')} style={btnPerfilStyle}>Reconhecimento Facial</button>
-                  </>
-                ) : (
-                  <div style={{ marginTop: '20px' }}>
-                    {metodoRH === 'facial' && (
-                        <div style={{ width: '100%', height: '220px', backgroundColor: '#000', borderRadius: '15px', marginBottom: '15px', overflow: 'hidden', border: '2px solid #4b0082' }}>
-                            <Webcam width="100%" height="100%" />
-                        </div>
-                    )}
-                    {metodoRH === 'senha' && (
-                      <input type="password" placeholder="Senha do Gestor" style={{ width: '100%', padding: '12px', marginBottom: '15px', borderRadius: '8px', border: '1px solid #ccc', boxSizing: 'border-box' }} />
-                    )}
-                    <button onClick={realizarLoginSucesso} style={btnPerfilStyle}>ENTRAR COMO SUPERVISOR</button>
+            {/* TELA DE REGISTRO */}
+            {fazendoRegistro ? (
+              <Register onBack={() => setFazendoRegistro(false)} />
+            ) : (
+              <>
+                {/* ESCOLHA DE PERFIL INICIAL */}
+                {!perfil && (
+                  <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)', textAlign: 'center', width: '350px' }}>
+                    <h2 style={{ color: '#4b0082' }}>VisAlay</h2>
+                    <button onClick={() => setPerfil('funcionario')} style={btnPerfilStyle}>SOU FUNCIONÁRIO</button>
+                    <button onClick={() => setPerfil('rh')} style={btnPerfilStyle}>ADM / SUPERVISOR</button>
+                    
+                    {/* Botão para ativar o estado de registro */}
+                    <p 
+                      onClick={() => setFazendoRegistro(true)} 
+                      style={{ cursor: 'pointer', color: '#4b0082', fontSize: '14px', marginTop: '15px', textDecoration: 'underline', fontWeight: 'bold' }}
+                    >
+                      Não tem conta? Cadastre-se
+                    </p>
                   </div>
                 )}
-              </div>
+
+                {/* LOGIN FUNCIONÁRIO */}
+                {perfil === 'funcionario' && (
+                  <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '25px', textAlign: 'center', width: '400px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
+                    <button onClick={() => {setPerfil(null); setErroAcesso(false);}} style={{ float: 'left', border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px' }}>←</button>
+                    <h2 style={{ color: '#4b0082' }}>Login Facial</h2>
+                    {erroAcesso && <div style={{ backgroundColor: '#ffcccc', color: '#cc0000', padding: '10px', borderRadius: '8px', marginBottom: '10px' }}>ERRO: Acesso negado! <br/> Use a Área Restrita.</div>}
+                    <div style={{ width: '100%', height: '250px', backgroundColor: '#000', borderRadius: '15px', overflow: 'hidden', border: '3px solid #4b0082' }}>
+                      <Webcam width="100%" height="100%" />
+                    </div>
+                    <button onClick={() => {setErroAcesso(true); setTimeout(()=>setErroAcesso(false), 3000)}} style={{...btnPerfilStyle, marginTop: '15px'}}>IDENTIFICAR FUNCIONÁRIO</button>
+                  </div>
+                )}
+
+                {/* LOGIN ADM / RH */}
+                {perfil === 'rh' && (
+                  <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '25px', textAlign: 'center', width: '380px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
+                    <button onClick={() => {setPerfil(null); setMetodoRH(null);}} style={{ float: 'left', border: 'none', background: 'none', cursor: 'pointer', fontSize: '20px' }}>←</button>
+                    <h2 style={{ color: '#4b0082' }}>Área Restrita</h2>
+                    {!metodoRH ? (
+                      <>
+                        <button onClick={() => setMetodoRH('senha')} style={btnPerfilStyle}>E-mail e Senha</button>
+                        <button onClick={() => setMetodoRH('facial')} style={btnPerfilStyle}>Reconhecimento Facial</button>
+                      </>
+                    ) : (
+                      <div style={{ marginTop: '20px' }}>
+                        {metodoRH === 'facial' && (
+                            <div style={{ width: '100%', height: '220px', backgroundColor: '#000', borderRadius: '15px', marginBottom: '15px', overflow: 'hidden', border: '2px solid #4b0082' }}>
+                                <Webcam width="100%" height="100%" />
+                            </div>
+                        )}
+                        {metodoRH === 'senha' && (
+                          <input type="password" placeholder="Senha do Gestor" style={{ width: '100%', padding: '12px', marginBottom: '15px', borderRadius: '8px', border: '1px solid #ccc', boxSizing: 'border-box' }} />
+                        )}
+                        <button onClick={realizarLoginSucesso} style={btnPerfilStyle}>ENTRAR COMO SUPERVISOR</button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
             )}
           </>
         )}
