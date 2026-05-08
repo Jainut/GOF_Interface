@@ -3,6 +3,7 @@ import Webcam from 'react-webcam';
 import Header from './Header.jsx';
 import Register from './Register.jsx';
 import RegistrarEmprestimo from './RegistrarEmprestimo.jsx';
+import RegistrarDevolucao from './RegistrarDevolucao.jsx';
 
 function App() {
   // ==========================================
@@ -195,34 +196,43 @@ function App() {
 
           {/* 3. ABA TELA DE DEVOLUÇÕES */}
           {abaAtiva === 'devolucoes' && (
-            <div style={{ backgroundColor: 'white', borderRadius: '15px', padding: '25px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
-              <h3 style={{ color: '#4b0082', marginTop: 0 }}>🔄 Histórico de Devoluções</h3>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#f8f9fa' }}>
-                    <th style={{ padding: '12px', borderBottom: '2px solid #dee2e6' }}>Ferramenta</th>
-                    <th style={{ padding: '12px' }}>Responsável</th>
-                    <th style={{ padding: '12px' }}>Setor</th>
-                    <th style={{ padding: '12px' }}>Data/Hora Devolução</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {devolucoes.length === 0 ? (
-                    <tr><td colSpan="4" style={{ padding: '12px', textAlign: 'center' }}>Nenhum registro de devolução.</td></tr>
-                  ) : (
-                    devolucoes.map((dev, index) => (
-                      <tr key={`dev-${dev.id || dev.devolucao_id || index}`} style={{ borderBottom: '1px solid #eee' }}>
-                        <td style={{ padding: '12px' }}>{dev.tipo_ferramenta || dev.ferramenta || '-'}</td>
-                        <td style={{ padding: '12px', fontWeight: 'bold' }}>{dev.nome_operador || dev.operador || '-'}</td>
-                        <td style={{ padding: '12px' }}>{dev.setor_operador || dev.setor || '-'}</td>
-                        <td style={{ padding: '12px', color: '#28a745', fontWeight: 'bold' }}>
-                          {dev.data_devolucao ? new Date(dev.data_devolucao).toLocaleString() : 'Data não registrada'}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+              
+              {/* PARTE DE CIMA: Componente para realizar a devolução */}
+              <RegistrarDevolucao 
+                  API_URL={API_URL}
+                  emprestimos={emprestimos}
+                  onDevolucaoConcluida={buscarDadosDoBanco}
+              />
+
+              {/* PARTE DE BAIXO: Histórico das que já foram devolvidas */}
+              <div style={{ backgroundColor: 'white', borderRadius: '15px', padding: '25px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
+                <h3 style={{ color: '#4b0082', marginTop: 0 }}>📊 Histórico Geral de Devoluções</h3>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#f8f9fa' }}>
+                      <th style={{ padding: '12px', borderBottom: '2px solid #dee2e6' }}>Ferramenta</th>
+                      <th style={{ padding: '12px' }}>Responsável</th>
+                      <th style={{ padding: '12px' }}>Data/Hora Devolução</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {devolucoes.length === 0 ? (
+                      <tr><td colSpan="3" style={{ padding: '12px', textAlign: 'center' }}>Nenhum registro histórico.</td></tr>
+                    ) : (
+                      devolucoes.map((dev, index) => (
+                        <tr key={`dev-${dev.id || index}`} style={{ borderBottom: '1px solid #eee' }}>
+                          <td style={{ padding: '12px' }}>{dev.tipo_ferramenta}</td>
+                          <td style={{ padding: '12px' }}>{dev.nome_operador}</td>
+                          <td style={{ padding: '12px', color: '#28a745', fontWeight: 'bold' }}>
+                            {new Date(dev.data_devolucao).toLocaleString()}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
 
