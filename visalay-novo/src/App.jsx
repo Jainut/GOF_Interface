@@ -20,7 +20,7 @@ function App() {
   // ==========================================
   // 2. DADOS LOCAIS (MOCK) E CONFIGURAÇÕES
   // ==========================================
-  const API_URL = ''; 
+  const API_URL = 'http://localhost:3000'; 
 
   const alertasAnomalias = [
     { id: 1, tipo: 'Atraso', msg: 'Furadeira Bosch não devolvida por Carlos Eduardo.', hora: '17:05h' },
