@@ -2,6 +2,29 @@ import React, { useState, useEffect, useRef } from 'react';
 
 function App() {
   // --- ESTADOS DO SISTEMA ---
+  const [ferramentas, setFerramentas] = useState([]);
+
+  useEffect(() => {
+    buscarFerramentas();
+  }, []);
+
+  const buscarFerramentas = async () => {
+    try{
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/listar/Ativos`, { method: 'GET' });
+
+      if (!response.ok) {
+        throw new Error('Erro ao buscar ferramentas');
+      }
+
+      const data = await response.json();
+      console.log(data);
+      setFerramentas(data);
+    } catch (error) {
+      console.error('Erro ao buscar ferramentas:', error);
+    }
+  }
+
+
   const [perfil, setPerfil] = useState(null); 
   const [logado, setLogado] = useState(false); 
   const [perfilLogado, setPerfilLogado] = useState(''); 
@@ -35,13 +58,6 @@ function App() {
   
   const [itemSendoDevolvido, setItemSendoDevolvido] = useState(null);
   const [raDevolucaoFunc, setRaDevolucaoFunc] = useState('');
-
-  const ferramentas = [
-    { id: 1, nome: "Chave Estrela Isolada 19mm", img: 'https://placehold.co/80x80/f4f4f4/cc0000?text=Chave' },
-    { id: 2, nome: "Torquímetro de Estalo 1/2", img: 'https://placehold.co/80x80/f4f4f4/cc0000?text=Torq' },
-    { id: 3, nome: "Megômetro Digital 5KV", img: 'https://placehold.co/80x80/f4f4f4/cc0000?text=Mego' },
-    { id: 4, nome: "Cinta de Elevação (3T)", img: 'https://placehold.co/80x80/f4f4f4/cc0000?text=Cinta' }
-  ];
 
   const [ferramentasEmPosse, setFerramentasEmPosse] = useState([]);
   const [ativosEmCustodiaTSEA, setAtivosEmCustodiaTSEA] = useState([]);
@@ -610,24 +626,37 @@ function App() {
                       </tr>
                     </thead>
                     <tbody>
-                      {ativosEmCustodiaTSEA.map((item, index) => {
-                        let bgStatus = '#ffebee'; let corStatus = TSEA.vermelho; let classeAdicional = "";
-                        if (item.status === "AGUARDANDO BAIXA") { bgStatus = '#fff3e0'; corStatus = '#ef6c00'; classeAdicional = "pisca-alerta"; }
-                        else if (item.status === "DEVOLVIDO") { bgStatus = '#e8f5e9'; corStatus = 'green'; }
-                        return (
-                          <tr key={index} style={{ borderBottom: `1px solid ${TSEA.cinzaMedio}` }}>
-                            <td style={{ padding: '12px' }}><strong>{item.funcionario}</strong><div style={{ fontSize: '11px', color: '#666' }}>RE: {item.matricula}</div></td>
-                            <td style={{ padding: '12px' }}>{item.ferramenta}</td>
-                            <td style={{ padding: '12px' }}>{item.qtd}x</td>
-                            <td style={{ padding: '12px', fontSize: '12px' }}>
-                              {item.status === "DEVOLVIDO" ? <div><del>{item.data}</del><div style={{ color: 'green', fontWeight: 'bold' }}>Retornado: {item.dataDevolucao}</div></div> : item.data}
-                            </td>
-                            <td style={{ padding: '12px' }}>
-                              <span className={classeAdicional} style={{ background: bgStatus, color: corStatus, padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold', display: 'inline-block' }}>{item.status}</span>
-                            </td>
-                          </tr>
-                        );
-                      })}
+  {ferramentas.map((emprestimo) => (
+
+    emprestimo.item_emprestimo.map((item) => (
+
+      <tr key={item.id}>
+
+        <td style={{ padding: '12px' }}>
+          {emprestimo.usuario.nome}
+        </td>
+
+        <td style={{ padding: '12px' }}>
+          {item.ferramenta.tipo}
+        </td>
+
+        <td style={{ padding: '12px' }}>
+          {item.quantidade}
+        </td>
+
+        <td style={{ padding: '12px' }}>
+          {new Date(emprestimo.data_retirada).toLocaleString()}
+        </td>
+
+        <td style={{ padding: '12px' }}>
+          {emprestimo.status}
+        </td>
+
+      </tr>
+
+    ))
+
+  ))}
                     </tbody>
                   </table>
                 </div>
