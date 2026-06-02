@@ -11,8 +11,8 @@ function Register({ onBack }) {
   
   const [status, setStatus] = useState({ loading: false, msg: '', error: false });
 
-  const API_URL = ''; 
-
+  const API_URL = "https://visalayapi.onrender.com";
+  
   const handleRegistro = async (e) => {
     e.preventDefault();
     setStatus({ loading: true, error: false });
