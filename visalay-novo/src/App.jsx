@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { io } from 'socket.io-client';
 
-// ==========================================
-// CONFIGURAÇÃO DE DIRETRIZES VISUAIS (TSEA)
-// ==========================================
 const TSEA = {
   vermelho: '#E30613',
   preto: '#1A1A1A',
@@ -13,16 +11,16 @@ const TSEA = {
   branco: '#FFFFFF'
 };
 
+const socket = io(import.meta.env.VITE_API_URL, { withCredentials: true });
+
 // ==========================================
-// COMPONENTE 1: TELA DE LOGIN (COM WEBCAM CORRIGIDA)
+// COMPONENTE 1: LOGIN
 // ==========================================
-function Login({ 
+function Login({
   perfil, setPerfil, statusBiometria, setStatusBiometria, videoRef, progressoEscaneamento, setProgressoEscaneamento,
   entrarNoPainelManualmente, idAlmoxarife, setIdAlmoxarife, senhaLoginAlmoxarife, setSenhaLoginAlmoxarife, entrarComoAlmoxarife,
   senhaSuperAdmin, setSenhaSuperAdmin, entrarComoSuperAdmin
 }) {
-  
-  // Função nativa para ativar a câmera real
   const ligarWebcamReal = async () => {
     try {
       setStatusBiometria('carregando_camera');
@@ -38,18 +36,15 @@ function Login({
     }
   };
 
-  // Desliga os feixes da câmera ao sair
   const desligarWebcamReal = () => {
     if (videoRef.current && videoRef.current.srcObject) {
       const stream = videoRef.current.srcObject;
-      const tracks = stream.getTracks();
-      tracks.forEach(track => track.stop());
+      stream.getTracks().forEach(track => track.stop());
       videoRef.current.srcObject = null;
     }
     setStatusBiometria('desligado');
   };
 
-  // Efeito simulador de varredura biométrica após câmera aberta
   useEffect(() => {
     let intervalo;
     if (statusBiometria === 'escanear') {
@@ -74,7 +69,7 @@ function Login({
       </header>
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '15px', backgroundColor: '#f0f2f5' }}>
         <div style={{ backgroundColor: '#fff', padding: '30px', borderRadius: '8px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', width: '100%', maxWidth: '380px', borderTop: `5px solid ${TSEA.vermelho}`, textAlign: 'center' }}>
-          
+
           {!perfil && (
             <>
               <h4 style={{ margin: '0 0 20px 0', color: TSEA.preto }}>CONTROLE DE ACESSO MÓVEL</h4>
@@ -92,9 +87,7 @@ function Login({
               <div style={{ width: '200px', height: '200px', backgroundColor: '#111', borderRadius: '50%', margin: '0 auto 20px auto', position: 'relative', overflow: 'hidden', border: `4px solid ${statusBiometria === 'sucesso' ? '#2e7d32' : TSEA.vermelho}`, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                 {statusBiometria === 'desligado' && <div style={{ color: '#666', fontSize: '14px' }}>Câmera Inativa</div>}
                 {statusBiometria === 'carregando_camera' && <div style={{ color: '#fff', fontSize: '12px' }}>Iniciando lente...</div>}
-                
                 <video ref={videoRef} autoPlay playsInline muted style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', transform: 'scaleX(-1)', display: (statusBiometria === 'camera_ativa' || statusBiometria === 'escanear' || statusBiometria === 'sucesso') ? 'block' : 'none' }} />
-                
                 {statusBiometria === 'escanear' && (
                   <>
                     <div style={{ position: 'absolute', width: '100%', height: '4px', backgroundColor: TSEA.vermelho, top: `${progressoEscaneamento}%`, left: 0, boxShadow: '0 0 8px red' }} />
@@ -103,12 +96,10 @@ function Login({
                 )}
                 {statusBiometria === 'sucesso' && <div style={{ position: 'absolute', width: '100%', height: '100%', backgroundColor: 'rgba(46,125,50,0.9)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '16px' }}>Reconhecido</div>}
               </div>
-
               {statusBiometria === 'desligado' && <button onClick={ligarWebcamReal} style={{ width: '100%', padding: '12px', background: TSEA.vermelho, color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Habilitar Câmera</button>}
               {statusBiometria === 'camera_ativa' && <button onClick={() => setStatusBiometria('escanear')} style={{ width: '100%', padding: '12px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Escanear Face</button>}
               {statusBiometria === 'sucesso' && <button onClick={entrarNoPainelManualmente} style={{ width: '100%', padding: '14px', background: 'green', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Entrar no Totem</button>}
-              
-              <button onClick={() => { desligarWebcamReal(); setPerfil(null); setProgressoEscaneamento(0); }} style={{ marginTop: '15px', background: 'none', border: 'none', color: TSEA.vermelho, fontWeight: 'bold', cursor: 'pointer' }}>Cancelat e Voltar</button>
+              <button onClick={() => { desligarWebcamReal(); setPerfil(null); setProgressoEscaneamento(0); }} style={{ marginTop: '15px', background: 'none', border: 'none', color: TSEA.vermelho, fontWeight: 'bold', cursor: 'pointer' }}>Cancelar e Voltar</button>
             </div>
           )}
 
@@ -138,10 +129,10 @@ function Login({
 }
 
 // ==========================================
-// COMPONENTE 2: PAINEL DO FUNCIONÁRIO (TOTEM DE LEITURA)
+// COMPONENTE 2: PAINEL DO FUNCIONÁRIO
 // ==========================================
 function PainelOperador({
-  abaAtiva, setAbaAtiva, operador, ativosEmCustodiaTSEA, solicitarDevolucaoImediata, 
+  abaAtiva, setAbaAtiva, operador, ativosEmCustodiaTSEA, solicitarDevolucaoImediata,
   pedidoAtivo, confirmarRetiradaComCartao, logout
 }) {
   const [rfidInput, setRfidInput] = useState('');
@@ -153,13 +144,11 @@ function PainelOperador({
           <h3 style={{ margin: 0, fontSize: '22px' }}>TSEA <span style={{ color: TSEA.vermelho }}>MOBILE</span></h3>
           <small style={{ color: TSEA.cinzaMedio, fontSize: '11px' }}>TOTEM OPERACIONAL</small>
         </div>
-        
         <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <button onClick={() => setAbaAtiva('confirme_cartao')} className="btn-sidebar" style={{ backgroundColor: abaAtiva === 'confirme_cartao' ? TSEA.vermelho : 'transparent' }}>Confirme seu Cartão</button>
           <button onClick={() => setAbaAtiva('custodia')} className="btn-sidebar" style={{ backgroundColor: abaAtiva === 'custodia' ? TSEA.vermelho : 'transparent' }}>Minha Custódia ({ativosEmCustodiaTSEA.filter(a => a.matricula === operador.matricula && a.status === "EM CUSTÓDIA").length})</button>
           <button onClick={() => setAbaAtiva('info')} className="btn-sidebar" style={{ backgroundColor: abaAtiva === 'info' ? TSEA.vermelho : 'transparent' }}>Minhas Infos</button>
         </nav>
-
         <button onClick={logout} style={{ width: '100%', padding: '12px', background: TSEA.vermelho, color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Sair do Totem</button>
       </aside>
 
@@ -176,7 +165,6 @@ function PainelOperador({
           <div style={{ backgroundColor: TSEA.branco, padding: '30px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.03)', textAlign: 'center' }}>
             <h3 style={{ margin: '0 0 10px 0', color: TSEA.vermelho }}>Aproximação de Crachá RFID</h3>
             <p style={{ color: '#555', fontSize: '15px', marginBottom: '25px' }}>Valide a retirada física das ferramentas preparadas pelo almoxarife.</p>
-            
             {!pedidoAtivo ? (
               <div style={{ padding: '30px', border: '2px dashed #ccc', borderRadius: '8px', backgroundColor: '#fafafa', color: '#777' }}>
                 <p style={{ margin: 0, fontWeight: 'bold' }}>Nenhum lote aguardando liberação no sensor para você.</p>
@@ -186,16 +174,14 @@ function PainelOperador({
               <div style={{ maxWidth: '450px', margin: '0 auto', padding: '25px', border: `2px solid ${TSEA.vermelho}`, borderRadius: '8px', backgroundColor: '#fff9f9' }}>
                 <h4 style={{ color: TSEA.vermelho, margin: '0 0 10px 0', animation: 'blink 1.5s infinite' }}>PASSE SEU CARTÃO NO TOTEM</h4>
                 <p style={{ fontSize: '13px', color: '#444' }}>Lote pronto: <strong>#{pedidoAtivo.idPedido}</strong></p>
-                
                 <ul style={{ textAlign: 'left', display: 'inline-block', margin: '15px 0', paddingLeft: '20px', fontSize: '13px' }}>
                   {pedidoAtivo.itens.map((it, i) => <li key={i}><strong>{it}</strong></li>)}
                 </ul>
-
                 <div style={{ marginTop: '15px' }}>
-                  <input 
-                    type="text" 
-                    placeholder="Aproxime o Cartão (RE-40922)" 
-                    value={rfidInput} 
+                  <input
+                    type="text"
+                    placeholder="Aproxime o Cartão (RE-40922)"
+                    value={rfidInput}
                     onChange={(e) => setRfidInput(e.target.value)}
                     style={{ padding: '12px', borderRadius: '4px', border: '1px solid #ccc', width: '220px', textAlign: 'center', fontWeight: 'bold' }}
                   />
@@ -261,12 +247,13 @@ function PainelOperador({
 }
 
 // ==========================================
-// COMPONENTE 3: PAINEL DO ALMOXARIFE (COM O CATÁLOGO DE EMISSÃO)
+// COMPONENTE 3: PAINEL DO ALMOXARIFE
 // ==========================================
 function PainelAlmoxarife({
-  abaAtivaAdm, setAbaAtivaAdm, pedidoAtivo, senhaAlmoxarife, setSenhaAlmoxarife, 
-  devolucoesPendentes, senhaAlmoxarifeDevolucao, setSenhaAlmoxarifeDevolucao, 
-  aprovarBaixaDevolucao, ativosEmCustodiaTSEA, catalogoFerramentas, listaFuncionariosTSEA, 
+  nfcLiberado, tempoRestante,
+  abaAtivaAdm, setAbaAtivaAdm, pedidoAtivo, senhaAlmoxarife, setSenhaAlmoxarife,
+  devolucoesPendentes, senhaAlmoxarifeDevolucao, setSenhaAlmoxarifeDevolucao,
+  aprovarBaixaDevolucao, ativosEmCustodiaTSEA, catalogoFerramentas, listaFuncionariosTSEA,
   carrinho, alterarQuantidadeCarrinho, emitirLotePeloAlmoxarife, ultimasRetiradas, ultimasDevolucoes, logout
 }) {
   const [funcSelecionado, setFuncSelecionado] = useState('');
@@ -290,70 +277,86 @@ function PainelAlmoxarife({
       </aside>
 
       <main className="content-main">
+
         {abaAtivaAdm === 'solicitar_emprestimo' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div style={{ backgroundColor: TSEA.branco, padding: '20px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.03)' }}>
-              <h3 style={{ margin: '0 0 15px 0', borderBottom: `2px solid ${TSEA.cinzaClaro}`, paddingBottom: '8px' }}>Painel de Despacho de Ativos</h3>
-              
-              <div style={{ marginBottom: '20px', maxWidth: '400px' }}>
-                <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '6px' }}>1. Escolha o Funcionário Destinatário:</label>
-                <select value={funcSelecionado} onChange={(e) => setFuncSelecionado(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}>
-                  <option value="">-- Selecione o Colaborador --</option>
-                  {listaFuncionariosTSEA.filter(f => f.perfil === "Funcionário").map(f => (
-                    <option key={f.matricula} value={f.matricula}>{f.nome} ({f.matricula})</option>
-                  ))}
-                </select>
-              </div>
-
-              <h4 style={{ margin: '20px 0 10px 0' }}>2. Selecione as Ferramentas:</h4>
-              <div className="grid-catalogo">
-                {catalogoFerramentas.map(item => {
-                  const noCarrinho = carrinho.find(c => c.nome === item.nome)?.qtd || 0;
-                  return (
-                    <div key={item.id} className="card-ferramenta">
-                      <div>
-                        <span className="badge-categoria">{item.categoria}</span>
-                        <h4 style={{ margin: '10px 0 5px 0', fontSize: '14px' }}>{item.nome}</h4>
-                        <p style={{ margin: '0 0 15px 0', fontSize: '11px', color: '#666' }}>Disponível: <strong>{item.disponivel}</strong> / {item.total}</p>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: TSEA.cinzaClaro, padding: '5px', borderRadius: '4px' }}>
-                        <button onClick={() => alterarQuantidadeCarrinho(item.nome, 'subtrair')} style={{ width: '28px', height: '28px', background: TSEA.cinzaEscuro, color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>-</button>
-                        <span style={{ fontWeight: 'bold' }}>{noCarrinho}</span>
-                        <button onClick={() => alterarQuantidadeCarrinho(item.nome, 'somar')} style={{ width: '28px', height: '28px', background: TSEA.vermelho, color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>+</button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+          !nfcLiberado ? (
+            <div style={{ backgroundColor: TSEA.branco, padding: '30px', borderRadius: '8px', textAlign: 'center' }}>
+              <h2>Acesso bloqueado</h2>
+              <p>Passe o cartão NFC no totem para liberar</p>
             </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
-            {carrinho.length > 0 && (
-              <div style={{ backgroundColor: TSEA.branco, padding: '25px', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.08)', borderTop: `4px solid ${TSEA.vermelho}` }}>
-                <h3 style={{ margin: '0 0 15px 0', color: TSEA.vermelho }}>Fechamento do Lote de Carga</h3>
-                <ul style={{ marginBottom: '20px' }}>
-                  {carrinho.map((c, i) => <li key={i} style={{ fontSize: '14px' }}><strong>{c.qtd}x</strong> - {c.nome}</li>)}
-                </ul>
+              <div style={{ padding: '12px', background: '#e8f5e9', borderRadius: '6px' }}>
+                Sessao: <strong>
+                  {Math.floor(tempoRestante / 60)}:{(tempoRestante % 60).toString().padStart(2, '0')}
+                </strong>
+              </div>
 
-                <div style={{ padding: '15px', background: TSEA.cinzaClaro, borderRadius: '6px', marginBottom: '15px', maxWidth: '400px' }}>
-                  <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Código do Almoxarife para Assinatura (`9999`):</label>
-                  <input type="password" value={senhaAlmoxarife} onChange={(e) => setSenhaAlmoxarife(e.target.value)} placeholder="Digite o código" style={{ padding: '10px', width: '100%', borderRadius: '4px', border: '1px solid #ccc', boxSizing: 'border-box' }} />
+              <div style={{ backgroundColor: TSEA.branco, padding: '20px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.03)' }}>
+                <h3 style={{ margin: '0 0 15px 0', borderBottom: `2px solid ${TSEA.cinzaClaro}`, paddingBottom: '8px' }}>Painel de Despacho de Ativos</h3>
+
+                <div style={{ marginBottom: '20px', maxWidth: '400px' }}>
+                  <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '6px' }}>1. Escolha o Funcionário Destinatário:</label>
+                  <select value={funcSelecionado} onChange={(e) => setFuncSelecionado(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}>
+                    <option value="">-- Selecione o Colaborador --</option>
+                    {listaFuncionariosTSEA.filter(f => f.perfil === "Funcionário").map(f => (
+                      <option key={f.matricula} value={f.matricula}>{f.nome} ({f.matricula})</option>
+                    ))}
+                  </select>
                 </div>
 
-                <button onClick={() => {
-                  if (!funcSelecionado) return alert("Selecione um funcionário antes de lançar!");
-                  emitirLotePeloAlmoxarife(funcSelecionado);
-                }} style={{ padding: '14px 25px', background: 'green', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer' }}>
-                  ENVIAR PARA VALIDAÇÃO RFID NO TOTEM
-                </button>
+                <h4 style={{ margin: '20px 0 10px 0' }}>2. Selecione as Ferramentas:</h4>
+                <div className="grid-catalogo">
+                  {catalogoFerramentas.map(item => {
+                    const noCarrinho = carrinho.find(c => c.nome === item.nome)?.qtd || 0;
+                    return (
+                      <div key={item.id} className="card-ferramenta">
+                        <div>
+                          <span className="badge-categoria">{item.categoria}</span>
+                          <h4 style={{ margin: '10px 0 5px 0', fontSize: '14px' }}>{item.nome}</h4>
+                          <p style={{ margin: '0 0 15px 0', fontSize: '11px', color: '#666' }}>
+                            Disponível: <strong style={{ color: item.disponivel === 0 ? 'red' : 'green' }}>{item.disponivel}</strong> / {item.total}
+                          </p>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: TSEA.cinzaClaro, padding: '5px', borderRadius: '4px' }}>
+                          <button onClick={() => alterarQuantidadeCarrinho(item.nome, 'subtrair')} style={{ width: '28px', height: '28px', background: TSEA.cinzaEscuro, color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>-</button>
+                          <span style={{ fontWeight: 'bold' }}>{noCarrinho}</span>
+                          <button onClick={() => alterarQuantidadeCarrinho(item.nome, 'somar')} style={{ width: '28px', height: '28px', background: TSEA.vermelho, color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>+</button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            )}
-            
-            {pedidoAtivo && pedidoAtivo.status === "Aguardando RFID" && (
-              <div style={{ backgroundColor: '#fff8e1', padding: '15px', borderRadius: '6px', borderLeft: '5px solid #ffb300' }}>
-                <p style={{ margin: 0, color: '#b78103', fontWeight: 'bold' }}>Lote #{pedidoAtivo.idPedido} enviado! Aguardando o funcionário passar o cartão no totem secundário.</p>
-              </div>
-            )}
-          </div>
+
+              {carrinho.length > 0 && (
+                <div style={{ backgroundColor: TSEA.branco, padding: '25px', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.08)', borderTop: `4px solid ${TSEA.vermelho}` }}>
+                  <h3 style={{ margin: '0 0 15px 0', color: TSEA.vermelho }}>Fechamento do Lote de Carga</h3>
+                  <ul style={{ marginBottom: '20px' }}>
+                    {carrinho.map((c, i) => <li key={i} style={{ fontSize: '14px' }}><strong>{c.qtd}x</strong> - {c.nome}</li>)}
+                  </ul>
+                  <div style={{ padding: '15px', background: TSEA.cinzaClaro, borderRadius: '6px', marginBottom: '15px', maxWidth: '400px' }}>
+                    <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Código do Almoxarife para Assinatura (9999):</label>
+                    <input type="password" value={senhaAlmoxarife} onChange={(e) => setSenhaAlmoxarife(e.target.value)} placeholder="Digite o código" style={{ padding: '10px', width: '100%', borderRadius: '4px', border: '1px solid #ccc', boxSizing: 'border-box' }} />
+                  </div>
+                  <button onClick={() => {
+                    if (!funcSelecionado) return alert("Selecione um funcionário antes de lançar!");
+                    emitirLotePeloAlmoxarife(funcSelecionado);
+                  }} style={{ padding: '14px 25px', background: 'green', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer' }}>
+                    ENVIAR PARA VALIDAÇÃO RFID NO TOTEM
+                  </button>
+                </div>
+              )}
+
+              {pedidoAtivo && pedidoAtivo.status === "Aguardando RFID" && (
+                <div style={{ backgroundColor: '#fff8e1', padding: '15px', borderRadius: '6px', borderLeft: '5px solid #ffb300' }}>
+                  <p style={{ margin: 0, color: '#b78103', fontWeight: 'bold' }}>Lote #{pedidoAtivo.idPedido} enviado! Aguardando o funcionário passar o cartão no totem secundário.</p>
+                </div>
+              )}
+
+            </div>
+          )
         )}
 
         {abaAtivaAdm === 'retornos' && (
@@ -383,7 +386,13 @@ function PainelAlmoxarife({
             <h4>Monitor Geral de Ferramentas Ativas</h4>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
-                <tr style={{ backgroundColor: TSEA.cinzaClaro }}><th style={{ padding: '12px' }}>Funcionário</th><th style={{ padding: '12px' }}>Ferramenta</th><th style={{ padding: '12px' }}>Qtd</th><th style={{ padding: '12px' }}>Data Retirada</th><th style={{ padding: '12px' }}>Status</th></tr>
+                <tr style={{ backgroundColor: TSEA.cinzaClaro }}>
+                  <th style={{ padding: '12px' }}>Funcionário</th>
+                  <th style={{ padding: '12px' }}>Ferramenta</th>
+                  <th style={{ padding: '12px' }}>Qtd</th>
+                  <th style={{ padding: '12px' }}>Data Retirada</th>
+                  <th style={{ padding: '12px' }}>Status</th>
+                </tr>
               </thead>
               <tbody>
                 {ativosEmCustodiaTSEA.filter(a => a.status !== "DEVOLVIDO").map((item, idx) => (
@@ -392,7 +401,11 @@ function PainelAlmoxarife({
                     <td style={{ padding: '12px' }}>{item.ferramenta}</td>
                     <td style={{ padding: '12px' }}>{item.qtd}x</td>
                     <td style={{ padding: '12px' }}>{item.data}</td>
-                    <td style={{ padding: '12px' }}><span style={{ padding: '4px 8px', borderRadius: '4px', background: item.status === 'EM CUSTÓDIA' ? '#ffebee' : '#fff3e0', color: item.status === 'EM CUSTÓDIA' ? TSEA.vermelho : '#ef6c00', fontWeight: 'bold', fontSize: '11px' }}>{item.status}</span></td>
+                    <td style={{ padding: '12px' }}>
+                      <span style={{ padding: '4px 8px', borderRadius: '4px', background: item.status === 'EM CUSTÓDIA' ? '#ffebee' : '#fff3e0', color: item.status === 'EM CUSTÓDIA' ? TSEA.vermelho : '#ef6c00', fontWeight: 'bold', fontSize: '11px' }}>
+                        {item.status}
+                      </span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -405,7 +418,12 @@ function PainelAlmoxarife({
             <h4>Inventário Físico do Almoxarifado</h4>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
-                <tr style={{ backgroundColor: TSEA.cinzaClaro }}><th style={{ padding: '12px' }}>Ferramenta</th><th style={{ padding: '12px' }}>Categoria</th><th style={{ padding: '12px' }}>Qtd Disponível</th><th style={{ padding: '12px' }}>Qtd Total</th></tr>
+                <tr style={{ backgroundColor: TSEA.cinzaClaro }}>
+                  <th style={{ padding: '12px' }}>Ferramenta</th>
+                  <th style={{ padding: '12px' }}>Categoria</th>
+                  <th style={{ padding: '12px' }}>Qtd Disponível</th>
+                  <th style={{ padding: '12px' }}>Qtd Total</th>
+                </tr>
               </thead>
               <tbody>
                 {catalogoFerramentas.map(item => (
@@ -424,26 +442,35 @@ function PainelAlmoxarife({
         {abaAtivaAdm === 'historico_retiradas' && (
           <div style={{ backgroundColor: TSEA.branco, padding: '25px', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
             <h4>Histórico de Últimas Retiradas</h4>
-            {ultimasRetiradas.map((r, i) => <div key={i} style={{ padding: '10px', borderBottom: '1px solid #eee' }}>{r.data} - <strong>{r.funcionario}</strong> retirou {r.qtd}x {r.ferramenta}</div>)}
+            {ultimasRetiradas.map((r, i) => (
+              <div key={i} style={{ padding: '10px', borderBottom: '1px solid #eee' }}>
+                {r.data} - <strong>{r.funcionario}</strong> retirou {r.qtd}x {r.ferramenta}
+              </div>
+            ))}
           </div>
         )}
 
         {abaAtivaAdm === 'historico_devolucoes' && (
           <div style={{ backgroundColor: TSEA.branco, padding: '25px', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
             <h4>Histórico de Últimas Devoluções</h4>
-            {ultimasDevolucoes.map((d, i) => <div key={i} style={{ padding: '10px', borderBottom: '1px solid #eee', color: 'green' }}>{d.dataDevolucao} - <strong>{d.funcionario}</strong> devolveu {d.qtd}x {d.ferramenta}</div>)}
+            {ultimasDevolucoes.map((d, i) => (
+              <div key={i} style={{ padding: '10px', borderBottom: '1px solid #eee', color: 'green' }}>
+                {d.dataDevolucao} - <strong>{d.funcionario}</strong> devolveu {d.qtd}x {d.ferramenta}
+              </div>
+            ))}
           </div>
         )}
+
       </main>
     </div>
   );
 }
 
 // ==========================================
-// COMPONENTE 4: PAINEL MASTER (SUPER ADMIN)
+// COMPONENTE 4: PAINEL MASTER
 // ==========================================
 function PainelMaster({
-  abaAtivaSuper, setAbaAtivaSuper, ativosEmCustodiaTSEA, catalogoFerramentas, 
+  abaAtivaSuper, setAbaAtivaSuper, ativosEmCustodiaTSEA, catalogoFerramentas,
   listaFuncionariosTSEA, cadastrarNovoUsuario, logout
 }) {
   const [novoNome, setNovoNome] = useState('');
@@ -501,7 +528,11 @@ function PainelMaster({
               <thead><tr style={{ backgroundColor: '#eee' }}><th style={{ padding: '10px' }}>Nome</th><th style={{ padding: '10px' }}>Matrícula</th><th style={{ padding: '10px' }}>Perfil</th></tr></thead>
               <tbody>
                 {listaFuncionariosTSEA.map((u, i) => (
-                  <tr key={i} style={{ borderBottom: '1px solid #eee' }}><td style={{ padding: '10px' }}>{u.nome}</td><td style={{ padding: '10px' }}>{u.matricula}</td><td style={{ padding: '10px' }}>{u.perfil}</td></tr>
+                  <tr key={i} style={{ borderBottom: '1px solid #eee' }}>
+                    <td style={{ padding: '10px' }}>{u.nome}</td>
+                    <td style={{ padding: '10px' }}>{u.matricula}</td>
+                    <td style={{ padding: '10px' }}>{u.perfil}</td>
+                  </tr>
                 ))}
               </tbody>
             </table>
@@ -531,13 +562,13 @@ function PainelMaster({
 }
 
 // ==========================================
-// ORQUESTRADOR CENTRAL CONTROLADOR (APP COM ESTADO UNIFICADO)
+// APP PRINCIPAL
 // ==========================================
 function App() {
   const [logado, setLogado] = useState(false);
-  const [perfilLogado, setPerfilLogado] = useState(null); 
-  const [perfil, setPerfil] = useState(null);             
-  
+  const [perfilLogado, setPerfilLogado] = useState(null);
+  const [perfil, setPerfil] = useState(null);
+
   const [operador] = useState({
     nome: "Carlos Eduardo Santos",
     matricula: "RE-40922",
@@ -550,7 +581,7 @@ function App() {
   const [abaAtiva, setAbaAtiva] = useState('confirme_cartao');
   const [abaAtivaAdm, setAbaAtivaAdm] = useState('solicitar_emprestimo');
   const [abaAtivaSuper, setAbaAtivaSuper] = useState('registro_usuario');
-  
+
   const [carrinho, setCarrinho] = useState([]);
   const [statusBiometria, setStatusBiometria] = useState('desligado');
   const [progressoEscaneamento, setProgressoEscaneamento] = useState(0);
@@ -562,7 +593,6 @@ function App() {
   const [senhaAlmoxarife, setSenhaAlmoxarife] = useState('');
   const [senhaAlmoxarifeDevolucao, setSenhaAlmoxarifeDevolucao] = useState('');
 
-  // BANCO DE ESTADOS COMPARTILHADO (A Conexão em tempo real)
   const [catalogoFerramentas, setCatalogoFerramentas] = useState([
     { id: 1, nome: "Chave Estrela 1/2 texturada TSEA", categoria: "Manuais", total: 15, disponivel: 15 },
     { id: 2, nome: "Alicate de Pressão Isolado 1000V", categoria: "Manuais", total: 10, disponivel: 10 },
@@ -576,13 +606,37 @@ function App() {
   const [ultimasDevolucoes, setUltimasDevolucoes] = useState([]);
   const [devolucoesPendentes, setDevolucoesPendentes] = useState([]);
   const [pedidoAtivo, setPedidoAtivo] = useState(null);
+  const [nfcLiberado, setNfcLiberado] = useState(false);
+  const [tempoRestante, setTempoRestante] = useState(0);
 
   const [listaFuncionariosTSEA, setListaFuncionariosTSEA] = useState([
     { nome: "Carlos Eduardo Santos", matricula: "RE-40922", perfil: "Funcionário" },
     { nome: "Almoxarife Sergio", matricula: "ID-1002", perfil: "Almoxarife" }
   ]);
 
-  // LOGIN HANDLERS
+  useEffect(() => {
+    socket.on("nfcAuth", () => {
+      setNfcLiberado(true);
+      setTempoRestante(10 * 60);
+    });
+    return () => socket.off("nfcAuth");
+  }, []);
+
+  useEffect(() => {
+    if (!nfcLiberado) return;
+    const intervalo = setInterval(() => {
+      setTempoRestante(prev => {
+        if (prev <= 1) {
+          clearInterval(intervalo);
+          setNfcLiberado(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(intervalo);
+  }, [nfcLiberado]);
+
   const entrarComoAlmoxarife = () => {
     if (idAlmoxarife === 'admin' && senhaLoginAlmoxarife === '1234') {
       setPerfilLogado('adm'); setLogado(true);
@@ -595,33 +649,27 @@ function App() {
     } else { alert("Chave mestre inválida!"); }
   };
 
-  // ADICIONAR E SUBTRAIR ITENS NO CARRINHO DO ALMOXARIFE
   const alterarQuantidadeCarrinho = (nome, acao) => {
     const itemEstoque = catalogoFerramentas.find(f => f.nome === nome);
     const itemCarrinho = carrinho.find(c => c.nome === nome);
-
     if (acao === 'somar') {
       if (itemCarrinho && itemCarrinho.qtd >= itemEstoque.disponivel) {
         alert("Quantidade máxima disponível em estoque atingida!");
         return;
       }
-      itemCarrinho 
-        ? setCarrinho(carrinho.map(c => c.nome === nome ? {...c, qtd: c.qtd + 1} : c)) 
+      itemCarrinho
+        ? setCarrinho(carrinho.map(c => c.nome === nome ? { ...c, qtd: c.qtd + 1 } : c))
         : setCarrinho([...carrinho, { nome, qtd: 1 }]);
     } else {
       if (!itemCarrinho) return;
-      itemCarrinho.qtd === 1 
-        ? setCarrinho(carrinho.filter(c => c.nome !== nome)) 
-        : setCarrinho(carrinho.map(c => c.nome === nome ? {...c, qtd: c.qtd - 1} : c));
+      itemCarrinho.qtd === 1
+        ? setCarrinho(carrinho.filter(c => c.nome !== nome))
+        : setCarrinho(carrinho.map(c => c.nome === nome ? { ...c, qtd: c.qtd - 1 } : c));
     }
   };
 
-  // ALMOXARIFE GERA O LOTE
   const emitirLotePeloAlmoxarife = (matricula) => {
-    if (senhaAlmoxarife !== '9999') {
-      alert("Código do Almoxarife incorreto!");
-      return;
-    }
+    if (senhaAlmoxarife !== '9999') { alert("Código do Almoxarife incorreto!"); return; }
     const func = listaFuncionariosTSEA.find(f => f.matricula === matricula);
     const novoChamado = {
       idPedido: Math.floor(100000 + Math.random() * 900000),
@@ -637,36 +685,22 @@ function App() {
     alert("Lote assinado! Peça ao operador para passar o cartão no Totem.");
   };
 
-  // FUNCIONÁRIO PARTE: CONFIRMA COM CARTÃO RFID NO TOTEM (ATUALIZAÇÃO GERAL)
   const confirmarRetiradaComCartao = () => {
     const dataAtual = new Date().toLocaleString();
-    
-    // Atualiza o estoque real subtraindo os itens
     setCatalogoFerramentas(prevEstoque => prevEstoque.map(ferr => {
       const correspondente = pedidoAtivo.itensPuros.find(c => c.nome === ferr.nome);
       return correspondente ? { ...ferr, disponivel: ferr.disponivel - correspondente.qtd } : ferr;
     }));
-
-    // Insere os itens na custódia e no histórico geral de retiradas
     pedidoAtivo.itensPuros.forEach(item => {
-      const registro = { 
-        funcionario: pedidoAtivo.funcionario, 
-        matricula: pedidoAtivo.badge, 
-        ferramenta: item.nome, 
-        qtd: item.qtd, 
-        data: dataAtual, 
-        status: "EM CUSTÓDIA" 
-      };
+      const registro = { funcionario: pedidoAtivo.funcionario, matricula: pedidoAtivo.badge, ferramenta: item.nome, qtd: item.qtd, data: dataAtual, status: "EM CUSTÓDIA" };
       setAtivosEmCustodiaTSEA(prev => [registro, ...prev]);
       setUltimasRetiradas(prev => [registro, ...prev]);
     });
-
     setPedidoAtivo(null);
     setCarrinho([]);
     alert("Crachá reconhecido! Ferramentas vinculadas à sua RE e estoque atualizado!");
   };
 
-  // DEVOLUÇÕES
   const solicitarDevolucaoImediata = (item) => {
     setAtivosEmCustodiaTSEA(ativosEmCustodiaTSEA.map(a => (a.matricula === item.matricula && a.ferramenta === item.ferramenta && a.status === "EM CUSTÓDIA") ? { ...a, status: "AGUARDANDO BAIXA" } : a));
     setDevolucoesPendentes([...devolucoesPendentes, { id: Date.now(), ...item }]);
@@ -674,11 +708,10 @@ function App() {
   };
 
   const aprovarBaixaDevolucao = (idDevolucao, funcNome, ferramentaNome) => {
-    if(senhaAlmoxarifeDevolucao === '9999') {
+    if (senhaAlmoxarifeDevolucao === '9999') {
       const dev = devolucoesPendentes.find(d => d.id === idDevolucao);
       setDevolucoesPendentes(devolucoesPendentes.filter(d => d.id !== idDevolucao));
       setAtivosEmCustodiaTSEA(ativosEmCustodiaTSEA.map(a => (a.funcionario === funcNome && a.ferramenta === ferramentaNome && a.status === "AGUARDANDO BAIXA") ? { ...a, status: "DEVOLVIDO" } : a));
-      
       setCatalogoFerramentas(catalogoFerramentas.map(f => f.nome === ferramentaNome ? { ...f, disponivel: f.disponivel + dev.qtd } : f));
       setUltimasDevolucoes([{ funcionario: funcNome, matricula: dev.matricula, ferramenta: ferramentaNome, qtd: dev.qtd, dataDevolucao: new Date().toLocaleString() }, ...ultimasDevolucoes]);
       setSenhaAlmoxarifeDevolucao('');
@@ -706,36 +739,38 @@ function App() {
       `}</style>
 
       {!logado ? (
-        <Login 
-          perfil={perfil} setPerfil={setPerfil} statusBiometria={statusBiometria} setStatusBiometria={setStatusBiometria} videoRef={videoRef} 
+        <Login
+          perfil={perfil} setPerfil={setPerfil} statusBiometria={statusBiometria} setStatusBiometria={setStatusBiometria} videoRef={videoRef}
           progressoEscaneamento={progressoEscaneamento} setProgressoEscaneamento={setProgressoEscaneamento}
           entrarNoPainelManualmente={() => { setPerfilLogado('func'); setLogado(true); }}
           idAlmoxarife={idAlmoxarife} setIdAlmoxarife={setIdAlmoxarife}
-          senhaLoginAlmoxarife={senhaLoginAlmoxarife} setSenhaLoginAlmoxarife={setSenhaLoginAlmoxarife} entrarComoAlmoxarife={entrarComoAlmoxarife} 
+          senhaLoginAlmoxarife={senhaLoginAlmoxarife} setSenhaLoginAlmoxarife={setSenhaLoginAlmoxarife} entrarComoAlmoxarife={entrarComoAlmoxarife}
           senhaSuperAdmin={senhaSuperAdmin} setSenhaSuperAdmin={setSenhaSuperAdmin} entrarComoSuperAdmin={entrarComoSuperAdmin}
         />
       ) : perfilLogado === 'func' ? (
-        <PainelOperador 
-          abaAtiva={abaAtiva} setAbaAtiva={setAbaAtiva} operador={operador} 
-          ativosEmCustodiaTSEA={ativosEmCustodiaTSEA} solicitarDevolucaoImediata={solicitarDevolucaoImediata} 
-          pedidoAtivo={pedidoAtivo} confirmarRetiradaComCartao={confirmarRetiradaComCartao} 
+        <PainelOperador
+          abaAtiva={abaAtiva} setAbaAtiva={setAbaAtiva} operador={operador}
+          ativosEmCustodiaTSEA={ativosEmCustodiaTSEA} solicitarDevolucaoImediata={solicitarDevolucaoImediata}
+          pedidoAtivo={pedidoAtivo} confirmarRetiradaComCartao={confirmarRetiradaComCartao}
           logout={() => { setLogado(false); setPerfil(null); setStatusBiometria('desligado'); setProgressoEscaneamento(0); }}
         />
       ) : perfilLogado === 'adm' ? (
-        <PainelAlmoxarife 
-          abaAtivaAdm={abaAtivaAdm} setAbaAtivaAdm={setAbaAtivaAdm} pedidoAtivo={pedidoAtivo} senhaAlmoxarife={senhaAlmoxarife} 
-          setSenhaAlmoxarife={setSenhaAlmoxarife} devolucoesPendentes={devolucoesPendentes} senhaAlmoxarifeDevolucao={senhaAlmoxarifeDevolucao} 
-          setSenhaAlmoxarifeDevolucao={setSenhaAlmoxarifeDevolucao} aprovarBaixaDevolucao={aprovarBaixaDevolucao} 
-          ativosEmCustodiaTSEA={ativosEmCustodiaTSEA} catalogoFerramentas={catalogoFerramentas} listaFuncionariosTSEA={listaFuncionariosTSEA} 
+        <PainelAlmoxarife
+          nfcLiberado={nfcLiberado} tempoRestante={tempoRestante}
+          abaAtivaAdm={abaAtivaAdm} setAbaAtivaAdm={setAbaAtivaAdm} pedidoAtivo={pedidoAtivo}
+          senhaAlmoxarife={senhaAlmoxarife} setSenhaAlmoxarife={setSenhaAlmoxarife}
+          devolucoesPendentes={devolucoesPendentes} senhaAlmoxarifeDevolucao={senhaAlmoxarifeDevolucao}
+          setSenhaAlmoxarifeDevolucao={setSenhaAlmoxarifeDevolucao} aprovarBaixaDevolucao={aprovarBaixaDevolucao}
+          ativosEmCustodiaTSEA={ativosEmCustodiaTSEA} catalogoFerramentas={catalogoFerramentas} listaFuncionariosTSEA={listaFuncionariosTSEA}
           carrinho={carrinho} alterarQuantidadeCarrinho={alterarQuantidadeCarrinho} emitirLotePeloAlmoxarife={emitirLotePeloAlmoxarife}
-          ultimasRetiradas={ultimasRetiradas} ultimasDevolucoes={ultimasDevolucoes} 
+          ultimasRetiradas={ultimasRetiradas} ultimasDevolucoes={ultimasDevolucoes}
           logout={() => { setLogado(false); setPerfil(null); setCarrinho([]); }}
         />
       ) : perfilLogado === 'superadmin' ? (
-        <PainelMaster 
-          abaAtivaSuper={abaAtivaSuper} setAbaAtivaSuper={setAbaAtivaSuper} ativosEmCustodiaTSEA={ativosEmCustodiaTSEA} 
-          catalogoFerramentas={catalogoFerramentas} ultimasRetiradas={ultimasRetiradas} ultimasDevolucoes={ultimasDevolucoes} 
-          listaFuncionariosTSEA={listaFuncionariosTSEA} cadastrarNovoUsuario={cadastrarNovoUsuario} 
+        <PainelMaster
+          abaAtivaSuper={abaAtivaSuper} setAbaAtivaSuper={setAbaAtivaSuper} ativosEmCustodiaTSEA={ativosEmCustodiaTSEA}
+          catalogoFerramentas={catalogoFerramentas} listaFuncionariosTSEA={listaFuncionariosTSEA}
+          cadastrarNovoUsuario={cadastrarNovoUsuario}
           logout={() => { setLogado(false); setPerfil(null); }}
         />
       ) : null}
