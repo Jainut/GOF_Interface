@@ -582,12 +582,6 @@ function App() {
     { nome: "Almoxarife Sergio", matricula: "ID-1002", perfil: "Almoxarife" }
   ]);
 
-  // LOGIN HANDLERS
-  const entrarComoAlmoxarife = () => {
-    if (idAlmoxarife === 'admin' && senhaLoginAlmoxarife === '1234') {
-      setPerfilLogado('adm'); setLogado(true);
-    } else { alert("ID ou Senha de Almoxarife inválidos!"); }
-  };
 
   const entrarComoSuperAdmin = () => {
     if (senhaSuperAdmin === 'adminadmin') {
@@ -615,6 +609,113 @@ function App() {
         : setCarrinho(carrinho.map(c => c.nome === nome ? {...c, qtd: c.qtd - 1} : c));
     }
   };
+
+   // Crie essa função no lugar onde você gerencia os estados principais do App
+  const entrarComoAlmoxarife = async () => {
+    try {
+      // Substitua a URL base pela URL onde seu backend Express está rodando (ex: http://localhost:3000)
+      const response = await fetch('https://visalayapi.onrender.com/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cpf: idAlmoxarife, // ID que o admin digita no front vai como CPF pro back
+          senha: senhaLoginAlmoxarife
+        }),
+      });
+
+      const data = await response.json();
+      console.log("RESPOSTA DO LOGIN:", data); // ADICIONE ESTA LINHA
+
+      if (response.ok) {
+        // Deu bom! Salva o token JWT no navegador
+        localStorage.setItem('tsea_token', data.token);
+        alert('Login realizado com sucesso, chefe!');
+        
+        // Aqui você altera o estado para mudar a tela para o PainelAlmoxarife
+        // Exemplo: setPerfil('almoxarife_logado') ou setAbaAtivaAdm('solicitar_emprestimo')
+        
+      } else {
+        // Caso a senha esteja errada ou usuário não exista
+        alert(`Ops: ${data.message}`);
+        console.log("RESPOSTA DO LOGIN:", data); // ADICIONE ESTA LINHA
+      }
+    } catch (error) {
+      console.error('Erro ao conectar com a bomba:', error);
+      alert('Erro de conexão com o servidor!');
+      console.log("RESPOSTA DO LOGIN:", data); // ADICIONE ESTA LINHA
+    }
+  };
+
+  const carregarCatalogoDeFerramentas = async () => {
+    // Pega o token que foi salvo lá no momento do login
+    const token = localStorage.getItem('tsea_token');
+
+    if (!token) {
+      alert('Você precisa fazer login primeiro!');
+      return;
+    }
+
+    try {
+      const response = await fetch('https://visalayapi.onrender.com/listar/Ferramentas', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          // Aqui está a mágica: enviando o passe VIP para a rota privada
+          'Authorization': `Bearer ${token}` 
+        }
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('Ferramentas carregadas do banco:', data);
+        // Aqui você atualizaria o estado das ferramentas no React
+        // Exemplo: setCatalogoFerramentas(data);
+      } else {
+        // Se o token expirou ou é inválido, o seu backend retorna 401
+        alert(`Acesso negado: ${data.message}`);
+        // Opcional: deslogar o usuário limpando o localStorage
+        // localStorage.removeItem('tsea_token');
+        // setPerfil(null);
+      }
+    } catch (error) {
+      console.error('Erro ao listar ferramentas:', error);
+    }
+  };
+  
+  const finalizarLotePeloAlmoxarife = async () => {
+    const token = localStorage.getItem('tsea_token');
+
+    const payload = {
+      user_cpf: funcSelecionado, 
+      ferramentas: carrinho // Supondo que o array já está no formato certo
+    };
+
+    try {
+      const response = await fetch('https://visalayapi.onrender.com/registrar/Emprestimo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(`Lote despachado com sucesso! ID do Empréstimo: ${data.emprestimo_id}`);
+        // Limpa o carrinho e atualiza a tela
+      } else {
+        alert(`Erro: ${data.message}`);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
 
   // ALMOXARIFE GERA O LOTE
   const emitirLotePeloAlmoxarife = (matricula) => {
