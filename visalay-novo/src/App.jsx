@@ -69,7 +69,6 @@ function Login({
       </header>
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '15px', backgroundColor: '#f0f2f5' }}>
         <div style={{ backgroundColor: '#fff', padding: '30px', borderRadius: '8px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', width: '100%', maxWidth: '380px', borderTop: `5px solid ${TSEA.vermelho}`, textAlign: 'center' }}>
-
           {!perfil && (
             <>
               <h4 style={{ margin: '0 0 20px 0', color: TSEA.preto }}>CONTROLE DE ACESSO MÓVEL</h4>
@@ -80,7 +79,6 @@ function Login({
               </div>
             </>
           )}
-
           {perfil === 'func' && (
             <div>
               <h5 style={{ margin: '0 0 15px 0' }}>Validação Biométrica Requerida</h5>
@@ -102,7 +100,6 @@ function Login({
               <button onClick={() => { desligarWebcamReal(); setPerfil(null); setProgressoEscaneamento(0); }} style={{ marginTop: '15px', background: 'none', border: 'none', color: TSEA.vermelho, fontWeight: 'bold', cursor: 'pointer' }}>Cancelar e Voltar</button>
             </div>
           )}
-
           {perfil === 'adm' && (
             <div>
               <h5 style={{ margin: '0 0 15px 0' }}>Autenticação - Almoxarifado</h5>
@@ -112,7 +109,6 @@ function Login({
               <button onClick={() => setPerfil(null)} style={{ marginTop: '15px', background: 'none', border: 'none', color: TSEA.vermelho, fontWeight: 'bold', cursor: 'pointer' }}>Voltar</button>
             </div>
           )}
-
           {perfil === 'superadmin' && (
             <div>
               <h5 style={{ margin: '0 0 15px 0' }}>Acesso Master Corporativo</h5>
@@ -121,7 +117,6 @@ function Login({
               <button onClick={() => setPerfil(null)} style={{ marginTop: '15px', background: 'none', border: 'none', color: TSEA.vermelho, fontWeight: 'bold', cursor: 'pointer' }}>Voltar</button>
             </div>
           )}
-
         </div>
       </div>
     </div>
@@ -151,7 +146,6 @@ function PainelOperador({
         </nav>
         <button onClick={logout} style={{ width: '100%', padding: '12px', background: TSEA.vermelho, color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Sair do Totem</button>
       </aside>
-
       <main className="content-main">
         <header style={{ backgroundColor: TSEA.branco, padding: '15px 20px', borderRadius: '6px', boxShadow: '0 2px 10px rgba(0,0,0,0.03)', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
@@ -275,9 +269,7 @@ function PainelAlmoxarife({
         </nav>
         <button onClick={logout} style={{ width: '100%', padding: '12px', background: TSEA.vermelho, color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Sair</button>
       </aside>
-
       <main className="content-main">
-
         {abaAtivaAdm === 'solicitar_emprestimo' && (
           !nfcLiberado ? (
             <div style={{ backgroundColor: TSEA.branco, padding: '30px', borderRadius: '8px', textAlign: 'center' }}>
@@ -286,16 +278,13 @@ function PainelAlmoxarife({
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-
               <div style={{ padding: '12px', background: '#e8f5e9', borderRadius: '6px' }}>
                 Sessao: <strong>
                   {Math.floor(tempoRestante / 60)}:{(tempoRestante % 60).toString().padStart(2, '0')}
                 </strong>
               </div>
-
               <div style={{ backgroundColor: TSEA.branco, padding: '20px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.03)' }}>
                 <h3 style={{ margin: '0 0 15px 0', borderBottom: `2px solid ${TSEA.cinzaClaro}`, paddingBottom: '8px' }}>Painel de Despacho de Ativos</h3>
-
                 <div style={{ marginBottom: '20px', maxWidth: '400px' }}>
                   <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '6px' }}>1. Escolha o Funcionário Destinatário:</label>
                   <select value={funcSelecionado} onChange={(e) => setFuncSelecionado(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}>
@@ -305,7 +294,6 @@ function PainelAlmoxarife({
                     ))}
                   </select>
                 </div>
-
                 <h4 style={{ margin: '20px 0 10px 0' }}>2. Selecione as Ferramentas:</h4>
                 <div className="grid-catalogo">
                   {catalogoFerramentas.map(item => {
@@ -329,7 +317,6 @@ function PainelAlmoxarife({
                   })}
                 </div>
               </div>
-
               {carrinho.length > 0 && (
                 <div style={{ backgroundColor: TSEA.branco, padding: '25px', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.08)', borderTop: `4px solid ${TSEA.vermelho}` }}>
                   <h3 style={{ margin: '0 0 15px 0', color: TSEA.vermelho }}>Fechamento do Lote de Carga</h3>
@@ -348,13 +335,11 @@ function PainelAlmoxarife({
                   </button>
                 </div>
               )}
-
               {pedidoAtivo && pedidoAtivo.status === "Aguardando RFID" && (
                 <div style={{ backgroundColor: '#fff8e1', padding: '15px', borderRadius: '6px', borderLeft: '5px solid #ffb300' }}>
                   <p style={{ margin: 0, color: '#b78103', fontWeight: 'bold' }}>Lote #{pedidoAtivo.idPedido} enviado! Aguardando o funcionário passar o cartão no totem secundário.</p>
                 </div>
               )}
-
             </div>
           )
         )}
@@ -460,7 +445,6 @@ function PainelAlmoxarife({
             ))}
           </div>
         )}
-
       </main>
     </div>
   );
@@ -481,7 +465,8 @@ function PainelMaster({
     e.preventDefault();
     if (!novoNome || !novaMatricula) return alert("Preencha todos os campos!");
     cadastrarNovoUsuario({ nome: novoNome, matricula: novaMatricula, perfil: novoPerfil, setor: "Manufatura TSEA", cargo: "Operador", status: "Ativo" });
-    setNovoNome(''); setNovaMatricula('');
+    setNovoNome('');
+    setNovaMatricula('');
     alert("Usuário registrado corporativamente!");
   };
 
@@ -500,7 +485,6 @@ function PainelMaster({
         </nav>
         <button onClick={logout} style={{ width: '100%', padding: '12px', background: TSEA.vermelho, color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Sair</button>
       </aside>
-
       <main className="content-main">
         <header style={{ backgroundColor: TSEA.branco, padding: '15px 20px', borderRadius: '8px', borderLeft: `6px solid ${TSEA.vermelho}`, boxShadow: '0 2px 10px rgba(0,0,0,0.05)', marginBottom: '20px' }}>
           <h3 style={{ margin: 0 }}>Painel Master de Auditoria de TI</h3>
@@ -581,7 +565,6 @@ function App() {
   const [abaAtiva, setAbaAtiva] = useState('confirme_cartao');
   const [abaAtivaAdm, setAbaAtivaAdm] = useState('solicitar_emprestimo');
   const [abaAtivaSuper, setAbaAtivaSuper] = useState('registro_usuario');
-
   const [carrinho, setCarrinho] = useState([]);
   const [statusBiometria, setStatusBiometria] = useState('desligado');
   const [progressoEscaneamento, setProgressoEscaneamento] = useState(0);
@@ -606,6 +589,8 @@ function App() {
   const [ultimasDevolucoes, setUltimasDevolucoes] = useState([]);
   const [devolucoesPendentes, setDevolucoesPendentes] = useState([]);
   const [pedidoAtivo, setPedidoAtivo] = useState(null);
+
+  // NFC: liberado via totem físico, com timer de sessão
   const [nfcLiberado, setNfcLiberado] = useState(false);
   const [tempoRestante, setTempoRestante] = useState(0);
 
@@ -614,39 +599,13 @@ function App() {
     { nome: "Almoxarife Sergio", matricula: "ID-1002", perfil: "Almoxarife" }
   ]);
 
-  useEffect(() => {
-    socket.on("nfcAuth", () => {
-      setNfcLiberado(true);
-      setTempoRestante(10 * 60);
-    });
-    return () => socket.off("nfcAuth");
-  }, []);
-
-  useEffect(() => {
-    if (!nfcLiberado) return;
-    const intervalo = setInterval(() => {
-      setTempoRestante(prev => {
-        if (prev <= 1) {
-          clearInterval(intervalo);
-          setNfcLiberado(false);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(intervalo);
-  }, [nfcLiberado]);
-
-  const entrarComoAlmoxarife = () => {
-    if (idAlmoxarife === 'admin' && senhaLoginAlmoxarife === '1234') {
-      setPerfilLogado('adm'); setLogado(true);
-    } else { alert("ID ou Senha de Almoxarife inválidos!"); }
-  };
-
   const entrarComoSuperAdmin = () => {
     if (senhaSuperAdmin === 'adminadmin') {
-      setPerfilLogado('superadmin'); setLogado(true);
-    } else { alert("Chave mestre inválida!"); }
+      setPerfilLogado('superadmin');
+      setLogado(true);
+    } else {
+      alert("Chave mestre inválida!");
+    }
   };
 
   const alterarQuantidadeCarrinho = (nome, acao) => {
@@ -668,6 +627,49 @@ function App() {
     }
   };
 
+  // Login do almoxarife via API com JWT
+  const entrarComoAlmoxarife = async () => {
+    try {
+      const response = await fetch(import.meta.env.VITE_API_URL + '/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cpf: idAlmoxarife, senha: senhaLoginAlmoxarife }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem('tsea_token', data.token);
+        setPerfilLogado('adm');
+        setLogado(true);
+      } else {
+        alert(`Ops: ${data.message}`);
+      }
+    } catch (error) {
+      console.error('Erro ao conectar com o servidor:', error);
+      alert('Erro de conexão com o servidor!');
+    }
+  };
+
+  // Busca catálogo atualizado do backend (requer token válido)
+  const carregarCatalogoDeFerramentas = async () => {
+    const token = localStorage.getItem('tsea_token');
+    if (!token) { alert('Você precisa fazer login primeiro!'); return; }
+    try {
+      const response = await fetch(import.meta.env.VITE_API_URL + '/listar/Ferramentas', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setCatalogoFerramentas(data);
+      } else {
+        alert(`Acesso negado: ${data.message}`);
+      }
+    } catch (error) {
+      console.error('Erro ao listar ferramentas:', error);
+    }
+  };
+
+  // Almoxarife assina e despacha o lote para validação RFID
   const emitirLotePeloAlmoxarife = (matricula) => {
     if (senhaAlmoxarife !== '9999') { alert("Código do Almoxarife incorreto!"); return; }
     const func = listaFuncionariosTSEA.find(f => f.matricula === matricula);
@@ -685,6 +687,7 @@ function App() {
     alert("Lote assinado! Peça ao operador para passar o cartão no Totem.");
   };
 
+  // Operador passa o crachá → confirma retirada e baixa o estoque
   const confirmarRetiradaComCartao = () => {
     const dataAtual = new Date().toLocaleString();
     setCatalogoFerramentas(prevEstoque => prevEstoque.map(ferr => {
@@ -692,7 +695,14 @@ function App() {
       return correspondente ? { ...ferr, disponivel: ferr.disponivel - correspondente.qtd } : ferr;
     }));
     pedidoAtivo.itensPuros.forEach(item => {
-      const registro = { funcionario: pedidoAtivo.funcionario, matricula: pedidoAtivo.badge, ferramenta: item.nome, qtd: item.qtd, data: dataAtual, status: "EM CUSTÓDIA" };
+      const registro = {
+        funcionario: pedidoAtivo.funcionario,
+        matricula: pedidoAtivo.badge,
+        ferramenta: item.nome,
+        qtd: item.qtd,
+        data: dataAtual,
+        status: "EM CUSTÓDIA"
+      };
       setAtivosEmCustodiaTSEA(prev => [registro, ...prev]);
       setUltimasRetiradas(prev => [registro, ...prev]);
     });
@@ -701,22 +711,39 @@ function App() {
     alert("Crachá reconhecido! Ferramentas vinculadas à sua RE e estoque atualizado!");
   };
 
+  // Operador solicita devolução → item vai para fila de conferência
   const solicitarDevolucaoImediata = (item) => {
-    setAtivosEmCustodiaTSEA(ativosEmCustodiaTSEA.map(a => (a.matricula === item.matricula && a.ferramenta === item.ferramenta && a.status === "EM CUSTÓDIA") ? { ...a, status: "AGUARDANDO BAIXA" } : a));
+    setAtivosEmCustodiaTSEA(ativosEmCustodiaTSEA.map(a =>
+      (a.matricula === item.matricula && a.ferramenta === item.ferramenta && a.status === "EM CUSTÓDIA")
+        ? { ...a, status: "AGUARDANDO BAIXA" }
+        : a
+    ));
     setDevolucoesPendentes([...devolucoesPendentes, { id: Date.now(), ...item }]);
     alert("Item colocado na esteira de devolução. Entregue a ferramenta no balcão.");
   };
 
+  // Almoxarife confirma a devolução física e reintegra ao estoque
   const aprovarBaixaDevolucao = (idDevolucao, funcNome, ferramentaNome) => {
-    if (senhaAlmoxarifeDevolucao === '9999') {
-      const dev = devolucoesPendentes.find(d => d.id === idDevolucao);
-      setDevolucoesPendentes(devolucoesPendentes.filter(d => d.id !== idDevolucao));
-      setAtivosEmCustodiaTSEA(ativosEmCustodiaTSEA.map(a => (a.funcionario === funcNome && a.ferramenta === ferramentaNome && a.status === "AGUARDANDO BAIXA") ? { ...a, status: "DEVOLVIDO" } : a));
-      setCatalogoFerramentas(catalogoFerramentas.map(f => f.nome === ferramentaNome ? { ...f, disponivel: f.disponivel + dev.qtd } : f));
-      setUltimasDevolucoes([{ funcionario: funcNome, matricula: dev.matricula, ferramenta: ferramentaNome, qtd: dev.qtd, dataDevolucao: new Date().toLocaleString() }, ...ultimasDevolucoes]);
-      setSenhaAlmoxarifeDevolucao('');
-      alert("Retorno processado! Estoque atualizado nas três frentes.");
-    } else { alert("Senha do conferente incorreta!"); }
+    if (senhaAlmoxarifeDevolucao !== '9999') { alert("Senha do conferente incorreta!"); return; }
+    const dev = devolucoesPendentes.find(d => d.id === idDevolucao);
+    setDevolucoesPendentes(devolucoesPendentes.filter(d => d.id !== idDevolucao));
+    setAtivosEmCustodiaTSEA(ativosEmCustodiaTSEA.map(a =>
+      (a.funcionario === funcNome && a.ferramenta === ferramentaNome && a.status === "AGUARDANDO BAIXA")
+        ? { ...a, status: "DEVOLVIDO" }
+        : a
+    ));
+    setCatalogoFerramentas(catalogoFerramentas.map(f =>
+      f.nome === ferramentaNome ? { ...f, disponivel: f.disponivel + dev.qtd } : f
+    ));
+    setUltimasDevolucoes([{
+      funcionario: funcNome,
+      matricula: dev.matricula,
+      ferramenta: ferramentaNome,
+      qtd: dev.qtd,
+      dataDevolucao: new Date().toLocaleString()
+    }, ...ultimasDevolucoes]);
+    setSenhaAlmoxarifeDevolucao('');
+    alert("Retorno processado! Estoque atualizado nas três frentes.");
   };
 
   const cadastrarNovoUsuario = (u) => setListaFuncionariosTSEA([...listaFuncionariosTSEA, u]);
@@ -740,36 +767,50 @@ function App() {
 
       {!logado ? (
         <Login
-          perfil={perfil} setPerfil={setPerfil} statusBiometria={statusBiometria} setStatusBiometria={setStatusBiometria} videoRef={videoRef}
+          perfil={perfil} setPerfil={setPerfil}
+          statusBiometria={statusBiometria} setStatusBiometria={setStatusBiometria}
+          videoRef={videoRef}
           progressoEscaneamento={progressoEscaneamento} setProgressoEscaneamento={setProgressoEscaneamento}
           entrarNoPainelManualmente={() => { setPerfilLogado('func'); setLogado(true); }}
           idAlmoxarife={idAlmoxarife} setIdAlmoxarife={setIdAlmoxarife}
-          senhaLoginAlmoxarife={senhaLoginAlmoxarife} setSenhaLoginAlmoxarife={setSenhaLoginAlmoxarife} entrarComoAlmoxarife={entrarComoAlmoxarife}
-          senhaSuperAdmin={senhaSuperAdmin} setSenhaSuperAdmin={setSenhaSuperAdmin} entrarComoSuperAdmin={entrarComoSuperAdmin}
+          senhaLoginAlmoxarife={senhaLoginAlmoxarife} setSenhaLoginAlmoxarife={setSenhaLoginAlmoxarife}
+          entrarComoAlmoxarife={entrarComoAlmoxarife}
+          senhaSuperAdmin={senhaSuperAdmin} setSenhaSuperAdmin={setSenhaSuperAdmin}
+          entrarComoSuperAdmin={entrarComoSuperAdmin}
         />
       ) : perfilLogado === 'func' ? (
         <PainelOperador
-          abaAtiva={abaAtiva} setAbaAtiva={setAbaAtiva} operador={operador}
-          ativosEmCustodiaTSEA={ativosEmCustodiaTSEA} solicitarDevolucaoImediata={solicitarDevolucaoImediata}
-          pedidoAtivo={pedidoAtivo} confirmarRetiradaComCartao={confirmarRetiradaComCartao}
+          abaAtiva={abaAtiva} setAbaAtiva={setAbaAtiva}
+          operador={operador}
+          ativosEmCustodiaTSEA={ativosEmCustodiaTSEA}
+          solicitarDevolucaoImediata={solicitarDevolucaoImediata}
+          pedidoAtivo={pedidoAtivo}
+          confirmarRetiradaComCartao={confirmarRetiradaComCartao}
           logout={() => { setLogado(false); setPerfil(null); setStatusBiometria('desligado'); setProgressoEscaneamento(0); }}
         />
       ) : perfilLogado === 'adm' ? (
         <PainelAlmoxarife
           nfcLiberado={nfcLiberado} tempoRestante={tempoRestante}
-          abaAtivaAdm={abaAtivaAdm} setAbaAtivaAdm={setAbaAtivaAdm} pedidoAtivo={pedidoAtivo}
+          abaAtivaAdm={abaAtivaAdm} setAbaAtivaAdm={setAbaAtivaAdm}
+          pedidoAtivo={pedidoAtivo}
           senhaAlmoxarife={senhaAlmoxarife} setSenhaAlmoxarife={setSenhaAlmoxarife}
-          devolucoesPendentes={devolucoesPendentes} senhaAlmoxarifeDevolucao={senhaAlmoxarifeDevolucao}
-          setSenhaAlmoxarifeDevolucao={setSenhaAlmoxarifeDevolucao} aprovarBaixaDevolucao={aprovarBaixaDevolucao}
-          ativosEmCustodiaTSEA={ativosEmCustodiaTSEA} catalogoFerramentas={catalogoFerramentas} listaFuncionariosTSEA={listaFuncionariosTSEA}
-          carrinho={carrinho} alterarQuantidadeCarrinho={alterarQuantidadeCarrinho} emitirLotePeloAlmoxarife={emitirLotePeloAlmoxarife}
+          devolucoesPendentes={devolucoesPendentes}
+          senhaAlmoxarifeDevolucao={senhaAlmoxarifeDevolucao} setSenhaAlmoxarifeDevolucao={setSenhaAlmoxarifeDevolucao}
+          aprovarBaixaDevolucao={aprovarBaixaDevolucao}
+          ativosEmCustodiaTSEA={ativosEmCustodiaTSEA}
+          catalogoFerramentas={catalogoFerramentas}
+          listaFuncionariosTSEA={listaFuncionariosTSEA}
+          carrinho={carrinho} alterarQuantidadeCarrinho={alterarQuantidadeCarrinho}
+          emitirLotePeloAlmoxarife={emitirLotePeloAlmoxarife}
           ultimasRetiradas={ultimasRetiradas} ultimasDevolucoes={ultimasDevolucoes}
           logout={() => { setLogado(false); setPerfil(null); setCarrinho([]); }}
         />
       ) : perfilLogado === 'superadmin' ? (
         <PainelMaster
-          abaAtivaSuper={abaAtivaSuper} setAbaAtivaSuper={setAbaAtivaSuper} ativosEmCustodiaTSEA={ativosEmCustodiaTSEA}
-          catalogoFerramentas={catalogoFerramentas} listaFuncionariosTSEA={listaFuncionariosTSEA}
+          abaAtivaSuper={abaAtivaSuper} setAbaAtivaSuper={setAbaAtivaSuper}
+          ativosEmCustodiaTSEA={ativosEmCustodiaTSEA}
+          catalogoFerramentas={catalogoFerramentas}
+          listaFuncionariosTSEA={listaFuncionariosTSEA}
           cadastrarNovoUsuario={cadastrarNovoUsuario}
           logout={() => { setLogado(false); setPerfil(null); }}
         />
