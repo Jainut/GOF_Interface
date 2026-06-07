@@ -546,18 +546,34 @@ function App() {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
+
+      // ==========================================
+      // PRINTS PARA DEBUG DE DEVOLUÇÕES
+      // ==========================================
+      console.log("Status da resposta (/listar/Devolucoes):", res.status);
+      console.log("Dados BRUTOS retornados pela API:", data);
+
       if (res.ok) {
-        setUltimasDevolucoes(data.map(d => ({
-          id:           d.devolucao_id,
-          funcionario:  d.nome_usuario,
-          matricula:    d.setor_usuario,
-          ferramenta:   d.tipo_ferramenta,
-          qtd:          1,
+        const devolucoesMapeadas = data.map(d => ({
+          id:            d.devolucao_id,
+          funcionario:   d.nome_usuario,
+          matricula:     d.setor_usuario,
+          ferramenta:    d.tipo_ferramenta,
+          qtd:           1,
           dataDevolucao: new Date(d.data_devolucao).toLocaleString('pt-BR'),
-          status:       d.status
-        })));
+          status:        d.status
+        }));
+
+        console.log("Dados MAPEADOS (o que vai para a tela):", devolucoesMapeadas);
+        // ==========================================
+
+        setUltimasDevolucoes(devolucoesMapeadas);
+      } else {
+        console.error("A API retornou um erro estrutural:", data);
       }
-    } catch (e) { console.error('Erro ao carregar devoluções:', e); }
+    } catch (e) { 
+      console.error('Erro no catch ao carregar devoluções:', e); 
+    }
   };
 
   /**
@@ -628,7 +644,7 @@ function App() {
     }
   };
 
-  // ------------------------------------------
+ // ------------------------------------------
   // Registrar empréstimo (NFC já identificou o operador)
   // ------------------------------------------
   const registrarEmprestimoNFC = async (itensCarrinho) => {
@@ -640,30 +656,48 @@ function App() {
       setMensagemSistema({ tipo: 'aviso', texto: 'Nenhuma ferramenta selecionada.' });
       return;
     }
+    
     const token = getToken();
     try {
       const res = await fetch(import.meta.env.VITE_API_URL + '/registrar/Emprestimo', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json', 
+          Authorization: `Bearer ${token}` 
+        },
         body: JSON.stringify({
-          user_cpf:    operadorNFC.cpf,
-          ferramentas: itensCarrinho.map(i => ({ ferramenta_id: i.id, quantidade: i.qtd }))
+          user_cpf: operadorNFC.cpf,
+          ferramentas: itensCarrinho.map(i => ({ 
+            ferramenta_id: i.id, 
+            quantidade: i.quantidade || 1 
+          }))
         })
       });
-      const data = await res.json();
+
       if (res.ok) {
-        setMensagemSistema({ tipo: 'sucesso', texto: `Empréstimo #${data.emprestimo_id} registrado com sucesso.` });
-        // Recarregar dados para manter interface atualizada
+        setMensagemSistema({ tipo: 'sucesso', texto: 'Empréstimo registrado com sucesso!' });
+        
+        // Atualiza as listas do painel do almoxarife em segundo plano
         carregarAtivos(token);
         carregarEmprestimos(token);
-        carregarFerramentas(token);
-        carregarEmprestimosDoOperador(operadorNFC.cpf);
+
+        // ==========================================
+        // LÓGICA DE BLOQUEIO: Volta a pedir o NFC
+        // ==========================================
+        setNfcLiberado(false);
+        setOperadorNFC(null);
+        setTempoRestante(0);
+        setEmprestimosOperador([]);
+        // ==========================================
+
       } else {
-        setMensagemSistema({ tipo: 'erro', texto: data.message ?? 'Erro ao registrar empréstimo.' });
+        const erroData = await res.json();
+        setMensagemSistema({ tipo: 'erro', texto: erroData.message || 'Erro ao registrar empréstimo no servidor.' });
       }
-    } catch (e) {
-      console.error('Erro ao registrar empréstimo NFC:', e);
-      setMensagemSistema({ tipo: 'erro', texto: 'Erro de conexão ao registrar empréstimo.' });
+
+    } catch (erro) {
+      console.error('Erro ao realizar empréstimo:', erro);
+      setMensagemSistema({ tipo: 'erro', texto: 'Falha de comunicação com o servidor.' });
     }
   };
 

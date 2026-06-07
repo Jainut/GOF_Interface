@@ -216,13 +216,13 @@ export default function PainelAlmoxarife({
                   <p style={{ color: '#888', fontStyle: 'italic' }}>Carregando ferramentas...</p>
                 ) : (
                   <div className="grid-catalogo">
-                    {catalogoFerramentas.map(item => {
+                    {catalogoFerramentas.map((item, idx) => {
                       const qtdSelecionada = selecionadas[item.id] ?? 0;
                       const esgotado = item.disponivel === 0;
                       const noMaximo = qtdSelecionada >= item.disponivel;
                       return (
                         <div
-                          key={item.id}
+                          key={`${item.id}-${idx}`}
                           className="card-ferramenta"
                           style={{ opacity: esgotado ? 0.5 : 1 }}
                         >
@@ -340,7 +340,7 @@ export default function PainelAlmoxarife({
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {emprestimosOperador.map((item, idx) => (
                       <div
-                        key={item.emprestimo_id ?? idx}
+                        key={`${item.emprestimo_id}-${idx}`}
                         style={{
                           display: 'flex', justifyContent: 'space-between',
                           alignItems: 'center', padding: '14px 16px',
@@ -438,8 +438,8 @@ export default function PainelAlmoxarife({
                 </tr>
               </thead>
               <tbody>
-                {catalogoFerramentas.map(item => (
-                  <tr key={item.id} style={{ borderBottom: '1px solid #eee' }}>
+                {catalogoFerramentas.map((item, idx) => (
+                  <tr key={`${item.id}-${idx}`} style={{ borderBottom: '1px solid #eee' }}>
                     <td style={{ padding: '12px' }}><strong>{item.nome}</strong></td>
                     <td style={{ padding: '12px' }}>{item.categoria}</td>
                     <td style={{ padding: '12px', color: item.disponivel === 0 ? 'red' : 'green', fontWeight: 'bold' }}>
