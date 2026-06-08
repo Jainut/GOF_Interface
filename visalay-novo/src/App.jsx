@@ -31,7 +31,8 @@ function Login({
   entrarComoAlmoxarife,
   cpfSuperAdmin, setCpfSuperAdmin,
   senhaSuperAdmin, setSenhaSuperAdmin,
-  entrarComoSuperAdmin
+  entrarComoSuperAdmin,
+  mensagemSistema, setMensagemSistema
 }) {
   const ligarWebcamReal = async () => {
     try {
@@ -84,6 +85,19 @@ function Login({
           boxShadow: '0 4px 20px rgba(0,0,0,0.08)', width: '100%', maxWidth: '380px',
           borderTop: `5px solid ${TSEA.vermelho}`, textAlign: 'center'
         }}>
+
+          {/* Mensagem de erro/sucesso */}
+          {mensagemSistema && (
+            <div style={{
+              padding: '10px 14px', borderRadius: '6px', marginBottom: '15px', fontSize: '13px', fontWeight: 'bold',
+              backgroundColor: mensagemSistema.tipo === 'erro' ? '#ffebee' : mensagemSistema.tipo === 'sucesso' ? '#e8f5e9' : '#fff8e1',
+              color: mensagemSistema.tipo === 'erro' ? TSEA.vermelho : mensagemSistema.tipo === 'sucesso' ? '#2e7d32' : '#f57f17',
+              border: `1px solid ${mensagemSistema.tipo === 'erro' ? '#ffcdd2' : mensagemSistema.tipo === 'sucesso' ? '#c8e6c9' : '#ffecb3'}`,
+              cursor: 'pointer'
+            }} onClick={() => setMensagemSistema(null)}>
+              {mensagemSistema.texto} ✕
+            </div>
+          )}
 
           {/* Seleção de perfil */}
           {!perfil && (
@@ -682,6 +696,7 @@ const cancelarAcessoNFC = () => {
           senhaSuperAdmin={senhaSuperAdmin}   setSenhaSuperAdmin={setSenhaSuperAdmin}
           cpfSuperAdmin={cpfSuperAdmin}       setCpfSuperAdmin={setCpfSuperAdmin}
           entrarComoSuperAdmin={entrarComoSuperAdmin}
+          mensagemSistema={mensagemSistema}   setMensagemSistema={setMensagemSistema}
         />
 
       ) : perfilLogado === 'func' ? (
