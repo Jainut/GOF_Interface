@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import PainelAlmoxarife from './Componentes/PainelAlmoxarife';
+import PainelMaster from './Componentes/PainelMaster';
 
 // ==========================================
 // TEMA DE CORES TSEA
@@ -28,6 +29,7 @@ function Login({
   idAlmoxarife, setIdAlmoxarife,
   senhaLoginAlmoxarife, setSenhaLoginAlmoxarife,
   entrarComoAlmoxarife,
+  cpfSuperAdmin, setCpfSuperAdmin,
   senhaSuperAdmin, setSenhaSuperAdmin,
   entrarComoSuperAdmin
 }) {
@@ -181,6 +183,13 @@ function Login({
             <div>
               <h5 style={{ margin: '0 0 15px 0' }}>Acesso Master Corporativo</h5>
               <input
+                type="text"
+                placeholder="CPF do Administrador"
+                value={cpfSuperAdmin}
+                onChange={(e) => setCpfSuperAdmin(e.target.value)}
+                style={{ width: '100%', padding: '12px', borderRadius: '6px', border: `1px solid ${TSEA.cinzaMedio}`, textAlign: 'center', marginBottom: '10px', boxSizing: 'border-box' }}
+              />
+              <input
                 type="password"
                 placeholder="Senha Master"
                 value={senhaSuperAdmin}
@@ -271,111 +280,6 @@ function PainelOperador({ abaAtiva, setAbaAtiva, operador, ativosEmCustodiaTSEA,
 }
 
 // ==========================================
-// COMPONENTE 3: PAINEL MASTER
-// ==========================================
-function PainelMaster({
-  abaAtivaSuper, setAbaAtivaSuper,
-  ativosEmCustodiaTSEA, catalogoFerramentas,
-  listaFuncionariosTSEA, cadastrarNovoUsuario,
-  logout
-}) {
-  const [novoNome, setNovoNome] = useState('');
-  const [novaMatricula, setNovaMatricula] = useState('');
-  const [novoPerfil, setNovoPerfil] = useState('Funcionário');
-  const [msgCadastro, setMsgCadastro] = useState(null);
-
-  const handleCadastrar = () => {
-    if (!novoNome || !novaMatricula) {
-      setMsgCadastro({ tipo: 'erro', texto: 'Preencha todos os campos.' });
-      return;
-    }
-    cadastrarNovoUsuario({ nome: novoNome, matricula: novaMatricula, perfil: novoPerfil, setor: 'Manufatura TSEA', cargo: 'Operador', status: 'Ativo' });
-    setNovoNome(''); setNovaMatricula('');
-    setMsgCadastro({ tipo: 'sucesso', texto: 'Usuário registrado com sucesso.' });
-  };
-
-  return (
-    <div className="layout-container">
-      <aside className="sidebar no-print">
-        <div style={{ textAlign: 'center', borderBottom: `3px solid ${TSEA.vermelho}`, paddingBottom: '15px', marginBottom: '20px' }}>
-          <h3 style={{ margin: 0, fontSize: '20px' }}>TSEA <span style={{ color: TSEA.vermelho }}>MASTER</span></h3>
-          <small style={{ color: TSEA.cinzaBorda, fontSize: '10px' }}>GERAL / RH / TI</small>
-        </div>
-        <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-          <button onClick={() => setAbaAtivaSuper('registro_usuario')} className="btn-sidebar" style={{ backgroundColor: abaAtivaSuper === 'registro_usuario' ? TSEA.vermelho : 'transparent' }}>Registro de Usuário</button>
-          <button onClick={() => setAbaAtivaSuper('gerenciamento_usuario')} className="btn-sidebar" style={{ backgroundColor: abaAtivaSuper === 'gerenciamento_usuario' ? TSEA.vermelho : 'transparent' }}>Gerenciamento TSEA</button>
-          <button onClick={() => setAbaAtivaSuper('m_ativas')} className="btn-sidebar" style={{ backgroundColor: abaAtivaSuper === 'm_ativas' ? TSEA.vermelho : 'transparent' }}>Monitor de Ativas</button>
-          <button onClick={() => setAbaAtivaSuper('m_estoque')} className="btn-sidebar" style={{ backgroundColor: abaAtivaSuper === 'm_estoque' ? TSEA.vermelho : 'transparent' }}>Monitor de Estoque</button>
-        </nav>
-        <button onClick={logout} style={{ width: '100%', padding: '12px', background: TSEA.vermelho, color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Sair</button>
-      </aside>
-
-      <main className="content-main">
-        <header style={{ backgroundColor: TSEA.branco, padding: '15px 20px', borderRadius: '8px', borderLeft: `6px solid ${TSEA.vermelho}`, boxShadow: '0 2px 10px rgba(0,0,0,0.05)', marginBottom: '20px' }}>
-          <h3 style={{ margin: 0 }}>Painel Master de Auditoria de TI</h3>
-        </header>
-
-        {abaAtivaSuper === 'registro_usuario' && (
-          <div style={{ backgroundColor: TSEA.branco, padding: '25px', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
-            <h4>Cadastrar Novo Usuário no Sistema</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '400px' }}>
-              <input type="text" placeholder="Nome Completo" value={novoNome} onChange={(e) => setNovoNome(e.target.value)} style={{ padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }} />
-              <input type="text" placeholder="Matrícula / RE" value={novaMatricula} onChange={(e) => setNovaMatricula(e.target.value)} style={{ padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }} />
-              <select value={novoPerfil} onChange={(e) => setNovoPerfil(e.target.value)} style={{ padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}>
-                <option value="Funcionário">Funcionário (Operador)</option>
-                <option value="Almoxarife">Almoxarife</option>
-              </select>
-              <button onClick={handleCadastrar} style={{ padding: '12px', background: TSEA.vermelho, color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>SALVAR NO BANCO</button>
-              {msgCadastro && <p style={{ margin: '8px 0 0 0', color: msgCadastro.tipo === 'sucesso' ? '#2e7d32' : '#c62828', fontWeight: 'bold' }}>{msgCadastro.texto}</p>}
-            </div>
-          </div>
-        )}
-
-        {abaAtivaSuper === 'gerenciamento_usuario' && (
-          <div style={{ backgroundColor: TSEA.branco, padding: '25px', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
-            <h4>Quadro Geral de Usuários - Base de Dados</h4>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-              <thead><tr style={{ backgroundColor: '#eee' }}><th style={{ padding: '10px' }}>Nome</th><th style={{ padding: '10px' }}>Matrícula</th><th style={{ padding: '10px' }}>Perfil</th></tr></thead>
-              <tbody>
-                {listaFuncionariosTSEA.map((u, i) => (
-                  <tr key={i} style={{ borderBottom: '1px solid #eee' }}>
-                    <td style={{ padding: '10px' }}>{u.nome}</td>
-                    <td style={{ padding: '10px' }}>{u.matricula}</td>
-                    <td style={{ padding: '10px' }}>{u.perfil}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {abaAtivaSuper === 'm_ativas' && (
-          <div style={{ backgroundColor: TSEA.branco, padding: '25px', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
-            <h4>Auditoria Master: Ferramentas Ativas</h4>
-            {ativosEmCustodiaTSEA.filter(a => a.status !== 'DEVOLVIDO').map((item, idx) => (
-              <div key={idx} style={{ padding: '10px', borderBottom: '1px solid #eee' }}>
-                {item.funcionario} possui: {item.qtd}x {item.ferramenta}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {abaAtivaSuper === 'm_estoque' && (
-          <div style={{ backgroundColor: TSEA.branco, padding: '25px', borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
-            <h4>Auditoria Master: Estoque Consolidado</h4>
-            {catalogoFerramentas.map(item => (
-              <div key={item.id} style={{ padding: '10px', borderBottom: '1px solid #eee' }}>
-                {item.nome} | Disponível: {item.disponivel} / Total: {item.total}
-              </div>
-            ))}
-          </div>
-        )}
-      </main>
-    </div>
-  );
-}
-
-// ==========================================
 // APP PRINCIPAL
 // ==========================================
 function App() {
@@ -394,7 +298,7 @@ function App() {
 
   const [abaAtiva,      setAbaAtiva]      = useState('custodia');
   const [abaAtivaAdm,   setAbaAtivaAdm]   = useState('solicitar_emprestimo');
-  const [abaAtivaSuper, setAbaAtivaSuper] = useState('registro_usuario');
+  const [abaAtivaSuper, setAbaAtivaSuper] = useState('criar_usuario');
 
   const [statusBiometria,      setStatusBiometria]      = useState('desligado');
   const [progressoEscaneamento, setProgressoEscaneamento] = useState(0);
@@ -403,6 +307,7 @@ function App() {
   // Login almoxarife
   const [idAlmoxarife,         setIdAlmoxarife]         = useState('');
   const [senhaLoginAlmoxarife, setSenhaLoginAlmoxarife] = useState('');
+  const [cpfSuperAdmin,        setCpfSuperAdmin]        = useState('');
   const [senhaSuperAdmin,      setSenhaSuperAdmin]      = useState('');
 
   // Estado NFC / sessão do operador identificado
@@ -421,11 +326,6 @@ function App() {
 
   // Lista de empréstimos ativos do operador NFC identificado (usado na aba Devolução)
   const [emprestimosOperador, setEmprestimosOperador] = useState([]);
-
-  const [listaFuncionariosTSEA, setListaFuncionariosTSEA] = useState([
-    { nome: 'Carlos Eduardo Santos', matricula: 'RE-40922', perfil: 'Funcionário' },
-    { nome: 'Almoxarife Sergio',     matricula: 'ID-1002',  perfil: 'Almoxarife'  }
-  ]);
 
   // ------------------------------------------
   // Listener NFC via Socket.IO
@@ -612,7 +512,7 @@ function App() {
   // ------------------------------------------
   const entrarComoAlmoxarife = async () => {
     try {
-      const res  = await fetch(import.meta.env.VITE_API_URL + '/login', {
+      const res  = await fetch(import.meta.env.VITE_API_URL + '/login/almoxarife', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ cpf: idAlmoxarife, senha: senhaLoginAlmoxarife })
@@ -635,12 +535,24 @@ function App() {
     }
   };
 
-  const entrarComoSuperAdmin = () => {
-    if (senhaSuperAdmin === 'adminadmin') {
-      setPerfilLogado('superadmin');
-      setLogado(true);
-    } else {
-      setMensagemSistema({ tipo: 'erro', texto: 'Chave mestre inválida.' });
+  const entrarComoSuperAdmin = async () => {
+    try {
+      const res  = await fetch(import.meta.env.VITE_API_URL + '/login/admin', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ cpf: cpfSuperAdmin, senha: senhaSuperAdmin })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem('tsea_token', data.token);
+        setPerfilLogado('superadmin');
+        setLogado(true);
+      } else {
+        setMensagemSistema({ tipo: 'erro', texto: data.message ?? 'Credenciais inválidas.' });
+      }
+    } catch (e) {
+      console.error('Erro ao conectar:', e);
+      setMensagemSistema({ tipo: 'erro', texto: 'Erro de conexão com o servidor.' });
     }
   };
 
@@ -731,7 +643,12 @@ const devolverFerramenta = async (emprestimoId) => {
   }
 };
 
-  const cadastrarNovoUsuario = (u) => setListaFuncionariosTSEA(prev => [...prev, u]);
+const cancelarAcessoNFC = () => {
+  setNfcLiberado(false);
+  setOperadorNFC(null);
+  setEmprestimosOperador([]);
+  setMensagemSistema({ tipo: 'aviso', texto: 'Acesso do operador encerrado.' });
+};
 
   // ------------------------------------------
   // RENDER
@@ -763,6 +680,7 @@ const devolverFerramenta = async (emprestimoId) => {
           senhaLoginAlmoxarife={senhaLoginAlmoxarife} setSenhaLoginAlmoxarife={setSenhaLoginAlmoxarife}
           entrarComoAlmoxarife={entrarComoAlmoxarife}
           senhaSuperAdmin={senhaSuperAdmin}   setSenhaSuperAdmin={setSenhaSuperAdmin}
+          cpfSuperAdmin={cpfSuperAdmin}       setCpfSuperAdmin={setCpfSuperAdmin}
           entrarComoSuperAdmin={entrarComoSuperAdmin}
         />
 
@@ -782,6 +700,7 @@ const devolverFerramenta = async (emprestimoId) => {
           operadorNFC={operadorNFC}
           registrarEmprestimoNFC={registrarEmprestimoNFC}
           devolverFerramenta={devolverFerramenta}
+          cancelarAcessoNFC={cancelarAcessoNFC}
           emprestimosOperador={emprestimosOperador}
           mensagemSistema={mensagemSistema}
           setMensagemSistema={setMensagemSistema}
@@ -795,14 +714,14 @@ const devolverFerramenta = async (emprestimoId) => {
         />
 
       ) : perfilLogado === 'superadmin' ? (
-        <PainelMaster
-          abaAtivaSuper={abaAtivaSuper} setAbaAtivaSuper={setAbaAtivaSuper}
-          ativosEmCustodiaTSEA={ativosEmCustodiaTSEA}
-          catalogoFerramentas={catalogoFerramentas}
-          listaFuncionariosTSEA={listaFuncionariosTSEA}
-          cadastrarNovoUsuario={cadastrarNovoUsuario}
-          logout={() => { setLogado(false); setPerfil(null); }}
-        />
+<PainelMaster
+  abaAtivaSuper={abaAtivaSuper}
+  setAbaAtivaSuper={setAbaAtivaSuper}
+  ativosEmCustodiaTSEA={ativosEmCustodiaTSEA}
+  catalogoFerramentas={catalogoFerramentas}
+  getToken={getToken}
+  logout={() => { setLogado(false); setPerfil(null); }}
+/>
       ) : null}
     </div>
   );
