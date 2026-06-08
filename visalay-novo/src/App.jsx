@@ -704,31 +704,32 @@ function App() {
   // ------------------------------------------
   // Devolver ferramenta (remove da lista imediatamente ao ter sucesso)
   // ------------------------------------------
-  const devolverFerramenta = async (emprestimoId) => {
-    const token = getToken();
-    try {
-      const res = await fetch(import.meta.env.VITE_API_URL + '/devolver/Ferramenta', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ emprestimo_id: emprestimoId })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        // Remove o item da lista sem precisar recarregar a página
-        setEmprestimosOperador(prev => prev.filter(e => e.emprestimo_id !== emprestimoId));
-        setMensagemSistema({ tipo: 'sucesso', texto: 'Devolução registrada com sucesso.' });
-        // Atualiza listas gerais em background
-        carregarAtivos(token);
-        carregarDevolucoes(token);
-        carregarFerramentas(token);
-      } else {
-        setMensagemSistema({ tipo: 'erro', texto: data.message ?? 'Erro ao registrar devolução.' });
-      }
-    } catch (e) {
-      console.error('Erro ao devolver ferramenta:', e);
-      setMensagemSistema({ tipo: 'erro', texto: 'Erro de conexão ao registrar devolução.' });
+const devolverFerramenta = async (emprestimoId) => {
+  const token = getToken();
+  try {
+    const res = await fetch(import.meta.env.VITE_API_URL + '/registrar/Devolucao', { // ✅ rota correta
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+        emprestimo_id: emprestimoId,
+        user_cpf: operadorNFC.cpf  // ✅ campo obrigatório que estava faltando
+      })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      setEmprestimosOperador(prev => prev.filter(e => e.emprestimo_id !== emprestimoId));
+      setMensagemSistema({ tipo: 'sucesso', texto: 'Devolução registrada com sucesso.' });
+      carregarAtivos(token);
+      carregarDevolucoes(token);
+      carregarFerramentas(token);
+    } else {
+      setMensagemSistema({ tipo: 'erro', texto: data.message ?? 'Erro ao registrar devolução.' });
     }
-  };
+  } catch (e) {
+    console.error('Erro ao devolver ferramenta:', e);
+    setMensagemSistema({ tipo: 'erro', texto: 'Erro de conexão ao registrar devolução.' });
+  }
+};
 
   const cadastrarNovoUsuario = (u) => setListaFuncionariosTSEA(prev => [...prev, u]);
 
