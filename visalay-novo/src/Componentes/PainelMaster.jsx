@@ -197,7 +197,6 @@ export default function PainelMaster({
   abaAtivaSuper, setAbaAtivaSuper,
   ativosEmCustodiaTSEA, catalogoFerramentas,
   logout,
-  getToken,
 }) {
   const API = import.meta.env.VITE_API_URL;
 
@@ -206,22 +205,7 @@ export default function PainelMaster({
 
   // Dados mockados para o Dashboard
   const dashboardData = {
-    Soldagem: [
-      { nome: "Marcos Oliveira", ferramentas: ["Tocha TIG", "Máscara Eletrônica"] },
-      { nome: "Roberto Silva", ferramentas: ["Alicate de Pressão", "Esmerilhadeira"] }
-    ],
-    Produção: [
-      { nome: "Ana Costa", ferramentas: ["Parafusadeira Bosch", "Chave Fixa 13mm"] },
-      { nome: "Juliana Lima", ferramentas: ["Torquímetro Digital", "Multímetro Fluke"] },
-      { nome: "Pedro Rocha", ferramentas: ["Martelo de Borracha"] }
-    ],
-    Manutenção: [
-      { nome: "Sérgio Almoxarife", ferramentas: ["Scanner Industrial"] },
-      { nome: "Cláudio Souza", ferramentas: ["Jogo de Chaves Allen", "Óleo Protetivo"] }
-    ],
-    Engenharia: [
-      { nome: "Carlos Eduardo", ferramentas: ["Trena Laser", "Nível Digital"] }
-    ]
+    
   };
 
   // ── Estado: listar usuários ──────────────────────────────────────────────
@@ -235,11 +219,11 @@ export default function PainelMaster({
   // ── Estado: cartões NFC ──────────────────────────────────────────────────
   const [cartoes, setCartoes]           = useState([]);
   const [loadCartoes, setLoadCartoes]   = useState(false);
+  const [loadEstoque, setLoadEstoque]   = useState(false);
   const [formNFC, setFormNFC]           = useState({ user_cpf: '', codigo_uid: '' });
   const [salvandoNFC, setSalvandoNFC]   = useState(false);
 
   // ── Helpers ──────────────────────────────────────────────────────────────
-  
   const headers = () => ({ 'Content-Type': 'application/json'});
 
   const showMsg = (tipo, texto) => setMsg({ tipo, texto });
@@ -264,12 +248,29 @@ export default function PainelMaster({
   const buscarCartoes = useCallback(async () => {
     setLoadCartoes(true);
     try {
-      const res  = await fetch(`${API}/listar/CartoesNFC`, { headers: headers() });
+      const res  = await fetch(`${API}/listar/CartoesNFC`, { headers: headers(), credentials: 'include' });
       const data = await res.json();
       if (res.ok) setCartoes(data);
       else showMsg('erro', data.message ?? 'Erro ao carregar cartões.');
     } catch { showMsg('erro', 'Falha de conexão.'); }
     finally  { setLoadCartoes(false); }
+  }, []);
+
+  useEffect(() => {
+    if (abaAtivaSuper === 'gerenciar_usuarios') buscarUsuarios();
+    if (abaAtivaSuper === 'cartoes_nfc')        { buscarCartoes(); buscarUsuarios(); }
+    if (abaAtivaSuper === 'm_estoque')          buscarEstoque();
+  }, [abaAtivaSuper]);
+
+    const buscarEstoque = useCallback(async () => {
+    setLoadEstoque(true);
+    try {
+      const res  = await fetch(`${API}/listar/Ferramentas`, { headers: headers(), credentials: 'include' });
+      const data = await res.json();
+      if (res.ok) loadEstoque(data);
+      else showMsg('erro', data.message ?? 'Erro ao carregar cartões.');
+    } catch { showMsg('erro', 'Falha de conexão.'); }
+    finally  { setLoadEstoque(false); }
   }, []);
 
   useEffect(() => {
@@ -285,6 +286,7 @@ export default function PainelMaster({
     try {
       const res  = await fetch(`${API}/cadastrar/Usuario`, {
         method: 'POST', headers: headers(),
+        credentials: 'include',
         body: JSON.stringify(form)
       });
       const data = await res.json();
@@ -306,6 +308,7 @@ export default function PainelMaster({
     try {
       const res  = await fetch(`${API}/cadastrar/CartaoNFC`, {
         method: 'POST', headers: headers(),
+        credentials: 'include',
         body: JSON.stringify({ user_cpf: formNFC.user_cpf, codigo_uid: formNFC.codigo_uid })
       });
       const data = await res.json();
@@ -324,7 +327,7 @@ export default function PainelMaster({
     if (!confirm('Remover o cartão NFC deste usuário?')) return;
     try {
       const res  = await fetch(`${API}/remover/CartaoNFC/${user_cpf}`, {
-        method: 'DELETE', headers: headers()
+        method: 'DELETE', headers: headers(), credentials: 'include'
       });
       const data = await res.json();
       if (res.ok) {
