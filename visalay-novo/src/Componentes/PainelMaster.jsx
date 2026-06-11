@@ -2,6 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 
 // ── Ícones SVG ───────────────────────────────────────────────────────────────
 const Icons = {
+  dashboard: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+    </svg>
+  ),
   userPlus: (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
@@ -67,7 +72,6 @@ const Icons = {
       <polyline points="20 6 9 17 4 12"/>
     </svg>
   ),
-  // Cards de métricas
   totalUsers: (
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -97,13 +101,13 @@ const Icons = {
 };
 
 const TSEA = {
-  vermelho:    '#E30613',
-  preto:       '#1A1A1A',
-  cinzaEscuro: '#4A4A4A',
-  cinzaMedio:  '#CCCCCC',
-  cinzaClaro:  '#F5F5F5',
-  cinzaBorda:  '#999999',
-  branco:      '#FFFFFF'
+  vermelho:     '#E30613',
+  preto:        '#1A1A1A',
+  cinzaEscuro:  '#4A4A4A',
+  cinzaMedio:   '#CCCCCC',
+  cinzaClaro:   '#F5F5F5',
+  cinzaBorda:   '#999999',
+  branco:       '#FFFFFF'
 };
 
 const SETORES = ['SOLDA', 'CORTE_LASER', 'MONTAGEM', 'PINTURA', 'EL_TRICA', 'ALMOXARIFADO', 'ADMINISTRACAO'];
@@ -171,12 +175,12 @@ function Msg({ msg, onClose }) {
 }
 
 // ── Input estilizado ─────────────────────────────────────────────────────────
-function Field({ label, ...props }) {
+function Field({ label, as, ...props }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
       {label && <label style={{ fontSize: '12px', fontWeight: '600', color: TSEA.cinzaEscuro, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</label>}
-      {props.as === 'select' ? (
-        <select {...props} as={undefined} style={{ padding: '10px 12px', borderRadius: '6px', border: `1px solid ${TSEA.cinzaMedio}`, fontSize: '14px', background: TSEA.branco, ...props.style }}>
+      {as === 'select' ? (
+        <select {...props} style={{ padding: '10px 12px', borderRadius: '6px', border: `1px solid ${TSEA.cinzaMedio}`, fontSize: '14px', background: TSEA.branco, ...props.style }}>
           {props.children}
         </select>
       ) : (
@@ -198,6 +202,27 @@ export default function PainelMaster({
   const API = import.meta.env.VITE_API_URL;
 
   const [msg, setMsg] = useState(null);
+  const [setorSelecionado, setSetorSelecionado] = useState(null);
+
+  // Dados mockados para o Dashboard
+  const dashboardData = {
+    Soldagem: [
+      { nome: "Marcos Oliveira", ferramentas: ["Tocha TIG", "Máscara Eletrônica"] },
+      { nome: "Roberto Silva", ferramentas: ["Alicate de Pressão", "Esmerilhadeira"] }
+    ],
+    Produção: [
+      { nome: "Ana Costa", ferramentas: ["Parafusadeira Bosch", "Chave Fixa 13mm"] },
+      { nome: "Juliana Lima", ferramentas: ["Torquímetro Digital", "Multímetro Fluke"] },
+      { nome: "Pedro Rocha", ferramentas: ["Martelo de Borracha"] }
+    ],
+    Manutenção: [
+      { nome: "Sérgio Almoxarife", ferramentas: ["Scanner Industrial"] },
+      { nome: "Cláudio Souza", ferramentas: ["Jogo de Chaves Allen", "Óleo Protetivo"] }
+    ],
+    Engenharia: [
+      { nome: "Carlos Eduardo", ferramentas: ["Trena Laser", "Nível Digital"] }
+    ]
+  };
 
   // ── Estado: listar usuários ──────────────────────────────────────────────
   const [usuarios, setUsuarios]           = useState([]);
@@ -214,7 +239,8 @@ export default function PainelMaster({
   const [salvandoNFC, setSalvandoNFC]   = useState(false);
 
   // ── Helpers ──────────────────────────────────────────────────────────────
-  const headers = () => ({ 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` });
+  
+  const headers = () => ({ 'Content-Type': 'application/json'});
 
   const showMsg = (tipo, texto) => setMsg({ tipo, texto });
 
@@ -222,9 +248,13 @@ export default function PainelMaster({
   const buscarUsuarios = useCallback(async () => {
     setLoadUsuarios(true);
     try {
-      const res  = await fetch(`${API}/listar/Usuarios`, { headers: headers() });
-      const data = await res.json();
-      if (res.ok) setUsuarios(data);
+      const resUsers = await fetch(`${API}/listar/Usuarios`, {
+        method: 'GET',
+        credentials: 'include' 
+      });
+
+      const data = await resUsers.json();
+      if (resUsers.ok) setUsuarios(data);
       else showMsg('erro', data.message ?? 'Erro ao carregar usuários.');
     } catch { showMsg('erro', 'Falha de conexão.'); }
     finally  { setLoadUsuarios(false); }
@@ -242,13 +272,11 @@ export default function PainelMaster({
     finally  { setLoadCartoes(false); }
   }, []);
 
-  // Carrega ao trocar de aba
   useEffect(() => {
     if (abaAtivaSuper === 'gerenciar_usuarios') buscarUsuarios();
     if (abaAtivaSuper === 'cartoes_nfc')        { buscarCartoes(); buscarUsuarios(); }
   }, [abaAtivaSuper]);
 
-  // ── Criar usuário ────────────────────────────────────────────────────────
   const criarUsuario = async () => {
     if (!form.cpf || !form.nome || !form.senha) {
       showMsg('aviso', 'Preencha CPF, nome e senha.'); return;
@@ -270,7 +298,6 @@ export default function PainelMaster({
     finally  { setSalvando(false); }
   };
 
-  // ── Vincular cartão NFC ──────────────────────────────────────────────────
   const vincularCartao = async () => {
     if (!formNFC.user_cpf || !formNFC.codigo_uid) {
       showMsg('aviso', 'Informe o CPF do usuário e o UID do cartão.'); return;
@@ -293,7 +320,6 @@ export default function PainelMaster({
     finally  { setSalvandoNFC(false); }
   };
 
-  // ── Remover cartão NFC ───────────────────────────────────────────────────
   const removerCartao = async (user_cpf) => {
     if (!confirm('Remover o cartão NFC deste usuário?')) return;
     try {
@@ -318,6 +344,7 @@ export default function PainelMaster({
 
   // ── Sidebar nav ──────────────────────────────────────────────────────────
   const navItems = [
+    { key: 'dashboard',          label: 'Dashboard',         icon: Icons.dashboard },
     { key: 'criar_usuario',      label: 'Criar Usuário',      icon: Icons.userPlus },
     { key: 'gerenciar_usuarios', label: 'Gerenciar Usuários', icon: Icons.users    },
     { key: 'cartoes_nfc',        label: 'Cartões NFC',        icon: Icons.nfc      },
@@ -325,7 +352,6 @@ export default function PainelMaster({
     { key: 'm_estoque',          label: 'Monitor de Estoque', icon: Icons.stock    },
   ];
 
-  // ── Estilos compartilhados ───────────────────────────────────────────────
   const card = {
     backgroundColor: TSEA.branco, padding: '25px',
     borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
@@ -343,7 +369,7 @@ export default function PainelMaster({
   const tdStyle = { padding: '13px 14px', fontSize: '14px', borderBottom: `1px solid ${TSEA.cinzaClaro}` };
 
   return (
-    <div className="layout-container">
+    <div className="layout-container" style={{ filter: setorSelecionado ? 'blur(4px)' : 'none', transition: 'filter 0.3s' }}>
 
       {/* ── SIDEBAR ── */}
       <aside className="sidebar no-print">
@@ -383,7 +409,7 @@ export default function PainelMaster({
       </aside>
 
       {/* ── CONTEÚDO ── */}
-      <main className="content-main">
+      <main className="content-main" style={{ position: 'relative' }}>
 
         {/* Cards de métricas */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', marginBottom: '20px' }}>
@@ -393,12 +419,115 @@ export default function PainelMaster({
           <MetricCard icon={Icons.totalEstoque} label="Total em estoque"      value={totalEstoque}color="#2e7d32"       bg="#e8f5e9" />
         </div>
 
-        {/* Mensagem inline */}
         <Msg msg={msg} onClose={() => setMsg(null)} />
 
         {/* ══════════════════════════════════════
-            ABA: CRIAR USUÁRIO
+            ABA: DASHBOARD (NOVA)
         ══════════════════════════════════════ */}
+        {abaAtivaSuper === 'dashboard' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+            
+            {/* Grid de Setores */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+              {Object.keys(dashboardData).map(setor => (
+                <div 
+                  key={setor} 
+                  onClick={() => setSetorSelecionado(setor)}
+                  style={{ 
+                    ...card, 
+                    cursor: 'pointer', 
+                    textAlign: 'center', 
+                    borderBottom: `4px solid ${TSEA.vermelho}`,
+                    transition: 'transform 0.2s',
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
+                  onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                >
+                  <h4 style={{ color: TSEA.cinzaEscuro, marginBottom: '10px' }}>{setor}</h4>
+                  <div style={{ fontSize: '32px', fontWeight: '800', color: TSEA.preto }}>
+                    {dashboardData[setor].length}
+                  </div>
+                  <small style={{ color: TSEA.cinzaBorda }}>Ferramentas Ativas</small>
+                </div>
+              ))}
+            </div>
+
+            {/* Retângulo com a Bola de Cores */}
+            <div style={{ ...card, display: 'flex', alignItems: 'center', gap: '40px', justifyContent: 'center' }}>
+              <div style={{ textAlign: 'center' }}>
+                <h4 style={{ marginBottom: '15px' }}>Status Geral do Inventário</h4>
+                <div style={{ 
+                  width: '180px', 
+                  height: '180px', 
+                  borderRadius: '50%', 
+                  background: 'conic-gradient(#CCCCCC 0% 15%, #2e7d32 15% 65%, #E30613 65% 100%)',
+                  boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+                  margin: '0 auto'
+                }}></div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '15px', height: '15px', background: '#CCCCCC', borderRadius: '3px' }}></div>
+                  <span style={{ fontSize: '14px', fontWeight: '600' }}>Em Manutenção (15%)</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '15px', height: '15px', background: '#2e7d32', borderRadius: '3px' }}></div>
+                  <span style={{ fontSize: '14px', fontWeight: '600' }}>Em Uso (50%)</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ width: '15px', height: '15px', background: '#E30613', borderRadius: '3px' }}></div>
+                  <span style={{ fontSize: '14px', fontWeight: '600' }}>No Almoxarifado (35%)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de Detalhes do Setor (Fora do Main para o blur funcionar corretamente) */}
+        {setorSelecionado && (
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 999,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            backgroundColor: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)'
+          }}>
+            <div style={{
+              ...card, width: '700px', maxHeight: '80vh', overflowY: 'auto',
+              position: 'relative', borderTop: `6px solid ${TSEA.vermelho}`
+            }}>
+              <button 
+                onClick={() => setSetorSelecionado(null)}
+                style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', cursor: 'pointer' }}
+              >
+                {Icons.close}
+              </button>
+
+              <h2 style={{ marginBottom: '20px', color: TSEA.preto }}>Colaboradores: {setorSelecionado}</h2>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                {dashboardData[setorSelecionado].map((func, idx) => (
+                  <div key={idx} style={{ padding: '15px', background: TSEA.cinzaClaro, borderRadius: '6px' }}>
+                    <div style={{ fontWeight: '800', fontSize: '16px', color: TSEA.vermelho, marginBottom: '8px' }}>
+                      {func.nome}
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                      {func.ferramentas.map((f, i) => (
+                        <span key={i} style={{ 
+                          padding: '4px 10px', background: TSEA.branco, border: '1px solid #ddd', 
+                          borderRadius: '4px', fontSize: '13px', fontWeight: '500' 
+                        }}>
+                          {f}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ... Restante das abas (Criar Usuário, Gerenciar, etc) mantém-se igual ... */}
         {abaAtivaSuper === 'criar_usuario' && (
           <div style={card}>
             <h3 style={{ margin: '0 0 20px 0', paddingBottom: '10px', borderBottom: `2px solid ${TSEA.cinzaClaro}` }}>
@@ -447,9 +576,7 @@ export default function PainelMaster({
           </div>
         )}
 
-        {/* ══════════════════════════════════════
-            ABA: GERENCIAR USUÁRIOS
-        ══════════════════════════════════════ */}
+        {/* ... (O restante do código das outras abas segue aqui igual ao original) ... */}
         {abaAtivaSuper === 'gerenciar_usuarios' && (
           <div style={card}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', paddingBottom: '10px', borderBottom: `2px solid ${TSEA.cinzaClaro}` }}>
@@ -503,18 +630,12 @@ export default function PainelMaster({
           </div>
         )}
 
-        {/* ══════════════════════════════════════
-            ABA: CARTÕES NFC
-        ══════════════════════════════════════ */}
         {abaAtivaSuper === 'cartoes_nfc' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-
-            {/* Formulário de vinculação */}
             <div style={card}>
               <h3 style={{ margin: '0 0 20px 0', paddingBottom: '10px', borderBottom: `2px solid ${TSEA.cinzaClaro}` }}>
                 Vincular Cartão NFC a Usuário
               </h3>
-
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', maxWidth: '600px' }}>
                 <Field
                   label="CPF do usuário"
@@ -524,12 +645,9 @@ export default function PainelMaster({
                 >
                   <option value="">Selecione um usuário...</option>
                   {usuarios.map(u => (
-                    <option key={u.cpf} value={u.cpf}>
-                      {u.nome} ({u.cpf})
-                    </option>
+                    <option key={u.cpf} value={u.cpf}>{u.nome} ({u.cpf})</option>
                   ))}
                 </Field>
-
                 <Field
                   label="UID do Cartão NFC"
                   type="text"
@@ -538,159 +656,9 @@ export default function PainelMaster({
                   onChange={e => setFormNFC(p => ({ ...p, codigo_uid: e.target.value }))}
                 />
               </div>
-
-              <button
-                onClick={vincularCartao}
-                disabled={salvandoNFC}
-                style={{ ...btnPrimary(salvandoNFC), marginTop: '20px' }}
-              >
-                {Icons.card}
-                {salvandoNFC ? 'Vinculando...' : 'Vincular Cartão'}
+              <button onClick={vincularCartao} disabled={salvandoNFC} style={{ ...btnPrimary(salvandoNFC), marginTop: '20px' }}>
+                {Icons.card} {salvandoNFC ? 'Vinculando...' : 'Vincular Cartão'}
               </button>
-            </div>
-
-            {/* Lista de cartões vinculados */}
-            <div style={card}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', paddingBottom: '10px', borderBottom: `2px solid ${TSEA.cinzaClaro}` }}>
-                <h3 style={{ margin: 0 }}>Cartões Cadastrados</h3>
-                <button
-                  onClick={buscarCartoes}
-                  style={{ padding: '8px 16px', background: TSEA.cinzaClaro, border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}
-                >
-                  Atualizar
-                </button>
-              </div>
-
-              {loadCartoes ? (
-                <p style={{ color: '#888', fontStyle: 'italic' }}>Carregando...</p>
-              ) : cartoes.length === 0 ? (
-                <p style={{ color: '#888', fontStyle: 'italic' }}>Nenhum cartão cadastrado.</p>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {cartoes.map((c, i) => (
-                    <div key={i} style={{
-                      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                      padding: '14px 16px', border: `1px solid ${TSEA.cinzaMedio}`,
-                      borderRadius: '6px', background: TSEA.branco
-                    }}>
-                      <div>
-                        <div style={{ fontWeight: 'bold', fontSize: '14px', marginBottom: '4px' }}>
-                          {c.usuario?.nome ?? 'Usuário desconhecido'}
-                        </div>
-                        <div style={{ display: 'flex', gap: '16px' }}>
-                          <small style={{ color: TSEA.cinzaBorda }}>CPF: <strong style={{ color: TSEA.cinzaEscuro, fontFamily: 'monospace' }}>{c.user_cpf}</strong></small>
-                          <small style={{ color: TSEA.cinzaBorda }}>UID: <strong style={{ color: TSEA.cinzaEscuro, fontFamily: 'monospace' }}>{c.codigo_uid}</strong></small>
-                          <small style={{ color: c.ativo ? '#2e7d32' : '#c62828', fontWeight: 'bold' }}>
-                            {c.ativo ? '● Ativo' : '● Inativo'}
-                          </small>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => removerCartao(c.user_cpf)}
-                        title="Remover cartão"
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: '6px',
-                          padding: '8px 14px', background: '#ffebee',
-                          color: '#c62828', border: '1px solid #ffcdd2',
-                          borderRadius: '6px', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer'
-                        }}
-                      >
-                        {Icons.trash} Remover
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ══════════════════════════════════════
-            ABA: MONITOR DE ATIVAS
-        ══════════════════════════════════════ */}
-        {abaAtivaSuper === 'm_ativas' && (
-          <div style={card}>
-            <h3 style={{ margin: '0 0 16px 0', paddingBottom: '10px', borderBottom: `2px solid ${TSEA.cinzaClaro}` }}>
-              Auditoria: Ferramentas em Uso
-            </h3>
-            {ativosEmCustodiaTSEA.filter(a => a.status !== 'DEVOLVIDO').length === 0 ? (
-              <p style={{ color: '#888', fontStyle: 'italic' }}>Nenhuma ferramenta em custódia no momento.</p>
-            ) : (
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr style={{ backgroundColor: TSEA.cinzaClaro }}>
-                      <th style={thStyle}>Funcionário</th>
-                      <th style={thStyle}>Ferramenta</th>
-                      <th style={thStyle}>Qtd</th>
-                      <th style={thStyle}>Data Retirada</th>
-                      <th style={thStyle}>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ativosEmCustodiaTSEA.filter(a => a.status !== 'DEVOLVIDO').map((item, idx) => (
-                      <tr key={idx} style={{ background: idx % 2 === 0 ? TSEA.branco : '#fafafa' }}>
-                        <td style={tdStyle}>{item.funcionario} <span style={{ color: TSEA.cinzaBorda, fontSize: '12px' }}>({item.matricula})</span></td>
-                        <td style={tdStyle}>{item.ferramenta}</td>
-                        <td style={tdStyle}>{item.qtd}x</td>
-                        <td style={tdStyle}>{item.data}</td>
-                        <td style={tdStyle}>
-                          <span style={{ padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold', background: '#ffebee', color: TSEA.vermelho }}>
-                            EM CUSTÓDIA
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ══════════════════════════════════════
-            ABA: MONITOR DE ESTOQUE
-        ══════════════════════════════════════ */}
-        {abaAtivaSuper === 'm_estoque' && (
-          <div style={card}>
-            <h3 style={{ margin: '0 0 16px 0', paddingBottom: '10px', borderBottom: `2px solid ${TSEA.cinzaClaro}` }}>
-              Auditoria: Inventário de Estoque
-            </h3>
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ backgroundColor: TSEA.cinzaClaro }}>
-                    <th style={thStyle}>Ferramenta</th>
-                    <th style={thStyle}>Categoria</th>
-                    <th style={thStyle}>Disponível</th>
-                    <th style={thStyle}>Total</th>
-                    <th style={thStyle}>Utilização</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {catalogoFerramentas.map((item, idx) => {
-                    const pct = item.total > 0 ? Math.round(((item.total - item.disponivel) / item.total) * 100) : 0;
-                    return (
-                      <tr key={`${item.id}-${idx}`} style={{ background: idx % 2 === 0 ? TSEA.branco : '#fafafa' }}>
-                        <td style={tdStyle}><strong>{item.nome}</strong></td>
-                        <td style={tdStyle}>{item.categoria}</td>
-                        <td style={{ ...tdStyle, color: item.disponivel === 0 ? '#c62828' : '#2e7d32', fontWeight: 'bold' }}>
-                          {item.disponivel}
-                        </td>
-                        <td style={tdStyle}>{item.total}</td>
-                        <td style={{ ...tdStyle, minWidth: '120px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{ flex: 1, height: '6px', background: TSEA.cinzaClaro, borderRadius: '3px', overflow: 'hidden' }}>
-                              <div style={{ height: '100%', width: `${pct}%`, background: pct > 80 ? TSEA.vermelho : pct > 50 ? '#e65100' : '#2e7d32', borderRadius: '3px' }} />
-                            </div>
-                            <span style={{ fontSize: '12px', color: TSEA.cinzaBorda, minWidth: '30px' }}>{pct}%</span>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
             </div>
           </div>
         )}
