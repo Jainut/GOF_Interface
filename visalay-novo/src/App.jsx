@@ -388,12 +388,12 @@ function App() {
   // ------------------------------------------
   // Funções de carregamento via API
   // ------------------------------------------
-  const getToken = () => localStorage.getItem('tsea_token');
 
-  const carregarFerramentas = async (token) => {
+  const carregarFerramentas = async () => {
     try {
       const res  = await fetch(import.meta.env.VITE_API_URL + '/listar/Ferramentas', {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
       });
       const data = await res.json();
       if (res.ok) {
@@ -408,10 +408,11 @@ function App() {
     } catch (e) { console.error('Erro ao carregar ferramentas:', e); }
   };
 
-  const carregarAtivos = async (token) => {
+  const carregarAtivos = async () => {
     try {
       const res  = await fetch(import.meta.env.VITE_API_URL + '/listar/Ativos', {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
       });
       const data = await res.json();
       if (res.ok) {
@@ -431,10 +432,11 @@ function App() {
     } catch (e) { console.error('Erro ao carregar ativos:', e); }
   };
 
-  const carregarEmprestimos = async (token) => {
+  const carregarEmprestimos = async () => {
     try {
       const res  = await fetch(import.meta.env.VITE_API_URL + '/listar/Emprestimos', {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
       });
       const data = await res.json();
       if (res.ok) {
@@ -454,10 +456,11 @@ function App() {
     } catch (e) { console.error('Erro ao carregar empréstimos:', e); }
   };
 
-  const carregarDevolucoes = async (token) => {
+  const carregarDevolucoes = async () => {
     try {
       const res  = await fetch(import.meta.env.VITE_API_URL + '/listar/Devolucoes', {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
       });
       const data = await res.json();
       if (res.ok) {
@@ -481,11 +484,9 @@ function App() {
    * ou faz fetch pontual se necessário.
    */
   const carregarEmprestimosDoOperador = (cpf) => {
-    // Filtra da lista de ativos já carregada pelo token do almoxarife
-    const token = getToken();
-    if (!token) return;
     fetch(import.meta.env.VITE_API_URL + '/listar/Ativos', {
-      headers: { Authorization: `Bearer ${token}` }
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' }
     })
       .then(r => r.json())
       .then(data => {
@@ -512,16 +513,16 @@ function App() {
     try {
       const res  = await fetch(import.meta.env.VITE_API_URL + '/login/almoxarife', {
         method:  'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ cpf: idAlmoxarife, senha: senhaLoginAlmoxarife })
       });
       const data = await res.json();
       if (res.ok) {
-        localStorage.setItem('tsea_token', data.token);
-        carregarFerramentas(data.token);
-        carregarAtivos(data.token);
-        carregarEmprestimos(data.token);
-        carregarDevolucoes(data.token);
+        carregarFerramentas();
+        carregarAtivos();
+        carregarEmprestimos();
+        carregarDevolucoes();
         setPerfilLogado('adm');
         setLogado(true);
       } else {
@@ -537,6 +538,7 @@ function App() {
     try {
       const res  = await fetch(import.meta.env.VITE_API_URL + '/login/admin', {
         method:  'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ cpf: cpfSuperAdmin, senha: senhaSuperAdmin })
       });
@@ -567,13 +569,12 @@ function App() {
       return;
     }
     
-    const token = getToken();
     try {
       const res = await fetch(import.meta.env.VITE_API_URL + '/registrar/Emprestimo', {
         method: 'POST',
+        credentials: 'include',
         headers: { 
-          'Content-Type': 'application/json', 
-          Authorization: `Bearer ${token}` 
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           user_cpf: operadorNFC.cpf,
@@ -588,8 +589,8 @@ function App() {
         setMensagemSistema({ tipo: 'sucesso', texto: 'Empréstimo registrado com sucesso!' });
         
         // Atualiza as listas do painel do almoxarife em segundo plano
-        carregarAtivos(token);
-        carregarEmprestimos(token);
+        carregarAtivos();
+        carregarEmprestimos();
 
         // ==========================================
         // LÓGICA DE BLOQUEIO: Volta a pedir o NFC
@@ -615,23 +616,23 @@ function App() {
   // Devolver ferramenta (remove da lista imediatamente ao ter sucesso)
   // ------------------------------------------
 const devolverFerramenta = async (emprestimoId) => {
-  const token = getToken();
   try {
-    const res = await fetch(import.meta.env.VITE_API_URL + '/registrar/Devolucao', { // ✅ rota correta
+    const res = await fetch(import.meta.env.VITE_API_URL + '/registrar/Devolucao', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         emprestimo_id: emprestimoId,
-        user_cpf: operadorNFC.cpf  // ✅ campo obrigatório que estava faltando
+        user_cpf: operadorNFC.cpf
       })
     });
     const data = await res.json();
     if (res.ok) {
       setEmprestimosOperador(prev => prev.filter(e => e.emprestimo_id !== emprestimoId));
       setMensagemSistema({ tipo: 'sucesso', texto: 'Devolução registrada com sucesso.' });
-      carregarAtivos(token);
-      carregarDevolucoes(token);
-      carregarFerramentas(token);
+      carregarAtivos();
+      carregarDevolucoes();
+      carregarFerramentas();
     } else {
       setMensagemSistema({ tipo: 'erro', texto: data.message ?? 'Erro ao registrar devolução.' });
     }
@@ -718,7 +719,6 @@ const cancelarAcessoNFC = () => {
   setAbaAtivaSuper={setAbaAtivaSuper}
   ativosEmCustodiaTSEA={ativosEmCustodiaTSEA}
   catalogoFerramentas={catalogoFerramentas}
-  getToken={getToken}
   logout={() => { setLogado(false); setPerfil(null); }}
 />
       ) : null}
