@@ -218,8 +218,8 @@ export default function PainelMaster({
 
   // ── Estado: cartões NFC ──────────────────────────────────────────────────
   const [cartoes, setCartoes]           = useState([]);
-  const [loadCartoes, setLoadCartoes]   = useState(false);
-  const [loadEstoque, setLoadEstoque]   = useState(false);
+  const [, setLoadCartoes]              = useState(false);
+  const [, setLoadEstoque]              = useState(false);
   const [formNFC, setFormNFC]           = useState({ user_cpf: '', codigo_uid: '' });
   const [salvandoNFC, setSalvandoNFC]   = useState(false);
 
@@ -242,7 +242,7 @@ export default function PainelMaster({
       else showMsg('erro', data.message ?? 'Erro ao carregar usuários.');
     } catch { showMsg('erro', 'Falha de conexão.'); }
     finally  { setLoadUsuarios(false); }
-  }, []);
+  }, [API]);
 
   // ── Buscar cartões ───────────────────────────────────────────────────────
   const buscarCartoes = useCallback(async () => {
@@ -254,29 +254,23 @@ export default function PainelMaster({
       else showMsg('erro', data.message ?? 'Erro ao carregar cartões.');
     } catch { showMsg('erro', 'Falha de conexão.'); }
     finally  { setLoadCartoes(false); }
-  }, []);
+  }, [API]);
+
+  const buscarEstoque = useCallback(async () => {
+    setLoadEstoque(true);
+    try {
+      const res  = await fetch(`${API}/listar/Ferramentas`, { headers: headers(), credentials: 'include' });
+      const data = await res.json();
+      if (!res.ok) showMsg('erro', data.message ?? 'Erro ao carregar cartões.');
+    } catch { showMsg('erro', 'Falha de conexão.'); }
+    finally  { setLoadEstoque(false); }
+  }, [API]);
 
   useEffect(() => {
     if (abaAtivaSuper === 'gerenciar_usuarios') buscarUsuarios();
     if (abaAtivaSuper === 'cartoes_nfc')        { buscarCartoes(); buscarUsuarios(); }
     if (abaAtivaSuper === 'm_estoque')          buscarEstoque();
-  }, [abaAtivaSuper]);
-
-    const buscarEstoque = useCallback(async () => {
-    setLoadEstoque(true);
-    try {
-      const res  = await fetch(`${API}/listar/Ferramentas`, { headers: headers(), credentials: 'include' });
-      const data = await res.json();
-      if (res.ok) loadEstoque(data);
-      else showMsg('erro', data.message ?? 'Erro ao carregar cartões.');
-    } catch { showMsg('erro', 'Falha de conexão.'); }
-    finally  { setLoadEstoque(false); }
-  }, []);
-
-  useEffect(() => {
-    if (abaAtivaSuper === 'gerenciar_usuarios') buscarUsuarios();
-    if (abaAtivaSuper === 'cartoes_nfc')        { buscarCartoes(); buscarUsuarios(); }
-  }, [abaAtivaSuper]);
+  }, [abaAtivaSuper, buscarCartoes, buscarEstoque, buscarUsuarios]);
 
   const criarUsuario = async () => {
     if (!form.cpf || !form.nome || !form.senha) {
@@ -321,22 +315,6 @@ export default function PainelMaster({
       }
     } catch { showMsg('erro', 'Falha de conexão.'); }
     finally  { setSalvandoNFC(false); }
-  };
-
-  const removerCartao = async (user_cpf) => {
-    if (!confirm('Remover o cartão NFC deste usuário?')) return;
-    try {
-      const res  = await fetch(`${API}/remover/CartaoNFC/${user_cpf}`, {
-        method: 'DELETE', headers: headers(), credentials: 'include'
-      });
-      const data = await res.json();
-      if (res.ok) {
-        showMsg('sucesso', 'Cartão removido.');
-        buscarCartoes();
-      } else {
-        showMsg('erro', data.message ?? 'Erro ao remover cartão.');
-      }
-    } catch { showMsg('erro', 'Falha de conexão.'); }
   };
 
   // ── Métricas ─────────────────────────────────────────────────────────────

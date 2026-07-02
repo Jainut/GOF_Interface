@@ -130,7 +130,8 @@ export default function PainelAlmoxarife({
       const atual = prev[item.id] ?? 0;
       const nova = Math.max(0, Math.min(atual + delta, item.disponivel));
       if (nova === 0) {
-        const { [item.id]: _, ...resto } = prev;
+        const resto = { ...prev };
+        delete resto[item.id];
         return resto;
       }
       return { ...prev, [item.id]: nova };

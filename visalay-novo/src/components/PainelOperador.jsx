@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 export default function PainelOperador({
-  TSEA, abaAtiva, setAbaAtiva, operador, ativosEmCustodiaTSEA, solicitarDevolucaoImediata, 
-  pedidoAtivo, confirmarRetiradaComCartao, logout
+  TSEA, abaAtiva, setAbaAtiva, operador, ativosEmCustodiaTSEA, solicitarDevolucaoImediata = () => {}, 
+  pedidoAtivo = null, confirmarRetiradaComCartao = () => {}, logout
 }) {
   const [rfidInput, setRfidInput] = useState('');
 
