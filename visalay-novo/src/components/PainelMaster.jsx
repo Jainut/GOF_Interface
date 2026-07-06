@@ -196,6 +196,8 @@ function Field({ label, as, ...props }) {
 export default function PainelMaster({
   abaAtivaSuper, setAbaAtivaSuper,
   ativosEmCustodiaTSEA, catalogoFerramentas,
+  ultimasRetiradas = [], ultimasDevolucoes = [],
+  usuarioLogado = 'Administrador',
   logout,
 }) {
   const API = import.meta.env.VITE_API_URL;
@@ -203,10 +205,18 @@ export default function PainelMaster({
   const [msg, setMsg] = useState(null);
   const [setorSelecionado, setSetorSelecionado] = useState(null);
 
-  // Dados mockados para o Dashboard
-  const dashboardData = {
-    
-  };
+  const ativosAbertos = ativosEmCustodiaTSEA.filter(a => a.status !== 'DEVOLVIDO');
+  const totalEstoqueCatalogo = catalogoFerramentas.reduce((s, f) => s + Number(f.total ?? 0), 0);
+  const totalDisponivelCatalogo = catalogoFerramentas.reduce((s, f) => s + Number(f.disponivel ?? 0), 0);
+  const totalEmprestadoCatalogo = Math.max(ativosAbertos.reduce((s, a) => s + Number(a.qtd ?? 0), 0), totalEstoqueCatalogo - totalDisponivelCatalogo);
+  const totalManutencao = catalogoFerramentas.reduce((s, f) => s + Number(f.manutencao ?? f.em_manutencao ?? 0), 0);
+
+  const dashboardData = ativosAbertos.reduce((acc, ativo) => {
+    const setor = ativo.setor ?? ativo.matricula ?? 'Sem setor';
+    if (!acc[setor]) acc[setor] = [];
+    acc[setor].push(ativo);
+    return acc;
+  }, {});
 
   // ── Estado: listar usuários ──────────────────────────────────────────────
   const [usuarios, setUsuarios]           = useState([]);
@@ -320,8 +330,11 @@ export default function PainelMaster({
   // ── Métricas ─────────────────────────────────────────────────────────────
   const totalUsers   = usuarios.length;
   const totalCards   = cartoes.length;
-  const totalAtivos  = ativosEmCustodiaTSEA.filter(a => a.status !== 'DEVOLVIDO').length;
-  const totalEstoque = catalogoFerramentas.reduce((s, f) => s + f.total, 0);
+  const totalAtivos  = ativosAbertos.length;
+  const totalEstoque = totalEstoqueCatalogo;
+  const totalGrafico = Math.max(totalManutencao + totalEmprestadoCatalogo + totalDisponivelCatalogo, 1);
+  const manutencaoDeg = (totalManutencao / totalGrafico) * 360;
+  const emprestadoDeg = manutencaoDeg + (totalEmprestadoCatalogo / totalGrafico) * 360;
 
   // ── Sidebar nav ──────────────────────────────────────────────────────────
   const navItems = [
@@ -350,7 +363,7 @@ export default function PainelMaster({
   const tdStyle = { padding: '13px 14px', fontSize: '14px', borderBottom: `1px solid ${TSEA.cinzaClaro}` };
 
   return (
-    <div className="layout-container" style={{ filter: setorSelecionado ? 'blur(4px)' : 'none', transition: 'filter 0.3s' }}>
+    <div className="layout-container">
 
       {/* ── SIDEBAR ── */}
       <aside className="sidebar no-print">
@@ -407,17 +420,26 @@ export default function PainelMaster({
         ══════════════════════════════════════ */}
         {abaAtivaSuper === 'dashboard' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-            
-            {/* Grid de Setores */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
-              {Object.keys(dashboardData).map(setor => (
-                <div 
-                  key={setor} 
+            <div style={card}>
+              <h2 style={{ margin: '0 0 6px 0', color: TSEA.preto }}>Bem-vindo(a), {usuarioLogado}!</h2>
+              <p style={{ margin: 0, color: TSEA.cinzaEscuro, fontSize: '14px' }}>
+                Visao geral de estoque, ferramentas em uso e movimentacoes recentes.
+              </p>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '20px' }}>
+              {Object.keys(dashboardData).length === 0 ? (
+                <div style={{ ...card, gridColumn: '1 / -1', color: TSEA.cinzaEscuro }}>
+                  Nenhuma ferramenta ativa por setor no momento.
+                </div>
+              ) : Object.keys(dashboardData).map(setor => (
+                <div
+                  key={setor}
                   onClick={() => setSetorSelecionado(setor)}
-                  style={{ 
-                    ...card, 
-                    cursor: 'pointer', 
-                    textAlign: 'center', 
+                  style={{
+                    ...card,
+                    cursor: 'pointer',
+                    textAlign: 'center',
                     borderBottom: `4px solid ${TSEA.vermelho}`,
                     transition: 'transform 0.2s',
                   }}
@@ -433,15 +455,14 @@ export default function PainelMaster({
               ))}
             </div>
 
-            {/* Retângulo com a Bola de Cores */}
-            <div style={{ ...card, display: 'flex', alignItems: 'center', gap: '40px', justifyContent: 'center' }}>
+            <div style={{ ...card, display: 'flex', alignItems: 'center', gap: '40px', justifyContent: 'center', flexWrap: 'wrap' }}>
               <div style={{ textAlign: 'center' }}>
-                <h4 style={{ marginBottom: '15px' }}>Status Geral do Inventário</h4>
-                <div style={{ 
-                  width: '180px', 
-                  height: '180px', 
-                  borderRadius: '50%', 
-                  background: 'conic-gradient(#CCCCCC 0% 15%, #2e7d32 15% 65%, #E30613 65% 100%)',
+                <h4 style={{ marginBottom: '15px' }}>Status Geral do Inventario</h4>
+                <div style={{
+                  width: '180px',
+                  height: '180px',
+                  borderRadius: '50%',
+                  background: `conic-gradient(#CCCCCC 0 ${manutencaoDeg}deg, #2e7d32 ${manutencaoDeg}deg ${emprestadoDeg}deg, #E30613 ${emprestadoDeg}deg 360deg)`,
                   boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
                   margin: '0 auto'
                 }}></div>
@@ -450,56 +471,72 @@ export default function PainelMaster({
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div style={{ width: '15px', height: '15px', background: '#CCCCCC', borderRadius: '3px' }}></div>
-                  <span style={{ fontSize: '14px', fontWeight: '600' }}>Em Manutenção (15%)</span>
+                  <span style={{ fontSize: '14px', fontWeight: '600' }}>Em Manutencao ({totalManutencao})</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div style={{ width: '15px', height: '15px', background: '#2e7d32', borderRadius: '3px' }}></div>
-                  <span style={{ fontSize: '14px', fontWeight: '600' }}>Em Uso (50%)</span>
+                  <span style={{ fontSize: '14px', fontWeight: '600' }}>Em Uso ({totalEmprestadoCatalogo})</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div style={{ width: '15px', height: '15px', background: '#E30613', borderRadius: '3px' }}></div>
-                  <span style={{ fontSize: '14px', fontWeight: '600' }}>No Almoxarifado (35%)</span>
+                  <span style={{ fontSize: '14px', fontWeight: '600' }}>No Almoxarifado ({totalDisponivelCatalogo})</span>
                 </div>
               </div>
+            </div>
+
+            <div style={card}>
+              <h4 style={{ marginTop: 0 }}>Ultimas movimentacoes</h4>
+              {[...ultimasRetiradas.slice(0, 3), ...ultimasDevolucoes.slice(0, 3)]
+                .sort((a, b) => (b.timestamp ?? 0) - (a.timestamp ?? 0))
+                .slice(0, 5)
+                .map((mov, idx) => (
+                  <div key={idx} style={{ padding: '10px 0', borderBottom: idx === 4 ? 'none' : `1px solid ${TSEA.cinzaClaro}` }}>
+                    <strong>{mov.funcionario}</strong> - {mov.ferramenta} - {mov.data ?? mov.dataDevolucao}
+                  </div>
+                ))}
             </div>
           </div>
         )}
 
-        {/* Modal de Detalhes do Setor (Fora do Main para o blur funcionar corretamente) */}
         {setorSelecionado && (
-          <div style={{
-            position: 'fixed', inset: 0, zIndex: 999,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            backgroundColor: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)'
-          }}>
-            <div style={{
-              ...card, width: '700px', maxHeight: '80vh', overflowY: 'auto',
-              position: 'relative', borderTop: `6px solid ${TSEA.vermelho}`
-            }}>
-              <button 
+          <div
+            onClick={() => setSetorSelecionado(null)}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 999,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              backgroundColor: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)',
+              padding: '20px'
+            }}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                ...card, width: '700px', maxWidth: '100%', maxHeight: '80vh', overflowY: 'auto',
+                position: 'relative', borderTop: `6px solid ${TSEA.vermelho}`
+              }}
+            >
+              <button
                 onClick={() => setSetorSelecionado(null)}
                 style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', cursor: 'pointer' }}
               >
                 {Icons.close}
               </button>
 
-              <h2 style={{ marginBottom: '20px', color: TSEA.preto }}>Colaboradores: {setorSelecionado}</h2>
-              
+              <h2 style={{ marginBottom: '20px', color: TSEA.preto }}>Setor: {setorSelecionado}</h2>
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                {dashboardData[setorSelecionado].map((func, idx) => (
-                  <div key={idx} style={{ padding: '15px', background: TSEA.cinzaClaro, borderRadius: '6px' }}>
+                {dashboardData[setorSelecionado].map((item, idx) => (
+                  <div key={`${item.emprestimo_id}-${idx}`} style={{ padding: '15px', background: TSEA.cinzaClaro, borderRadius: '6px' }}>
                     <div style={{ fontWeight: '800', fontSize: '16px', color: TSEA.vermelho, marginBottom: '8px' }}>
-                      {func.nome}
+                      {item.funcionario}
                     </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                      {func.ferramentas.map((f, i) => (
-                        <span key={i} style={{ 
-                          padding: '4px 10px', background: TSEA.branco, border: '1px solid #ddd', 
-                          borderRadius: '4px', fontSize: '13px', fontWeight: '500' 
-                        }}>
-                          {f}
-                        </span>
-                      ))}
+                      <span style={{ padding: '4px 10px', background: TSEA.branco, border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px', fontWeight: '500' }}>
+                        {item.qtd}x {item.ferramenta}
+                      </span>
+                      <span style={{ padding: '4px 10px', background: TSEA.branco, border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px', fontWeight: '500' }}>
+                        Retirada: {item.data}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -641,6 +678,76 @@ export default function PainelMaster({
                 {Icons.card} {salvandoNFC ? 'Vinculando...' : 'Vincular Cartão'}
               </button>
             </div>
+          </div>
+        )}
+
+        {abaAtivaSuper === 'm_ativas' && (
+          <div style={card}>
+            <h3 style={{ margin: '0 0 18px 0', paddingBottom: '10px', borderBottom: `2px solid ${TSEA.cinzaClaro}` }}>
+              Monitor de Ferramentas Ativas
+            </h3>
+            {ativosAbertos.length === 0 ? (
+              <p style={{ color: '#888', fontStyle: 'italic' }}>Nenhuma ferramenta em custodia no momento.</p>
+            ) : (
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: TSEA.cinzaClaro }}>
+                      <th style={thStyle}>Funcionario</th>
+                      <th style={thStyle}>Ferramenta</th>
+                      <th style={thStyle}>Qtd</th>
+                      <th style={thStyle}>Retirada</th>
+                      <th style={thStyle}>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ativosAbertos.map((item, idx) => (
+                      <tr key={`${item.emprestimo_id}-${idx}`} style={{ background: idx % 2 === 0 ? TSEA.branco : '#fafafa' }}>
+                        <td style={tdStyle}><strong>{item.funcionario}</strong></td>
+                        <td style={tdStyle}>{item.ferramenta}</td>
+                        <td style={tdStyle}>{item.qtd}x</td>
+                        <td style={tdStyle}>{item.data}</td>
+                        <td style={tdStyle}>{item.status}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {abaAtivaSuper === 'm_estoque' && (
+          <div style={card}>
+            <h3 style={{ margin: '0 0 18px 0', paddingBottom: '10px', borderBottom: `2px solid ${TSEA.cinzaClaro}` }}>
+              Monitor de Estoque
+            </h3>
+            {catalogoFerramentas.length === 0 ? (
+              <p style={{ color: '#888', fontStyle: 'italic' }}>Nenhuma ferramenta cadastrada.</p>
+            ) : (
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: TSEA.cinzaClaro }}>
+                      <th style={thStyle}>Ferramenta</th>
+                      <th style={thStyle}>Categoria</th>
+                      <th style={thStyle}>Disponivel</th>
+                      <th style={thStyle}>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {catalogoFerramentas.map((item, idx) => (
+                      <tr key={`${item.id}-${idx}`} style={{ background: idx % 2 === 0 ? TSEA.branco : '#fafafa' }}>
+                        <td style={tdStyle}><strong>{item.nome}</strong></td>
+                        <td style={tdStyle}>{item.categoria}</td>
+                        <td style={{ ...tdStyle, color: item.disponivel === 0 ? TSEA.vermelho : '#2e7d32', fontWeight: 'bold' }}>{item.disponivel}</td>
+                        <td style={tdStyle}>{item.total}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
 

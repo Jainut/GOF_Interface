@@ -17,8 +17,8 @@ export function AppDataProvider({ children }) {
   });
 
   const [abaAtiva, setAbaAtiva] = useState('custodia');
-  const [abaAtivaAdm, setAbaAtivaAdm] = useState('solicitar_emprestimo');
-  const [abaAtivaSuper, setAbaAtivaSuper] = useState('criar_usuario');
+  const [abaAtivaAdm, setAbaAtivaAdm] = useState('dashboard');
+  const [abaAtivaSuper, setAbaAtivaSuper] = useState('dashboard');
 
   const [statusBiometria, setStatusBiometria] = useState('desligado');
   const [progressoEscaneamento, setProgressoEscaneamento] = useState(0);
@@ -86,8 +86,9 @@ export function AppDataProvider({ children }) {
       const res = await apiRequest('/listar/Emprestimos');
       const data = await readJson(res);
       if (res.ok && Array.isArray(data)) {
-        setUltimasRetiradas(data.flatMap(emp =>
-          emp.ferramentas.map(f => ({
+        const retiradas = data.flatMap(emp => {
+          const timestamp = new Date(emp.data_retirada).getTime();
+          return emp.ferramentas.map(f => ({
             emprestimo_id: emp.emprestimo_id,
             funcionario: emp.usuario.nome_usuario,
             matricula: emp.usuario.setor_usuario,
@@ -95,9 +96,11 @@ export function AppDataProvider({ children }) {
             ferramenta_id: f.ferramenta_id,
             qtd: f.quantidade,
             data: new Date(emp.data_retirada).toLocaleString('pt-BR'),
+            timestamp,
             status: emp.ferramenta_status === 'Emprestado' ? 'EM CUSTÓDIA' : 'DEVOLVIDO'
-          }))
-        ));
+          }));
+        });
+        setUltimasRetiradas(retiradas.sort((a, b) => b.timestamp - a.timestamp));
       }
     } catch (e) {
       console.error('Erro ao carregar empréstimos:', e);
@@ -116,8 +119,9 @@ export function AppDataProvider({ children }) {
           ferramenta: d.tipo_ferramenta,
           qtd: 1,
           dataDevolucao: new Date(d.data_devolucao).toLocaleString('pt-BR'),
+          timestamp: new Date(d.data_devolucao).getTime(),
           status: d.status
-        })));
+        })).sort((a, b) => b.timestamp - a.timestamp));
       } else if (!res.ok) {
         console.error('A API retornou erro ao carregar devoluções:', data);
       }
@@ -231,6 +235,10 @@ export function AppDataProvider({ children }) {
 
   const limparSessaoVisual = useCallback(() => {
     setPerfil(null);
+    setIdAlmoxarife('');
+    setSenhaLoginAlmoxarife('');
+    setCpfSuperAdmin('');
+    setSenhaSuperAdmin('');
     setStatusBiometria('desligado');
     setProgressoEscaneamento(0);
     setNfcLiberado(false);

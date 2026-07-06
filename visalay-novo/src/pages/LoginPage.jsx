@@ -25,8 +25,13 @@ export default function LoginPage() {
     setSenhaSuperAdmin,
     mensagemSistema,
     setMensagemSistema,
-    carregarDadosProtegidos
+    carregarDadosProtegidos,
+    limparSessaoVisual
   } = useAppData();
+
+  useEffect(() => {
+    if (!perfilLogado) limparSessaoVisual();
+  }, [limparSessaoVisual, perfilLogado]);
 
   useEffect(() => {
     if (perfilLogado === 'func') navigate('/operador', { replace: true });
@@ -196,6 +201,8 @@ export default function LoginPage() {
               <input
                 type="text"
                 placeholder="CPF do Almoxarife"
+                autoComplete="off"
+                name="almoxarife-cpf"
                 value={idAlmoxarife}
                 onChange={(e) => setIdAlmoxarife(e.target.value)}
                 style={{ width: '100%', padding: '12px', borderRadius: '6px', border: `1px solid ${TSEA.cinzaMedio}`, textAlign: 'center', marginBottom: '10px', boxSizing: 'border-box' }}
@@ -203,6 +210,8 @@ export default function LoginPage() {
               <input
                 type="password"
                 placeholder="Senha"
+                autoComplete="new-password"
+                name="almoxarife-password"
                 value={senhaLoginAlmoxarife}
                 onChange={(e) => setSenhaLoginAlmoxarife(e.target.value)}
                 style={{ width: '100%', padding: '12px', borderRadius: '6px', border: `1px solid ${TSEA.cinzaMedio}`, textAlign: 'center', marginBottom: '15px', boxSizing: 'border-box' }}
@@ -218,6 +227,8 @@ export default function LoginPage() {
               <input
                 type="text"
                 placeholder="CPF do Administrador"
+                autoComplete="off"
+                name="master-cpf"
                 value={cpfSuperAdmin}
                 onChange={(e) => setCpfSuperAdmin(e.target.value)}
                 style={{ width: '100%', padding: '12px', borderRadius: '6px', border: `1px solid ${TSEA.cinzaMedio}`, textAlign: 'center', marginBottom: '10px', boxSizing: 'border-box' }}
@@ -225,6 +236,8 @@ export default function LoginPage() {
               <input
                 type="password"
                 placeholder="Senha Master"
+                autoComplete="new-password"
+                name="master-password"
                 value={senhaSuperAdmin}
                 onChange={(e) => setSenhaSuperAdmin(e.target.value)}
                 style={{ width: '100%', padding: '12px', borderRadius: '6px', border: `1px solid ${TSEA.cinzaMedio}`, textAlign: 'center', marginBottom: '15px', boxSizing: 'border-box' }}
