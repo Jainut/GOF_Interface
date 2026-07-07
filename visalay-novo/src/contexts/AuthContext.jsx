@@ -36,10 +36,8 @@ export function AuthProvider({ children }) {
       throw new Error(data?.message ?? 'Credenciais invalidas.');
     }
 
-    if (data?.token) {
-      setStoredToken(data.token);
-      refreshSocketAuth();
-    }
+    if (data?.token) setStoredToken(data.token);
+    refreshSocketAuth();
     persistSession({
       perfil: 'adm',
       usuario: data?.usuario?.nome ?? data?.nome ?? data?.user?.nome ?? 'Almoxarife'
@@ -58,10 +56,8 @@ export function AuthProvider({ children }) {
       throw new Error(data?.message ?? 'Credenciais invalidas.');
     }
 
-    if (data?.token) {
-      setStoredToken(data.token);
-      refreshSocketAuth();
-    }
+    if (data?.token) setStoredToken(data.token);
+    refreshSocketAuth();
     persistSession({
       perfil: 'superadmin',
       usuario: data?.usuario?.nome ?? data?.nome ?? data?.user?.nome ?? 'Administrador'

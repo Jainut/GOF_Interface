@@ -68,6 +68,7 @@ export function AppDataProvider({ children }) {
             emprestimo_id: emp.id,
             funcionario: emp.usuario.nome,
             matricula: emp.usuario.cpf,
+            setor: emp.usuario.setor ?? emp.usuario.setor_usuario ?? emp.usuario.departamento ?? emp.setor ?? 'Sem setor',
             ferramenta: item.ferramenta.tipo,
             ferramenta_id: item.ferramenta_id,
             qtd: item.quantidade,
@@ -249,15 +250,17 @@ export function AppDataProvider({ children }) {
 
   useEffect(() => {
     const handleNfcAuth = (payload) => {
-      if (!payload?.operador) {
+      const operadorPayload = payload?.operador ?? payload?.usuario ?? payload;
+
+      if (!operadorPayload?.cpf) {
         setMensagemSistema({ tipo: 'erro', texto: 'Cartão NFC não reconhecido no sistema.' });
         return;
       }
 
       const op = {
-        nome: payload.operador.nome,
-        cpf: payload.operador.cpf,
-        setor: payload.operador.setor
+        nome: operadorPayload.nome ?? operadorPayload.nome_usuario ?? 'Operador identificado',
+        cpf: operadorPayload.cpf,
+        setor: operadorPayload.setor ?? operadorPayload.setor_usuario ?? 'Sem setor'
       };
       setOperadorNFC(op);
       setNfcLiberado(true);

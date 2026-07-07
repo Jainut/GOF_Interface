@@ -134,11 +134,12 @@ function MetricCard({ icon, label, value, color, bg }) {
   return (
     <div style={{
       background: TSEA.branco, borderRadius: '8px', padding: '20px 24px',
-      boxShadow: '0 2px 10px rgba(0,0,0,0.05)', borderLeft: `4px solid ${color}`,
-      display: 'flex', alignItems: 'center', gap: '18px', flex: '1 1 180px'
+      boxShadow: '0 10px 24px rgba(26,26,26,0.06)', border: `1px solid ${TSEA.cinzaClaro}`,
+      borderLeft: `4px solid ${color}`, display: 'flex', alignItems: 'center',
+      gap: '18px', flex: '1 1 180px'
     }}>
       <div style={{
-        width: '52px', height: '52px', borderRadius: '10px', background: bg,
+        width: '52px', height: '52px', borderRadius: '8px', background: bg,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         color, flexShrink: 0
       }}>
@@ -211,7 +212,7 @@ export default function PainelMaster({
   const totalManutencao = catalogoFerramentas.reduce((s, f) => s + Number(f.manutencao ?? f.em_manutencao ?? 0), 0);
 
   const dashboardData = ativosAbertos.reduce((acc, ativo) => {
-    const setor = ativo.setor ?? ativo.matricula ?? 'Sem setor';
+    const setor = ativo.setor || 'Sem setor';
     if (!acc[setor]) acc[setor] = [];
     acc[setor].push(ativo);
     return acc;
@@ -340,7 +341,8 @@ export default function PainelMaster({
 
   const card = {
     backgroundColor: TSEA.branco, padding: '25px',
-    borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
+    borderRadius: '8px', border: `1px solid ${TSEA.cinzaClaro}`,
+    boxShadow: '0 12px 28px rgba(26,26,26,0.06)'
   };
 
   const btnPrimary = (loading) => ({
@@ -433,10 +435,16 @@ export default function PainelMaster({
                     cursor: 'pointer',
                     textAlign: 'center',
                     borderBottom: `4px solid ${TSEA.vermelho}`,
-                    transition: 'transform 0.2s',
+                    transition: 'transform 0.18s ease, box-shadow 0.18s ease',
                   }}
-                  onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
-                  onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 16px 34px rgba(26,26,26,0.1)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = card.boxShadow;
+                  }}
                 >
                   <h4 style={{ color: TSEA.cinzaEscuro, marginBottom: '10px' }}>{setor}</h4>
                   <div style={{ fontSize: '32px', fontWeight: '800', color: TSEA.preto }}>
@@ -455,7 +463,7 @@ export default function PainelMaster({
                   height: '180px',
                   borderRadius: '50%',
                   background: `conic-gradient(#CCCCCC 0 ${manutencaoDeg}deg, #2e7d32 ${manutencaoDeg}deg ${emprestadoDeg}deg, #E30613 ${emprestadoDeg}deg 360deg)`,
-                  boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+                  boxShadow: 'inset 0 0 0 14px rgba(255,255,255,0.72), 0 12px 28px rgba(26,26,26,0.12)',
                   margin: '0 auto'
                 }}></div>
               </div>
