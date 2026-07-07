@@ -17,7 +17,7 @@ export function AppDataProvider({ children }) {
   });
 
   const [abaAtiva, setAbaAtiva] = useState('custodia');
-  const [abaAtivaAdm, setAbaAtivaAdm] = useState('dashboard');
+  const [abaAtivaAdm, setAbaAtivaAdm] = useState('solicitar_emprestimo');
   const [abaAtivaSuper, setAbaAtivaSuper] = useState('dashboard');
 
   const [statusBiometria, setStatusBiometria] = useState('desligado');
@@ -250,17 +250,15 @@ export function AppDataProvider({ children }) {
 
   useEffect(() => {
     const handleNfcAuth = (payload) => {
-      const operadorPayload = payload?.operador ?? payload?.usuario ?? payload;
-
-      if (!operadorPayload?.cpf) {
+      if (!payload?.operador) {
         setMensagemSistema({ tipo: 'erro', texto: 'Cartão NFC não reconhecido no sistema.' });
         return;
       }
 
       const op = {
-        nome: operadorPayload.nome ?? operadorPayload.nome_usuario ?? 'Operador identificado',
-        cpf: operadorPayload.cpf,
-        setor: operadorPayload.setor ?? operadorPayload.setor_usuario ?? 'Sem setor'
+        nome: payload.operador.nome,
+        cpf: payload.operador.cpf,
+        setor: payload.operador.setor
       };
       setOperadorNFC(op);
       setNfcLiberado(true);
@@ -269,9 +267,8 @@ export function AppDataProvider({ children }) {
       carregarEmprestimosDoOperador(op.cpf);
     };
 
-    socket.off('nfcAuth', handleNfcAuth);
     socket.on('nfcAuth', handleNfcAuth);
-    return () => socket.off('nfcAuth', handleNfcAuth);
+    return () => socket.off('nfcAuth');
   }, [carregarEmprestimosDoOperador]);
 
   useEffect(() => {
