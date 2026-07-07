@@ -32,25 +32,61 @@ function App() {
           .ficha-item span { font-size: 14px; font-weight: bold; }
           .theme-toggle { position: fixed; right: 18px; bottom: 18px; z-index: 1200; width: 44px; height: 44px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.12); background: #fff; color: ${TSEA.preto}; box-shadow: 0 6px 18px rgba(0,0,0,0.16); cursor: pointer; font-weight: 800; }
           .theme-toggle:hover { transform: translateY(-1px); }
-          body.dark-mode { background: #101214; color: #f4f6f8; color-scheme: dark; }
-          body.dark-mode .content-main { background-color: #101214 !important; }
-          body.dark-mode .sidebar { background-color: #050607 !important; border-right: 1px solid #2a2f36; }
-          body.dark-mode .card-ferramenta,
-          body.dark-mode main > div,
-          body.dark-mode main section { color: #f4f6f8; }
+          :root {
+            color-scheme: light;
+            --tsea-page: #f4f6f9;
+            --tsea-surface: #ffffff;
+            --tsea-surface-alt: #f5f5f5;
+            --tsea-text: #1a1a1a;
+            --tsea-muted: #555555;
+            --tsea-border: #d8d8d8;
+            --tsea-shadow: 0 4px 15px rgba(0,0,0,0.06);
+          }
+          body.dark-mode {
+            color-scheme: dark;
+            --tsea-page: #101214;
+            --tsea-surface: #181d23;
+            --tsea-surface-alt: #222933;
+            --tsea-text: #f4f6f8;
+            --tsea-muted: #c8d0da;
+            --tsea-border: #3b424c;
+            --tsea-shadow: 0 6px 18px rgba(0,0,0,0.32);
+            background: var(--tsea-page);
+            color: var(--tsea-text);
+          }
+          body.dark-mode .content-main { background-color: var(--tsea-page) !important; color: var(--tsea-text) !important; }
+          body.dark-mode .sidebar { background-color: #050607 !important; border-right: 1px solid var(--tsea-border); }
+          body.dark-mode .theme-toggle { background: var(--tsea-surface); color: var(--tsea-text); border-color: var(--tsea-border); }
           body.dark-mode input,
           body.dark-mode select,
-          body.dark-mode textarea { background: #15191f !important; color: #f4f6f8 !important; border-color: #3b424c !important; }
+          body.dark-mode textarea {
+            background: #15191f !important;
+            color: var(--tsea-text) !important;
+            border-color: var(--tsea-border) !important;
+          }
+          body.dark-mode input::placeholder,
+          body.dark-mode textarea::placeholder { color: #9aa5b1 !important; }
           body.dark-mode table,
           body.dark-mode th,
-          body.dark-mode td { color: #f4f6f8; border-color: #343a42 !important; }
-          body.dark-mode .theme-toggle { background: #1f242b; color: #f4f6f8; border-color: #3b424c; }
-          body.dark-mode [style*="background: white"],
-          body.dark-mode [style*="background: TSEA"],
-          body.dark-mode [style*="background-color: rgb(255, 255, 255)"],
-          body.dark-mode [style*="backgroundColor: TSEA"] { background: #181d23 !important; color: #f4f6f8 !important; }
-          body.dark-mode [style*="background-color: rgb(244, 246, 249)"],
-          body.dark-mode [style*="backgroundColor: #f4f6f9"] { background-color: #101214 !important; }
+          body.dark-mode td { color: var(--tsea-text) !important; border-color: var(--tsea-border) !important; }
+          body.dark-mode thead tr,
+          body.dark-mode .badge-categoria,
+          body.dark-mode .ficha-dados { background: var(--tsea-surface-alt) !important; color: var(--tsea-text) !important; }
+          body.dark-mode .card-ferramenta,
+          body.dark-mode .content-main [style*="background: white"],
+          body.dark-mode .content-main [style*="background: #fff"],
+          body.dark-mode .content-main [style*="background-color: white"],
+          body.dark-mode .content-main [style*="background-color: rgb(255, 255, 255)"] {
+            background: var(--tsea-surface) !important;
+            color: var(--tsea-text) !important;
+            border-color: var(--tsea-border) !important;
+            box-shadow: var(--tsea-shadow) !important;
+          }
+          body.dark-mode .content-main [style*="background: #fafafa"],
+          body.dark-mode .content-main [style*="background-color: #f0f2f5"],
+          body.dark-mode .content-main [style*="background-color: rgb(244, 246, 249)"] {
+            background: var(--tsea-page) !important;
+          }
           body.dark-mode .content-main h1,
           body.dark-mode .content-main h2,
           body.dark-mode .content-main h3,
@@ -58,9 +94,15 @@ function App() {
           body.dark-mode .content-main h5,
           body.dark-mode .content-main p,
           body.dark-mode .content-main small,
-          body.dark-mode .content-main label { color: #f4f6f8 !important; }
-          body.dark-mode .content-main div[style*="color: rgb(26, 26, 26)"],
-          body.dark-mode .content-main div[style*="color: rgb(74, 74, 74)"] { color: #f4f6f8 !important; }
+          body.dark-mode .content-main label,
+          body.dark-mode .content-main span,
+          body.dark-mode .content-main div { color: inherit; }
+          body.dark-mode .content-main [style*="color: rgb(26, 26, 26)"],
+          body.dark-mode .content-main [style*="color: rgb(74, 74, 74)"],
+          body.dark-mode .content-main [style*="color: #555"],
+          body.dark-mode .content-main [style*="color: #666"],
+          body.dark-mode .content-main [style*="color: rgb(85, 85, 85)"],
+          body.dark-mode .content-main [style*="color: rgb(102, 102, 102)"] { color: var(--tsea-muted) !important; }
           @media (max-width: 760px) {
             .layout-container { flex-direction: column; overflow: auto; }
             .sidebar { width: 100%; min-width: 0; height: auto; position: relative; }

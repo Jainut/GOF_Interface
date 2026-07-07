@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { apiRequest, clearStoredToken, readJson, setStoredToken } from '../services/api';
+import { refreshSocketAuth } from '../services/socket';
 
 const SESSION_KEY = 'tsea_session';
 const AuthContext = createContext(null);
@@ -35,7 +36,10 @@ export function AuthProvider({ children }) {
       throw new Error(data?.message ?? 'Credenciais invalidas.');
     }
 
-    if (data?.token) setStoredToken(data.token);
+    if (data?.token) {
+      setStoredToken(data.token);
+      refreshSocketAuth();
+    }
     persistSession({
       perfil: 'adm',
       usuario: data?.usuario?.nome ?? data?.nome ?? data?.user?.nome ?? 'Almoxarife'
@@ -54,7 +58,10 @@ export function AuthProvider({ children }) {
       throw new Error(data?.message ?? 'Credenciais invalidas.');
     }
 
-    if (data?.token) setStoredToken(data.token);
+    if (data?.token) {
+      setStoredToken(data.token);
+      refreshSocketAuth();
+    }
     persistSession({
       perfil: 'superadmin',
       usuario: data?.usuario?.nome ?? data?.nome ?? data?.user?.nome ?? 'Administrador'
@@ -66,6 +73,7 @@ export function AuthProvider({ children }) {
     clearStoredToken();
     localStorage.removeItem(SESSION_KEY);
     sessionStorage.clear();
+    refreshSocketAuth();
     setSession({ perfil: null });
   }, []);
 

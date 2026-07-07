@@ -266,6 +266,7 @@ export function AppDataProvider({ children }) {
       carregarEmprestimosDoOperador(op.cpf);
     };
 
+    socket.off('nfcAuth', handleNfcAuth);
     socket.on('nfcAuth', handleNfcAuth);
     return () => socket.off('nfcAuth', handleNfcAuth);
   }, [carregarEmprestimosDoOperador]);

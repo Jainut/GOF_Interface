@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { apiRequest, readJson } from '../services/api';
 
 // ── Ícones SVG ───────────────────────────────────────────────────────────────
 const Icons = {
@@ -200,8 +201,6 @@ export default function PainelMaster({
   usuarioLogado = 'Administrador',
   logout,
 }) {
-  const API = import.meta.env.VITE_API_URL;
-
   const [msg, setMsg] = useState(null);
   const [setorSelecionado, setSetorSelecionado] = useState(null);
 
@@ -234,47 +233,42 @@ export default function PainelMaster({
   const [salvandoNFC, setSalvandoNFC]   = useState(false);
 
   // ── Helpers ──────────────────────────────────────────────────────────────
-  const headers = () => ({ 'Content-Type': 'application/json'});
-
   const showMsg = (tipo, texto) => setMsg({ tipo, texto });
 
   // ── Buscar usuários ──────────────────────────────────────────────────────
   const buscarUsuarios = useCallback(async () => {
     setLoadUsuarios(true);
     try {
-      const resUsers = await fetch(`${API}/listar/Usuarios`, {
-        method: 'GET',
-        credentials: 'include' 
-      });
+      const resUsers = await apiRequest('/listar/Usuarios');
 
-      const data = await resUsers.json();
-      if (resUsers.ok) setUsuarios(data);
+      const data = await readJson(resUsers);
+      if (resUsers.ok) setUsuarios(Array.isArray(data) ? data : []);
       else showMsg('erro', data.message ?? 'Erro ao carregar usuários.');
     } catch { showMsg('erro', 'Falha de conexão.'); }
     finally  { setLoadUsuarios(false); }
-  }, [API]);
+  }, []);
 
   // ── Buscar cartões ───────────────────────────────────────────────────────
   const buscarCartoes = useCallback(async () => {
     setLoadCartoes(true);
     try {
-      const res  = await fetch(`${API}/listar/CartoesNFC`, { headers: headers(), credentials: 'include' });
-      const data = await res.json();
-      if (res.ok) setCartoes(data);
+      const res = await apiRequest('/listar/CartoesNFC');
+      const data = await readJson(res);
+      if (res.ok) setCartoes(Array.isArray(data) ? data : []);
       else showMsg('erro', data.message ?? 'Erro ao carregar cartões.');
     } catch { showMsg('erro', 'Falha de conexão.'); }
     finally  { setLoadCartoes(false); }
-  }, [API]);
+  }, []);
 
   const buscarEstoque = useCallback(async () => {
     setLoadEstoque(true);
     try {
-      const res  = await fetch(`${API}/listar/Ferramentas`, { headers: headers(), credentials: 'include' });
-      const data = await res.json();
+      const res = await apiRequest('/listar/Ferramentas');
+      const data = await readJson(res);
       if (!res.ok) showMsg('erro', data.message ?? 'Erro ao carregar cartões.');
     } catch { showMsg('erro', 'Falha de conexão.'); }
     finally  { setLoadEstoque(false); }
-  }, [API]);
+  }, []);
 
   useEffect(() => {
     if (abaAtivaSuper === 'gerenciar_usuarios') buscarUsuarios();
@@ -288,12 +282,11 @@ export default function PainelMaster({
     }
     setSalvando(true);
     try {
-      const res  = await fetch(`${API}/cadastrar/Usuario`, {
-        method: 'POST', headers: headers(),
-        credentials: 'include',
+      const res = await apiRequest('/cadastrar/Usuario', {
+        method: 'POST',
         body: JSON.stringify(form)
       });
-      const data = await res.json();
+      const data = await readJson(res);
       if (res.ok) {
         showMsg('sucesso', 'Usuário cadastrado com sucesso!');
         setForm({ cpf: '', nome: '', senha: '', tipo: 'OPERADOR', setor: 'MONTAGEM' });
@@ -310,12 +303,11 @@ export default function PainelMaster({
     }
     setSalvandoNFC(true);
     try {
-      const res  = await fetch(`${API}/cadastrar/CartaoNFC`, {
-        method: 'POST', headers: headers(),
-        credentials: 'include',
+      const res = await apiRequest('/cadastrar/CartaoNFC', {
+        method: 'POST',
         body: JSON.stringify({ user_cpf: formNFC.user_cpf, codigo_uid: formNFC.codigo_uid })
       });
-      const data = await res.json();
+      const data = await readJson(res);
       if (res.ok) {
         showMsg('sucesso', 'Cartão vinculado com sucesso!');
         setFormNFC({ user_cpf: '', codigo_uid: '' });

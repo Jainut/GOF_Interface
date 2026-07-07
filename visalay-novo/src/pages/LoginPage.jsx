@@ -78,6 +78,11 @@ export default function LoginPage() {
     setStatusBiometria('desligado');
   };
 
+  const voltarParaSelecao = () => {
+    desligarWebcamReal();
+    limparSessaoVisual();
+  };
+
   const entrarNoPainelManualmente = () => {
     loginOperador();
     navigate('/operador', { replace: true });
@@ -187,7 +192,7 @@ export default function LoginPage() {
                 <button onClick={entrarNoPainelManualmente} style={{ width: '100%', padding: '14px', background: 'green', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Entrar no Totem</button>
               )}
               <button
-                onClick={() => { desligarWebcamReal(); setPerfil(null); setProgressoEscaneamento(0); }}
+                onClick={voltarParaSelecao}
                 style={{ marginTop: '15px', background: 'none', border: 'none', color: TSEA.vermelho, fontWeight: 'bold', cursor: 'pointer' }}
               >
                 Cancelar e Voltar
@@ -217,7 +222,7 @@ export default function LoginPage() {
                 style={{ width: '100%', padding: '12px', borderRadius: '6px', border: `1px solid ${TSEA.cinzaMedio}`, textAlign: 'center', marginBottom: '15px', boxSizing: 'border-box' }}
               />
               <button onClick={entrarComoAlmoxarife} style={{ width: '100%', padding: '12px', background: TSEA.vermelho, color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Acessar Painel</button>
-              <button onClick={() => setPerfil(null)} style={{ marginTop: '15px', background: 'none', border: 'none', color: TSEA.vermelho, fontWeight: 'bold', cursor: 'pointer' }}>Voltar</button>
+              <button onClick={voltarParaSelecao} style={{ marginTop: '15px', background: 'none', border: 'none', color: TSEA.vermelho, fontWeight: 'bold', cursor: 'pointer' }}>Voltar</button>
             </div>
           )}
 
@@ -243,7 +248,7 @@ export default function LoginPage() {
                 style={{ width: '100%', padding: '12px', borderRadius: '6px', border: `1px solid ${TSEA.cinzaMedio}`, textAlign: 'center', marginBottom: '15px', boxSizing: 'border-box' }}
               />
               <button onClick={entrarComoSuperAdmin} style={{ width: '100%', padding: '12px', background: TSEA.vermelho, color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Entrar como Admin</button>
-              <button onClick={() => setPerfil(null)} style={{ marginTop: '15px', background: 'none', border: 'none', color: TSEA.vermelho, fontWeight: 'bold', cursor: 'pointer' }}>Voltar</button>
+              <button onClick={voltarParaSelecao} style={{ marginTop: '15px', background: 'none', border: 'none', color: TSEA.vermelho, fontWeight: 'bold', cursor: 'pointer' }}>Voltar</button>
             </div>
           )}
         </div>

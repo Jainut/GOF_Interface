@@ -1,13 +1,16 @@
 const API_URL = import.meta.env.VITE_API_URL ?? '';
 const TOKEN_KEY = 'tsea_token';
 
-export const getStoredToken = () => localStorage.getItem(TOKEN_KEY);
+export const getStoredToken = () => localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
 
 export const setStoredToken = (token) => {
   if (token) localStorage.setItem(TOKEN_KEY, token);
 };
 
-export const clearStoredToken = () => localStorage.removeItem(TOKEN_KEY);
+export const clearStoredToken = () => {
+  localStorage.removeItem(TOKEN_KEY);
+  sessionStorage.removeItem(TOKEN_KEY);
+};
 
 export async function apiRequest(path, options = {}) {
   const token = getStoredToken();
