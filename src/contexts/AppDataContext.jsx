@@ -4,6 +4,23 @@ import socket, { connectSocket, refreshSocketAuth } from '../services/socket';
 
 const AppDataContext = createContext(null);
 
+const DATA_REFRESH_EVENTS = [
+  'dadosAtualizados',
+  'atualizarDados',
+  'estoqueAtualizado',
+  'ferramentaAtualizada',
+  'emprestimoRegistrado',
+  'emprestimo:registrado',
+  'novoEmprestimo',
+  'devolucaoRegistrada',
+  'devolucao:registrada',
+  'novaDevolucao',
+  'usuarioCadastrado',
+  'usuarioAtualizado',
+  'cartaoNFCVinculado',
+  'cartaoAtualizado'
+];
+
 const normalizeNfcPayload = (payload) => {
   const operador = payload?.operador ?? payload?.usuario ?? payload?.user ?? payload;
   if (!operador || typeof operador !== 'object') return null;
@@ -169,14 +186,18 @@ export function AppDataProvider({ children }) {
     }
   }, []);
 
-  const carregarDadosProtegidos = useCallback(() => {
-    refreshSocketAuth();
-    connectSocket();
+  const atualizarDadosOperacionais = useCallback(() => {
     carregarFerramentas();
     carregarAtivos();
     carregarEmprestimos();
     carregarDevolucoes();
   }, [carregarAtivos, carregarDevolucoes, carregarEmprestimos, carregarFerramentas]);
+
+  const carregarDadosProtegidos = useCallback(() => {
+    refreshSocketAuth();
+    connectSocket();
+    atualizarDadosOperacionais();
+  }, [atualizarDadosOperacionais]);
 
   const registrarEmprestimoNFC = useCallback(async (itensCarrinho) => {
     if (!operadorNFC) {
@@ -335,6 +356,25 @@ export function AppDataProvider({ children }) {
   }, [carregarEmprestimosDoOperador]);
 
   useEffect(() => {
+    let timerId;
+
+    const refreshData = () => {
+      window.clearTimeout(timerId);
+      timerId = window.setTimeout(() => {
+        atualizarDadosOperacionais();
+        if (operadorNFC?.cpf) carregarEmprestimosDoOperador(operadorNFC.cpf);
+      }, 150);
+    };
+
+    DATA_REFRESH_EVENTS.forEach(eventName => socket.on(eventName, refreshData));
+
+    return () => {
+      window.clearTimeout(timerId);
+      DATA_REFRESH_EVENTS.forEach(eventName => socket.off(eventName, refreshData));
+    };
+  }, [atualizarDadosOperacionais, carregarEmprestimosDoOperador, operadorNFC?.cpf]);
+
+  useEffect(() => {
     if (!nfcLiberado) return undefined;
     const intervalo = setInterval(() => {
       setTempoRestante(prev => {
@@ -385,6 +425,7 @@ export function AppDataProvider({ children }) {
     ultimasDevolucoes,
     emprestimosOperador,
     carregarDadosProtegidos,
+    atualizarDadosOperacionais,
     registrarEmprestimoNFC,
     devolverFerramenta,
     cancelarAcessoNFC,
@@ -395,6 +436,7 @@ export function AppDataProvider({ children }) {
     abaAtivaSuper,
     ativosEmCustodiaTSEA,
     cancelarAcessoNFC,
+    atualizarDadosOperacionais,
     carregarDadosProtegidos,
     catalogoFerramentas,
     cpfSuperAdmin,

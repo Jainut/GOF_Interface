@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { apiRequest, readJson } from '../services/api';
+import socket from '../services/socket';
 
 // ── Ícones SVG ───────────────────────────────────────────────────────────────
 const Icons = {
@@ -113,6 +114,16 @@ const TSEA = {
 
 const SETORES = ['SOLDA', 'CORTE_LASER', 'MONTAGEM', 'PINTURA', 'EL_TRICA', 'ALMOXARIFADO', 'ADMINISTRACAO'];
 const ROLES   = ['OPERADOR', 'ALMOXARIFE', 'ADMIN'];
+const ADMIN_REFRESH_EVENTS = [
+  'dadosAtualizados',
+  'usuarioCadastrado',
+  'usuarioAtualizado',
+  'usuarioRemovido',
+  'cartaoNFCVinculado',
+  'cartaoAtualizado',
+  'cartaoRemovido',
+  'nfcAtualizado'
+];
 
 const roleBadge = (role) => {
   const map = {
@@ -277,6 +288,30 @@ export default function PainelMaster({
     if (abaAtivaSuper === 'm_estoque')          buscarEstoque();
   }, [abaAtivaSuper, buscarCartoes, buscarEstoque, buscarUsuarios]);
 
+  useEffect(() => {
+    buscarUsuarios();
+    buscarCartoes();
+  }, [buscarCartoes, buscarUsuarios]);
+
+  useEffect(() => {
+    let timerId;
+
+    const atualizarCadastros = () => {
+      window.clearTimeout(timerId);
+      timerId = window.setTimeout(() => {
+        buscarUsuarios();
+        buscarCartoes();
+      }, 150);
+    };
+
+    ADMIN_REFRESH_EVENTS.forEach(eventName => socket.on(eventName, atualizarCadastros));
+
+    return () => {
+      window.clearTimeout(timerId);
+      ADMIN_REFRESH_EVENTS.forEach(eventName => socket.off(eventName, atualizarCadastros));
+    };
+  }, [buscarCartoes, buscarUsuarios]);
+
   const criarUsuario = async () => {
     if (!form.cpf || !form.nome || !form.senha) {
       showMsg('aviso', 'Preencha CPF, nome e senha.'); return;
@@ -291,6 +326,7 @@ export default function PainelMaster({
       if (res.ok) {
         showMsg('sucesso', 'Usuário cadastrado com sucesso!');
         setForm({ cpf: '', nome: '', senha: '', tipo: 'OPERADOR', setor: 'MONTAGEM' });
+        buscarUsuarios();
       } else {
         showMsg('erro', data.message ?? 'Erro ao cadastrar usuário.');
       }
@@ -313,6 +349,7 @@ export default function PainelMaster({
         showMsg('sucesso', 'Cartão vinculado com sucesso!');
         setFormNFC({ user_cpf: '', codigo_uid: '' });
         buscarCartoes();
+        buscarUsuarios();
       } else {
         showMsg('erro', data.message ?? 'Erro ao vincular cartão.');
       }

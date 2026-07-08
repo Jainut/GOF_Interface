@@ -130,6 +130,7 @@ export default function PainelAlmoxarife({
   cancelarAcessoNFC,
 }) {
   const [selecionadas, setSelecionadas] = useState({});
+  const [setorSelecionado, setSetorSelecionado] = useState(null);
 
   const alterarQtd = (item, delta) => {
     setSelecionadas(prev => {
@@ -171,11 +172,25 @@ export default function PainelAlmoxarife({
     : '#e3f2fd';
 
   // ── Métricas para os cards do dashboard ─────────────────────────────────
-  const totalEmCustodia = ativosEmCustodiaTSEA.filter(a => a.status !== 'DEVOLVIDO').length;
+  const ativosAbertos = ativosEmCustodiaTSEA.filter(a => a.status !== 'DEVOLVIDO');
+  const dashboardData = ativosAbertos.reduce((acc, ativo) => {
+    const setor = ativo.setor || 'Sem setor';
+    if (!acc[setor]) acc[setor] = [];
+    acc[setor].push(ativo);
+    return acc;
+  }, {});
+  const totalEmCustodia = ativosAbertos.length;
   const totalFerramentas = catalogoFerramentas.reduce((s, f) => s + f.total, 0);
   const disponiveis = catalogoFerramentas.reduce((s, f) => s + f.disponivel, 0);
   const emprestadas = Math.max(totalFerramentas - disponiveis, totalEmCustodia);
   const totalDevolucoes = ultimasDevolucoes.length;
+  const totalSetoresAtivos = Object.keys(dashboardData).length;
+  const dashboardCard = {
+    backgroundColor: TSEA.branco,
+    padding: '20px',
+    borderRadius: '8px',
+    boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
+  };
 
   // ── Tela bloqueada aguardando NFC ────────────────────────────────────────
   const telaBloqueada = (
@@ -401,11 +416,45 @@ export default function PainelAlmoxarife({
                 <div style={{ fontSize: '30px', fontWeight: 800, marginTop: '8px' }}>{disponiveis}</div>
               </div>
               <div style={{ backgroundColor: TSEA.branco, padding: '18px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', borderLeft: '4px solid #e65100' }}>
-                <strong>Estoque zerado</strong>
+                <strong>Setores ativos</strong>
                 <div style={{ fontSize: '30px', fontWeight: 800, marginTop: '8px' }}>
-                  {catalogoFerramentas.filter(item => item.disponivel === 0).length}
+                  {totalSetoresAtivos}
                 </div>
               </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '14px' }}>
+              {Object.keys(dashboardData).length === 0 ? (
+                <div style={{ ...dashboardCard, gridColumn: '1 / -1', color: TSEA.cinzaEscuro }}>
+                  Nenhuma ferramenta ativa por setor no momento.
+                </div>
+              ) : Object.keys(dashboardData).map(setor => (
+                <div
+                  key={setor}
+                  onClick={() => setSetorSelecionado(setor)}
+                  style={{
+                    ...dashboardCard,
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                    borderBottom: `4px solid ${TSEA.vermelho}`,
+                    transition: 'transform 0.18s ease, box-shadow 0.18s ease',
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 16px 34px rgba(26,26,26,0.1)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = dashboardCard.boxShadow;
+                  }}
+                >
+                  <h4 style={{ color: TSEA.cinzaEscuro, marginBottom: '10px' }}>{setor}</h4>
+                  <div style={{ fontSize: '32px', fontWeight: '800', color: TSEA.preto }}>
+                    {dashboardData[setor].length}
+                  </div>
+                  <small style={{ color: TSEA.cinzaBorda }}>Ferramentas ativas</small>
+                </div>
+              ))}
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
@@ -440,6 +489,54 @@ export default function PainelAlmoxarife({
             </div>
           </div>
         )}
+
+        {setorSelecionado && (
+          <div
+            onClick={() => setSetorSelecionado(null)}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 999,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              backgroundColor: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)',
+              padding: '20px'
+            }}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                ...dashboardCard, width: '700px', maxWidth: '100%', maxHeight: '80vh', overflowY: 'auto',
+                position: 'relative', borderTop: `6px solid ${TSEA.vermelho}`
+              }}
+            >
+              <button
+                onClick={() => setSetorSelecionado(null)}
+                style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', cursor: 'pointer' }}
+              >
+                {Icons.close}
+              </button>
+
+              <h2 style={{ marginBottom: '20px', color: TSEA.preto }}>Setor: {setorSelecionado}</h2>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                {dashboardData[setorSelecionado].map((item, idx) => (
+                  <div key={`${item.emprestimo_id}-${idx}`} style={{ padding: '15px', background: TSEA.cinzaClaro, borderRadius: '6px' }}>
+                    <div style={{ fontWeight: '800', fontSize: '16px', color: TSEA.vermelho, marginBottom: '8px' }}>
+                      {item.funcionario}
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                      <span style={{ padding: '4px 10px', background: TSEA.branco, border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px', fontWeight: '500' }}>
+                        {item.qtd}x {item.ferramenta}
+                      </span>
+                      <span style={{ padding: '4px 10px', background: TSEA.branco, border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px', fontWeight: '500' }}>
+                        Retirada: {item.data}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {abaAtivaAdm === 'solicitar_emprestimo' && (
           !nfcLiberado ? telaBloqueada : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
