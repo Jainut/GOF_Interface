@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { TSEA } from '../utils/theme';
 
 export default function AlmoxarifePage() {
-  const { logout } = useAuth();
+  const { logout, usuarioLogado } = useAuth();
   const {
     nfcLiberado,
     tempoRestante,
@@ -53,6 +53,7 @@ export default function AlmoxarifePage() {
       catalogoFerramentas={catalogoFerramentas}
       ultimasRetiradas={ultimasRetiradas}
       ultimasDevolucoes={ultimasDevolucoes}
+      usuarioLogado={usuarioLogado}
       logout={sair}
     />
   );

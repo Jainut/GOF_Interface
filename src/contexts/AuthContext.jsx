@@ -38,7 +38,11 @@ export function AuthProvider({ children }) {
 
     const token = extractToken(data);
     if (token) setStoredToken(token);
-    persistSession({ perfil: 'adm', token: token ?? null });
+    persistSession({
+      perfil: 'adm',
+      token: token ?? null,
+      usuario: data?.usuario?.nome ?? data?.nome ?? data?.user?.nome ?? 'Almoxarife'
+    });
     return data;
   }, [persistSession]);
 
@@ -56,18 +60,24 @@ export function AuthProvider({ children }) {
 
     const token = extractToken(data);
     if (token) setStoredToken(token);
-    persistSession({ perfil: 'superadmin', token: token ?? null });
+    persistSession({
+      perfil: 'superadmin',
+      token: token ?? null,
+      usuario: data?.usuario?.nome ?? data?.nome ?? data?.user?.nome ?? 'Administrador'
+    });
     return data;
   }, [persistSession]);
 
   const logout = useCallback(() => {
     clearStoredToken();
     localStorage.removeItem(SESSION_KEY);
+    sessionStorage.clear();
     setSession({ perfil: null });
   }, []);
 
   const value = useMemo(() => ({
     perfilLogado: session.perfil,
+    usuarioLogado: session.usuario ?? null,
     logado: Boolean(session.perfil),
     loginOperador,
     loginAlmoxarife,

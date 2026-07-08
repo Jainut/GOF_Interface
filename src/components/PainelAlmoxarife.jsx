@@ -2,6 +2,11 @@ import { useState } from 'react';
 
 // ── Ícones SVG inline ────────────────────────────────────────────────────────
 const Icons = {
+  dashboard: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+    </svg>
+  ),
   nfc: (
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M20 7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2z"/>
@@ -119,6 +124,7 @@ export default function PainelAlmoxarife({
   catalogoFerramentas,
   ultimasRetiradas,
   ultimasDevolucoes,
+  usuarioLogado = 'Almoxarife',
   logout,
   // Função para cancelar/limpar acesso NFC — precisa ser passada via prop do App.jsx
   cancelarAcessoNFC,
@@ -168,6 +174,7 @@ export default function PainelAlmoxarife({
   const totalEmCustodia = ativosEmCustodiaTSEA.filter(a => a.status !== 'DEVOLVIDO').length;
   const totalFerramentas = catalogoFerramentas.reduce((s, f) => s + f.total, 0);
   const disponiveis = catalogoFerramentas.reduce((s, f) => s + f.disponivel, 0);
+  const emprestadas = Math.max(totalFerramentas - disponiveis, totalEmCustodia);
   const totalDevolucoes = ultimasDevolucoes.length;
 
   // ── Tela bloqueada aguardando NFC ────────────────────────────────────────
@@ -277,6 +284,7 @@ export default function PainelAlmoxarife({
 
         <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
           {[
+            { key: 'dashboard',            label: 'Dashboard',             icon: Icons.dashboard },
             { key: 'solicitar_emprestimo', label: 'Solicitar Empréstimo', icon: Icons.tools },
             { key: 'devolucao',            label: 'Devolução',            icon: Icons.return },
             { key: 'monitor_ativas',       label: 'Monitor de Ativas',    icon: Icons.monitor },
@@ -326,7 +334,7 @@ export default function PainelAlmoxarife({
             bg="#fff0f0"
           />
           <MetricCard
-            icon={Icons.package}
+            icon={Icons.package()}
             label="Total de ferramentas"
             value={totalFerramentas}
             color="#1565c0"
@@ -371,6 +379,67 @@ export default function PainelAlmoxarife({
         {/* ══════════════════════════════════════
             ABA: SOLICITAR EMPRÉSTIMO
         ══════════════════════════════════════ */}
+        {abaAtivaAdm === 'dashboard' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{
+              backgroundColor: TSEA.branco, padding: '25px',
+              borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
+            }}>
+              <h2 style={{ margin: '0 0 6px 0', color: TSEA.preto }}>Bem-vindo(a), {usuarioLogado}!</h2>
+              <p style={{ margin: 0, color: TSEA.cinzaEscuro, fontSize: '14px' }}>
+                Acompanhamento rapido do estoque e da operacao diaria.
+              </p>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+              <div style={{ backgroundColor: TSEA.branco, padding: '18px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', borderLeft: `4px solid ${TSEA.vermelho}` }}>
+                <strong>Ferramentas emprestadas</strong>
+                <div style={{ fontSize: '30px', fontWeight: 800, marginTop: '8px' }}>{emprestadas}</div>
+              </div>
+              <div style={{ backgroundColor: TSEA.branco, padding: '18px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', borderLeft: '4px solid #2e7d32' }}>
+                <strong>Ferramentas disponiveis</strong>
+                <div style={{ fontSize: '30px', fontWeight: 800, marginTop: '8px' }}>{disponiveis}</div>
+              </div>
+              <div style={{ backgroundColor: TSEA.branco, padding: '18px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', borderLeft: '4px solid #e65100' }}>
+                <strong>Estoque zerado</strong>
+                <div style={{ fontSize: '30px', fontWeight: 800, marginTop: '8px' }}>
+                  {catalogoFerramentas.filter(item => item.disponivel === 0).length}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+              <div style={{
+                backgroundColor: TSEA.branco, padding: '20px',
+                borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
+              }}>
+                <h4 style={{ marginTop: 0 }}>Alertas de estoque</h4>
+                {catalogoFerramentas.filter(item => item.disponivel <= 1).length === 0 ? (
+                  <p style={{ color: '#888', margin: 0 }}>Nenhum alerta no momento.</p>
+                ) : catalogoFerramentas.filter(item => item.disponivel <= 1).slice(0, 5).map(item => (
+                  <div key={item.id} style={{ padding: '10px 0', borderBottom: `1px solid ${TSEA.cinzaClaro}` }}>
+                    <strong>{item.nome}</strong> - disponivel: {item.disponivel}/{item.total}
+                  </div>
+                ))}
+              </div>
+
+              <div style={{
+                backgroundColor: TSEA.branco, padding: '20px',
+                borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
+              }}>
+                <h4 style={{ marginTop: 0 }}>Ultimas movimentacoes</h4>
+                {[...ultimasRetiradas.slice(0, 3), ...ultimasDevolucoes.slice(0, 3)]
+                  .sort((a, b) => (b.timestamp ?? 0) - (a.timestamp ?? 0))
+                  .slice(0, 5)
+                  .map((mov, idx) => (
+                    <div key={idx} style={{ padding: '10px 0', borderBottom: `1px solid ${TSEA.cinzaClaro}` }}>
+                      <strong>{mov.funcionario}</strong> - {mov.ferramenta} - {mov.data ?? mov.dataDevolucao}
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
+        )}
         {abaAtivaAdm === 'solicitar_emprestimo' && (
           !nfcLiberado ? telaBloqueada : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
