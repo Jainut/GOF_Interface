@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppData } from '../hooks/useAppData';
 import { useAuth } from '../hooks/useAuth';
@@ -7,6 +7,8 @@ import { TSEA } from '../utils/theme';
 export default function LoginPage() {
   const navigate = useNavigate();
   const { loginOperador, loginAlmoxarife, loginSuperAdmin, perfilLogado } = useAuth();
+  const [mostrarSenhaAlmoxarife, setMostrarSenhaAlmoxarife] = useState(false);
+  const [mostrarSenhaMaster, setMostrarSenhaMaster] = useState(false);
   const {
     perfil,
     setPerfil,
@@ -25,8 +27,13 @@ export default function LoginPage() {
     setSenhaSuperAdmin,
     mensagemSistema,
     setMensagemSistema,
-    carregarDadosProtegidos
+    carregarDadosProtegidos,
+    limparSessaoVisual
   } = useAppData();
+
+  useEffect(() => {
+    if (!perfilLogado) limparSessaoVisual();
+  }, [limparSessaoVisual, perfilLogado]);
 
   useEffect(() => {
     if (perfilLogado === 'func') navigate('/operador', { replace: true });
@@ -73,6 +80,11 @@ export default function LoginPage() {
     setStatusBiometria('desligado');
   };
 
+  const voltarParaSelecao = () => {
+    desligarWebcamReal();
+    limparSessaoVisual();
+  };
+
   const entrarNoPainelManualmente = () => {
     loginOperador();
     navigate('/operador', { replace: true });
@@ -97,6 +109,45 @@ export default function LoginPage() {
       setMensagemSistema({ tipo: 'erro', texto: e.message || 'Erro de conexão com o servidor.' });
     }
   };
+
+  const BotaoVisualizarSenha = ({ ativo, onClick }) => (
+    <button
+      type="button"
+      onClick={onClick}
+      title={ativo ? 'Ocultar senha' : 'Mostrar senha'}
+      aria-label={ativo ? 'Ocultar senha' : 'Mostrar senha'}
+      style={{
+        position: 'absolute',
+        right: '10px',
+        top: '50%',
+        transform: 'translateY(-50%)',
+        width: '34px',
+        height: '34px',
+        border: 'none',
+        background: 'transparent',
+        color: TSEA.cinzaEscuro,
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 0
+      }}
+    >
+      {ativo ? (
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C7 20 2.73 16.89 1 12a18.45 18.45 0 0 1 5.06-6.06" />
+          <path d="M9.9 4.24A10.78 10.78 0 0 1 12 4c5 0 9.27 3.11 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+          <path d="M14.12 14.12A3 3 0 0 1 9.88 9.88" />
+          <line x1="1" y1="1" x2="23" y2="23" />
+        </svg>
+      ) : (
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+      )}
+    </button>
+  );
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: 'sans-serif' }}>
@@ -182,7 +233,7 @@ export default function LoginPage() {
                 <button onClick={entrarNoPainelManualmente} style={{ width: '100%', padding: '14px', background: 'green', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Entrar no Totem</button>
               )}
               <button
-                onClick={() => { desligarWebcamReal(); setPerfil(null); setProgressoEscaneamento(0); }}
+                onClick={voltarParaSelecao}
                 style={{ marginTop: '15px', background: 'none', border: 'none', color: TSEA.vermelho, fontWeight: 'bold', cursor: 'pointer' }}
               >
                 Cancelar e Voltar
@@ -196,19 +247,29 @@ export default function LoginPage() {
               <input
                 type="text"
                 placeholder="CPF do Almoxarife"
+                autoComplete="off"
+                name="almoxarife-cpf"
                 value={idAlmoxarife}
                 onChange={(e) => setIdAlmoxarife(e.target.value)}
                 style={{ width: '100%', padding: '12px', borderRadius: '6px', border: `1px solid ${TSEA.cinzaMedio}`, textAlign: 'center', marginBottom: '10px', boxSizing: 'border-box' }}
               />
-              <input
-                type="password"
-                placeholder="Senha"
-                value={senhaLoginAlmoxarife}
-                onChange={(e) => setSenhaLoginAlmoxarife(e.target.value)}
-                style={{ width: '100%', padding: '12px', borderRadius: '6px', border: `1px solid ${TSEA.cinzaMedio}`, textAlign: 'center', marginBottom: '15px', boxSizing: 'border-box' }}
-              />
+              <div style={{ position: 'relative', marginBottom: '15px' }}>
+                <input
+                  type={mostrarSenhaAlmoxarife ? 'text' : 'password'}
+                  placeholder="Senha"
+                  autoComplete="new-password"
+                  name="almoxarife-password"
+                  value={senhaLoginAlmoxarife}
+                  onChange={(e) => setSenhaLoginAlmoxarife(e.target.value)}
+                  style={{ width: '100%', padding: '12px 44px 12px 12px', borderRadius: '6px', border: `1px solid ${TSEA.cinzaMedio}`, textAlign: 'center', boxSizing: 'border-box' }}
+                />
+                <BotaoVisualizarSenha
+                  ativo={mostrarSenhaAlmoxarife}
+                  onClick={() => setMostrarSenhaAlmoxarife(prev => !prev)}
+                />
+              </div>
               <button onClick={entrarComoAlmoxarife} style={{ width: '100%', padding: '12px', background: TSEA.vermelho, color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Acessar Painel</button>
-              <button onClick={() => setPerfil(null)} style={{ marginTop: '15px', background: 'none', border: 'none', color: TSEA.vermelho, fontWeight: 'bold', cursor: 'pointer' }}>Voltar</button>
+              <button onClick={voltarParaSelecao} style={{ marginTop: '15px', background: 'none', border: 'none', color: TSEA.vermelho, fontWeight: 'bold', cursor: 'pointer' }}>Voltar</button>
             </div>
           )}
 
@@ -218,19 +279,29 @@ export default function LoginPage() {
               <input
                 type="text"
                 placeholder="CPF do Administrador"
+                autoComplete="off"
+                name="master-cpf"
                 value={cpfSuperAdmin}
                 onChange={(e) => setCpfSuperAdmin(e.target.value)}
                 style={{ width: '100%', padding: '12px', borderRadius: '6px', border: `1px solid ${TSEA.cinzaMedio}`, textAlign: 'center', marginBottom: '10px', boxSizing: 'border-box' }}
               />
-              <input
-                type="password"
-                placeholder="Senha Master"
-                value={senhaSuperAdmin}
-                onChange={(e) => setSenhaSuperAdmin(e.target.value)}
-                style={{ width: '100%', padding: '12px', borderRadius: '6px', border: `1px solid ${TSEA.cinzaMedio}`, textAlign: 'center', marginBottom: '15px', boxSizing: 'border-box' }}
-              />
+              <div style={{ position: 'relative', marginBottom: '15px' }}>
+                <input
+                  type={mostrarSenhaMaster ? 'text' : 'password'}
+                  placeholder="Senha Master"
+                  autoComplete="new-password"
+                  name="master-password"
+                  value={senhaSuperAdmin}
+                  onChange={(e) => setSenhaSuperAdmin(e.target.value)}
+                  style={{ width: '100%', padding: '12px 44px 12px 12px', borderRadius: '6px', border: `1px solid ${TSEA.cinzaMedio}`, textAlign: 'center', boxSizing: 'border-box' }}
+                />
+                <BotaoVisualizarSenha
+                  ativo={mostrarSenhaMaster}
+                  onClick={() => setMostrarSenhaMaster(prev => !prev)}
+                />
+              </div>
               <button onClick={entrarComoSuperAdmin} style={{ width: '100%', padding: '12px', background: TSEA.vermelho, color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Entrar como Admin</button>
-              <button onClick={() => setPerfil(null)} style={{ marginTop: '15px', background: 'none', border: 'none', color: TSEA.vermelho, fontWeight: 'bold', cursor: 'pointer' }}>Voltar</button>
+              <button onClick={voltarParaSelecao} style={{ marginTop: '15px', background: 'none', border: 'none', color: TSEA.vermelho, fontWeight: 'bold', cursor: 'pointer' }}>Voltar</button>
             </div>
           )}
         </div>

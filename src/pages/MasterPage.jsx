@@ -4,12 +4,14 @@ import { useAppData } from '../hooks/useAppData';
 import { useAuth } from '../hooks/useAuth';
 
 export default function MasterPage() {
-  const { logout } = useAuth();
+  const { logout, usuarioLogado } = useAuth();
   const {
     abaAtivaSuper,
     setAbaAtivaSuper,
     ativosEmCustodiaTSEA,
     catalogoFerramentas,
+    ultimasRetiradas,
+    ultimasDevolucoes,
     carregarDadosProtegidos,
     limparSessaoVisual
   } = useAppData();
@@ -29,6 +31,9 @@ export default function MasterPage() {
       setAbaAtivaSuper={setAbaAtivaSuper}
       ativosEmCustodiaTSEA={ativosEmCustodiaTSEA}
       catalogoFerramentas={catalogoFerramentas}
+      ultimasRetiradas={ultimasRetiradas}
+      ultimasDevolucoes={ultimasDevolucoes}
+      usuarioLogado={usuarioLogado}
       logout={sair}
     />
   );

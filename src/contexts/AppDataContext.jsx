@@ -33,8 +33,8 @@ export function AppDataProvider({ children }) {
   });
 
   const [abaAtiva, setAbaAtiva] = useState('custodia');
-  const [abaAtivaAdm, setAbaAtivaAdm] = useState('solicitar_emprestimo');
-  const [abaAtivaSuper, setAbaAtivaSuper] = useState('criar_usuario');
+  const [abaAtivaAdm, setAbaAtivaAdm] = useState('dashboard');
+  const [abaAtivaSuper, setAbaAtivaSuper] = useState('dashboard');
 
   const [statusBiometria, setStatusBiometria] = useState('desligado');
   const [progressoEscaneamento, setProgressoEscaneamento] = useState(0);
@@ -89,6 +89,7 @@ export function AppDataProvider({ children }) {
             ferramenta_id: item.ferramenta_id,
             qtd: item.quantidade,
             data: new Date(emp.data_retirada).toLocaleString('pt-BR'),
+            timestamp: new Date(emp.data_retirada).getTime(),
             status: 'EM CUSTÓDIA'
           }))
         ));
@@ -112,6 +113,7 @@ export function AppDataProvider({ children }) {
             ferramenta_id: f.ferramenta_id,
             qtd: f.quantidade,
             data: new Date(emp.data_retirada).toLocaleString('pt-BR'),
+            timestamp: new Date(emp.data_retirada).getTime(),
             status: emp.ferramenta_status === 'Emprestado' ? 'EM CUSTÓDIA' : 'DEVOLVIDO'
           }))
         ));
@@ -133,6 +135,7 @@ export function AppDataProvider({ children }) {
           ferramenta: d.tipo_ferramenta,
           qtd: 1,
           dataDevolucao: new Date(d.data_devolucao).toLocaleString('pt-BR'),
+          timestamp: new Date(d.data_devolucao).getTime(),
           status: d.status
         })));
       } else if (!res.ok) {
@@ -255,6 +258,10 @@ export function AppDataProvider({ children }) {
 
   const limparSessaoVisual = useCallback(() => {
     setPerfil(null);
+    setIdAlmoxarife('');
+    setSenhaLoginAlmoxarife('');
+    setCpfSuperAdmin('');
+    setSenhaSuperAdmin('');
     setStatusBiometria('desligado');
     setProgressoEscaneamento(0);
     setNfcLiberado(false);
