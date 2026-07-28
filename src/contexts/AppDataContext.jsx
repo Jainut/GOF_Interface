@@ -28,7 +28,7 @@ export function AppDataProvider({ children }) {
     matricula: 'RE-40922',
     setor: 'Bobinagem de Transformadores',
     cargo: 'Técnico de Isolamento Especializado',
-    empresa: 'TSEA Energia S.A.',
+    empresa: 'GOF Project',
     status: 'Ativo Operacional'
   });
 
@@ -51,7 +51,7 @@ export function AppDataProvider({ children }) {
   const [mensagemSistema, setMensagemSistema] = useState(null);
 
   const [catalogoFerramentas, setCatalogoFerramentas] = useState([]);
-  const [ativosEmCustodiaTSEA, setAtivosEmCustodiaTSEA] = useState([]);
+  const [ativosEmCustodiaGofProject, setAtivosEmCustodiaGofProject] = useState([]);
   const [ultimasRetiradas, setUltimasRetiradas] = useState([]);
   const [ultimasDevolucoes, setUltimasDevolucoes] = useState([]);
   const [emprestimosOperador, setEmprestimosOperador] = useState([]);
@@ -79,7 +79,7 @@ export function AppDataProvider({ children }) {
       const res = await apiRequest('/listar/Ativos');
       const data = await readJson(res);
       if (res.ok && Array.isArray(data)) {
-        setAtivosEmCustodiaTSEA(data.flatMap(emp =>
+        setAtivosEmCustodiaGofProject(data.flatMap(emp =>
           (emp.item_emprestimo ?? []).map(item => ({
             emprestimo_id: emp.id,
             funcionario: emp.usuario?.nome ?? emp.usuario?.nome_usuario ?? 'Sem identificação',
@@ -380,7 +380,7 @@ export function AppDataProvider({ children }) {
     mensagemSistema,
     setMensagemSistema,
     catalogoFerramentas,
-    ativosEmCustodiaTSEA,
+    ativosEmCustodiaGofProject,
     ultimasRetiradas,
     ultimasDevolucoes,
     emprestimosOperador,
@@ -393,7 +393,7 @@ export function AppDataProvider({ children }) {
     abaAtiva,
     abaAtivaAdm,
     abaAtivaSuper,
-    ativosEmCustodiaTSEA,
+    ativosEmCustodiaGofProject,
     cancelarAcessoNFC,
     carregarDadosProtegidos,
     catalogoFerramentas,

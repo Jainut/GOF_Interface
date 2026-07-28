@@ -101,13 +101,14 @@ const Icons = {
   ),
 };
 
-const TSEA = {
-  vermelho:     '#E30613',
-  preto:        '#1A1A1A',
-  cinzaEscuro:  '#4A4A4A',
-  cinzaMedio:   '#CCCCCC',
-  cinzaClaro:   '#F5F5F5',
-  cinzaBorda:   '#999999',
+const GOF_PROJECT = {
+  azul:          '#0057B8',
+  azulEscuro:    '#003B7A',
+  azulProfundo:  '#00305F',
+  azulClaro:     '#B8CBE3',
+  azulMuitoClaro:'#F1F7FD',
+  azulAcinzentado:'#60788F',
+  amarelo:       '#FFC400',
   branco:       '#FFFFFF'
 };
 
@@ -116,11 +117,11 @@ const ROLES   = ['OPERADOR', 'ALMOXARIFE', 'ADMIN'];
 
 const roleBadge = (role) => {
   const map = {
-    ADMIN:      { bg: '#fce4ec', color: '#c62828', label: 'Admin' },
-    ALMOXARIFE: { bg: '#e3f2fd', color: '#1565c0', label: 'Almoxarife' },
-    OPERADOR:   { bg: '#e8f5e9', color: '#2e7d32', label: 'Operador' },
+    ADMIN:      { bg: '#FFF4CC', color: '#A36F00', label: 'Admin' },
+    ALMOXARIFE: { bg: '#E6F1FF', color: '#0057B8', label: 'Almoxarife' },
+    OPERADOR:   { bg: '#E6F1FF', color: '#0057B8', label: 'Operador' },
   };
-  const s = map[role] ?? { bg: '#f5f5f5', color: '#555', label: role };
+  const s = map[role] ?? { bg: '#F1F7FD', color: '#555', label: role };
   return (
     <span style={{
       padding: '3px 8px', borderRadius: '4px', fontSize: '11px',
@@ -133,8 +134,8 @@ const roleBadge = (role) => {
 function MetricCard({ icon, label, value, color, bg }) {
   return (
     <div style={{
-      background: TSEA.branco, borderRadius: '8px', padding: '20px 24px',
-      boxShadow: '0 10px 24px rgba(26,26,26,0.06)', border: `1px solid ${TSEA.cinzaClaro}`,
+      background: GOF_PROJECT.branco, borderRadius: '8px', padding: '20px 24px',
+      boxShadow: '0 10px 24px rgba(26,26,26,0.06)', border: `1px solid ${GOF_PROJECT.azulMuitoClaro}`,
       borderLeft: `4px solid ${color}`, display: 'flex', alignItems: 'center',
       gap: '18px', flex: '1 1 180px'
     }}>
@@ -146,8 +147,8 @@ function MetricCard({ icon, label, value, color, bg }) {
         {icon}
       </div>
       <div>
-        <div style={{ fontSize: '28px', fontWeight: '800', color: TSEA.preto, lineHeight: 1 }}>{value}</div>
-        <div style={{ fontSize: '12px', color: TSEA.cinzaBorda, marginTop: '4px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
+        <div style={{ fontSize: '28px', fontWeight: '800', color: GOF_PROJECT.azulEscuro, lineHeight: 1 }}>{value}</div>
+        <div style={{ fontSize: '12px', color: GOF_PROJECT.azulAcinzentado, marginTop: '4px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
       </div>
     </div>
   );
@@ -157,11 +158,11 @@ function MetricCard({ icon, label, value, color, bg }) {
 function Msg({ msg, onClose }) {
   if (!msg) return null;
   const cores = {
-    sucesso: { bg: '#e8f5e9', color: '#2e7d32' },
-    erro:    { bg: '#ffebee', color: '#c62828' },
-    aviso:   { bg: '#fff3e0', color: '#e65100' },
+    sucesso: { bg: '#E6F1FF', color: '#0057B8' },
+    erro:    { bg: '#FFF4CC', color: '#A36F00' },
+    aviso:   { bg: '#FFF8D6', color: '#A36F00' },
   };
-  const { bg, color } = cores[msg.tipo] ?? { bg: '#e3f2fd', color: '#1565c0' };
+  const { bg, color } = cores[msg.tipo] ?? { bg: '#E6F1FF', color: '#0057B8' };
   return (
     <div style={{
       padding: '12px 16px', borderRadius: '6px', marginBottom: '16px',
@@ -180,13 +181,13 @@ function Msg({ msg, onClose }) {
 function Field({ label, as, ...props }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-      {label && <label style={{ fontSize: '12px', fontWeight: '600', color: TSEA.cinzaEscuro, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</label>}
+      {label && <label style={{ fontSize: '12px', fontWeight: '600', color: GOF_PROJECT.azulProfundo, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</label>}
       {as === 'select' ? (
-        <select {...props} style={{ padding: '10px 12px', borderRadius: '6px', border: `1px solid ${TSEA.cinzaMedio}`, fontSize: '14px', background: TSEA.branco, ...props.style }}>
+        <select {...props} style={{ padding: '10px 12px', borderRadius: '6px', border: `1px solid ${GOF_PROJECT.azulClaro}`, fontSize: '14px', background: GOF_PROJECT.branco, ...props.style }}>
           {props.children}
         </select>
       ) : (
-        <input {...props} style={{ padding: '10px 12px', borderRadius: '6px', border: `1px solid ${TSEA.cinzaMedio}`, fontSize: '14px', ...props.style }} />
+        <input {...props} style={{ padding: '10px 12px', borderRadius: '6px', border: `1px solid ${GOF_PROJECT.azulClaro}`, fontSize: '14px', ...props.style }} />
       )}
     </div>
   );
@@ -197,7 +198,7 @@ function Field({ label, as, ...props }) {
 // ════════════════════════════════════════════════════════════════════════════
 export default function PainelMaster({
   abaAtivaSuper, setAbaAtivaSuper,
-  ativosEmCustodiaTSEA, catalogoFerramentas,
+  ativosEmCustodiaGofProject, catalogoFerramentas,
   ultimasRetiradas = [], ultimasDevolucoes = [],
   usuarioLogado = 'Administrador',
   logout,
@@ -205,7 +206,7 @@ export default function PainelMaster({
   const [msg, setMsg] = useState(null);
   const [setorSelecionado, setSetorSelecionado] = useState(null);
 
-  const ativosAbertos = ativosEmCustodiaTSEA.filter(a => a.status !== 'DEVOLVIDO');
+  const ativosAbertos = ativosEmCustodiaGofProject.filter(a => a.status !== 'DEVOLVIDO');
   const totalEstoqueCatalogo = catalogoFerramentas.reduce((s, f) => s + Number(f.total ?? 0), 0);
   const totalDisponivelCatalogo = catalogoFerramentas.reduce((s, f) => s + Number(f.disponivel ?? 0), 0);
   const totalEmprestadoCatalogo = Math.max(ativosAbertos.reduce((s, a) => s + Number(a.qtd ?? 0), 0), totalEstoqueCatalogo - totalDisponivelCatalogo);
@@ -340,30 +341,30 @@ export default function PainelMaster({
   ];
 
   const card = {
-    backgroundColor: TSEA.branco, padding: '25px',
-    borderRadius: '8px', border: `1px solid ${TSEA.cinzaClaro}`,
+    backgroundColor: GOF_PROJECT.branco, padding: '25px',
+    borderRadius: '8px', border: `1px solid ${GOF_PROJECT.azulMuitoClaro}`,
     boxShadow: '0 12px 28px rgba(26,26,26,0.06)'
   };
 
   const btnPrimary = (loading) => ({
-    padding: '11px 24px', background: loading ? '#999' : TSEA.vermelho,
+    padding: '11px 24px', background: loading ? '#60788F' : GOF_PROJECT.azul,
     color: 'white', border: 'none', borderRadius: '6px',
     fontWeight: 'bold', fontSize: '14px',
     cursor: loading ? 'not-allowed' : 'pointer',
     display: 'flex', alignItems: 'center', gap: '8px'
   });
 
-  const thStyle = { padding: '12px 14px', textAlign: 'left', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em', color: TSEA.cinzaBorda };
-  const tdStyle = { padding: '13px 14px', fontSize: '14px', borderBottom: `1px solid ${TSEA.cinzaClaro}` };
+  const thStyle = { padding: '12px 14px', textAlign: 'left', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em', color: GOF_PROJECT.azulAcinzentado };
+  const tdStyle = { padding: '13px 14px', fontSize: '14px', borderBottom: `1px solid ${GOF_PROJECT.azulMuitoClaro}` };
 
   return (
     <div className="layout-container">
 
       {/* ── SIDEBAR ── */}
       <aside className="sidebar no-print">
-        <div style={{ textAlign: 'center', borderBottom: `3px solid ${TSEA.vermelho}`, paddingBottom: '15px', marginBottom: '20px' }}>
-          <h3 style={{ margin: 0, fontSize: '20px' }}>TSEA <span style={{ color: TSEA.vermelho }}>MASTER</span></h3>
-          <small style={{ color: TSEA.cinzaBorda, fontSize: '10px' }}>GERAL / RH / TI</small>
+        <div style={{ textAlign: 'center', borderBottom: `3px solid ${GOF_PROJECT.azul}`, paddingBottom: '15px', marginBottom: '20px' }}>
+          <h3 style={{ margin: 0, fontSize: '20px' }}>GOF <span style={{ color: GOF_PROJECT.amarelo }}>PROJECT</span> MASTER</h3>
+          <small style={{ color: GOF_PROJECT.azulAcinzentado, fontSize: '10px' }}>GERAL / RH / TI</small>
         </div>
 
         <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
@@ -373,7 +374,7 @@ export default function PainelMaster({
               onClick={() => setAbaAtivaSuper(key)}
               className="btn-sidebar"
               style={{
-                backgroundColor: abaAtivaSuper === key ? TSEA.vermelho : 'transparent',
+                backgroundColor: abaAtivaSuper === key ? GOF_PROJECT.azul : 'transparent',
                 display: 'flex', alignItems: 'center', gap: '10px'
               }}
             >
@@ -386,7 +387,7 @@ export default function PainelMaster({
         <button
           onClick={logout}
           style={{
-            width: '100%', padding: '12px', background: TSEA.vermelho,
+            width: '100%', padding: '12px', background: GOF_PROJECT.azul,
             color: 'white', border: 'none', borderRadius: '4px',
             fontWeight: 'bold', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
@@ -401,10 +402,10 @@ export default function PainelMaster({
 
         {/* Cards de métricas */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', marginBottom: '20px' }}>
-          <MetricCard icon={Icons.totalUsers}   label="Usuários cadastrados" value={totalUsers}  color={TSEA.vermelho} bg="#fff0f0" />
-          <MetricCard icon={Icons.totalCards}   label="Cartões NFC ativos"   value={totalCards}  color="#1565c0"       bg="#e3f2fd" />
-          <MetricCard icon={Icons.totalAtivos}  label="Ferramentas em uso"   value={totalAtivos} color="#e65100"       bg="#fff3e0" />
-          <MetricCard icon={Icons.totalEstoque} label="Total em estoque"      value={totalEstoque}color="#2e7d32"       bg="#e8f5e9" />
+          <MetricCard icon={Icons.totalUsers}   label="Usuários cadastrados" value={totalUsers}  color={GOF_PROJECT.azul} bg="#FFF8D6" />
+          <MetricCard icon={Icons.totalCards}   label="Cartões NFC ativos"   value={totalCards}  color="#0057B8"       bg="#E6F1FF" />
+          <MetricCard icon={Icons.totalAtivos}  label="Ferramentas em uso"   value={totalAtivos} color="#A36F00"       bg="#FFF8D6" />
+          <MetricCard icon={Icons.totalEstoque} label="Total em estoque"      value={totalEstoque}color="#0057B8"       bg="#E6F1FF" />
         </div>
 
         <Msg msg={msg} onClose={() => setMsg(null)} />
@@ -415,15 +416,15 @@ export default function PainelMaster({
         {abaAtivaSuper === 'dashboard' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
             <div style={card}>
-              <h2 style={{ margin: '0 0 6px 0', color: TSEA.preto }}>Bem-vindo(a), {usuarioLogado}!</h2>
-              <p style={{ margin: 0, color: TSEA.cinzaEscuro, fontSize: '14px' }}>
+              <h2 style={{ margin: '0 0 6px 0', color: GOF_PROJECT.azulEscuro }}>Bem-vindo(a), {usuarioLogado}!</h2>
+              <p style={{ margin: 0, color: GOF_PROJECT.azulProfundo, fontSize: '14px' }}>
                 Visao geral de estoque, ferramentas em uso e movimentacoes recentes.
               </p>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '20px' }}>
               {Object.keys(dashboardData).length === 0 ? (
-                <div style={{ ...card, gridColumn: '1 / -1', color: TSEA.cinzaEscuro }}>
+                <div style={{ ...card, gridColumn: '1 / -1', color: GOF_PROJECT.azulProfundo }}>
                   Nenhuma ferramenta ativa por setor no momento.
                 </div>
               ) : Object.keys(dashboardData).map(setor => (
@@ -434,7 +435,7 @@ export default function PainelMaster({
                     ...card,
                     cursor: 'pointer',
                     textAlign: 'center',
-                    borderBottom: `4px solid ${TSEA.vermelho}`,
+                    borderBottom: `4px solid ${GOF_PROJECT.azul}`,
                     transition: 'transform 0.18s ease, box-shadow 0.18s ease',
                   }}
                   onMouseOver={(e) => {
@@ -446,11 +447,11 @@ export default function PainelMaster({
                     e.currentTarget.style.boxShadow = card.boxShadow;
                   }}
                 >
-                  <h4 style={{ color: TSEA.cinzaEscuro, marginBottom: '10px' }}>{setor}</h4>
-                  <div style={{ fontSize: '32px', fontWeight: '800', color: TSEA.preto }}>
+                  <h4 style={{ color: GOF_PROJECT.azulProfundo, marginBottom: '10px' }}>{setor}</h4>
+                  <div style={{ fontSize: '32px', fontWeight: '800', color: GOF_PROJECT.azulEscuro }}>
                     {dashboardData[setor].length}
                   </div>
-                  <small style={{ color: TSEA.cinzaBorda }}>Ferramentas Ativas</small>
+                  <small style={{ color: GOF_PROJECT.azulAcinzentado }}>Ferramentas Ativas</small>
                 </div>
               ))}
             </div>
@@ -462,7 +463,7 @@ export default function PainelMaster({
                   width: '180px',
                   height: '180px',
                   borderRadius: '50%',
-                  background: `conic-gradient(#CCCCCC 0 ${manutencaoDeg}deg, #2e7d32 ${manutencaoDeg}deg ${emprestadoDeg}deg, #E30613 ${emprestadoDeg}deg 360deg)`,
+                  background: `conic-gradient(#B8CBE3 0 ${manutencaoDeg}deg, #0057B8 ${manutencaoDeg}deg ${emprestadoDeg}deg, #0057B8 ${emprestadoDeg}deg 360deg)`,
                   boxShadow: 'inset 0 0 0 14px rgba(255,255,255,0.72), 0 12px 28px rgba(26,26,26,0.12)',
                   margin: '0 auto'
                 }}></div>
@@ -470,15 +471,15 @@ export default function PainelMaster({
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ width: '15px', height: '15px', background: '#CCCCCC', borderRadius: '3px' }}></div>
+                  <div style={{ width: '15px', height: '15px', background: '#B8CBE3', borderRadius: '3px' }}></div>
                   <span style={{ fontSize: '14px', fontWeight: '600' }}>Em Manutencao ({totalManutencao})</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ width: '15px', height: '15px', background: '#2e7d32', borderRadius: '3px' }}></div>
+                  <div style={{ width: '15px', height: '15px', background: '#0057B8', borderRadius: '3px' }}></div>
                   <span style={{ fontSize: '14px', fontWeight: '600' }}>Em Uso ({totalEmprestadoCatalogo})</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ width: '15px', height: '15px', background: '#E30613', borderRadius: '3px' }}></div>
+                  <div style={{ width: '15px', height: '15px', background: '#0057B8', borderRadius: '3px' }}></div>
                   <span style={{ fontSize: '14px', fontWeight: '600' }}>No Almoxarifado ({totalDisponivelCatalogo})</span>
                 </div>
               </div>
@@ -490,7 +491,7 @@ export default function PainelMaster({
                 .sort((a, b) => (b.timestamp ?? 0) - (a.timestamp ?? 0))
                 .slice(0, 5)
                 .map((mov, idx) => (
-                  <div key={idx} style={{ padding: '10px 0', borderBottom: idx === 4 ? 'none' : `1px solid ${TSEA.cinzaClaro}` }}>
+                  <div key={idx} style={{ padding: '10px 0', borderBottom: idx === 4 ? 'none' : `1px solid ${GOF_PROJECT.azulMuitoClaro}` }}>
                     <strong>{mov.funcionario}</strong> - {mov.ferramenta} - {mov.data ?? mov.dataDevolucao}
                   </div>
                 ))}
@@ -512,7 +513,7 @@ export default function PainelMaster({
               onClick={(e) => e.stopPropagation()}
               style={{
                 ...card, width: '700px', maxWidth: '100%', maxHeight: '80vh', overflowY: 'auto',
-                position: 'relative', borderTop: `6px solid ${TSEA.vermelho}`
+                position: 'relative', borderTop: `6px solid ${GOF_PROJECT.azul}`
               }}
             >
               <button
@@ -522,19 +523,19 @@ export default function PainelMaster({
                 {Icons.close}
               </button>
 
-              <h2 style={{ marginBottom: '20px', color: TSEA.preto }}>Setor: {setorSelecionado}</h2>
+              <h2 style={{ marginBottom: '20px', color: GOF_PROJECT.azulEscuro }}>Setor: {setorSelecionado}</h2>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                 {dashboardData[setorSelecionado].map((item, idx) => (
-                  <div key={`${item.emprestimo_id}-${idx}`} style={{ padding: '15px', background: TSEA.cinzaClaro, borderRadius: '6px' }}>
-                    <div style={{ fontWeight: '800', fontSize: '16px', color: TSEA.vermelho, marginBottom: '8px' }}>
+                  <div key={`${item.emprestimo_id}-${idx}`} style={{ padding: '15px', background: GOF_PROJECT.azulMuitoClaro, borderRadius: '6px' }}>
+                    <div style={{ fontWeight: '800', fontSize: '16px', color: GOF_PROJECT.azul, marginBottom: '8px' }}>
                       {item.funcionario}
                     </div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                      <span style={{ padding: '4px 10px', background: TSEA.branco, border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px', fontWeight: '500' }}>
+                      <span style={{ padding: '4px 10px', background: GOF_PROJECT.branco, border: '1px solid #B8CBE3', borderRadius: '4px', fontSize: '13px', fontWeight: '500' }}>
                         {item.qtd}x {item.ferramenta}
                       </span>
-                      <span style={{ padding: '4px 10px', background: TSEA.branco, border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px', fontWeight: '500' }}>
+                      <span style={{ padding: '4px 10px', background: GOF_PROJECT.branco, border: '1px solid #B8CBE3', borderRadius: '4px', fontSize: '13px', fontWeight: '500' }}>
                         Retirada: {item.data}
                       </span>
                     </div>
@@ -548,7 +549,7 @@ export default function PainelMaster({
         {/* ... Restante das abas (Criar Usuário, Gerenciar, etc) mantém-se igual ... */}
         {abaAtivaSuper === 'criar_usuario' && (
           <div style={card}>
-            <h3 style={{ margin: '0 0 20px 0', paddingBottom: '10px', borderBottom: `2px solid ${TSEA.cinzaClaro}` }}>
+            <h3 style={{ margin: '0 0 20px 0', paddingBottom: '10px', borderBottom: `2px solid ${GOF_PROJECT.azulMuitoClaro}` }}>
               Cadastrar Novo Usuário
             </h3>
 
@@ -597,11 +598,11 @@ export default function PainelMaster({
         {/* ... (O restante do código das outras abas segue aqui igual ao original) ... */}
         {abaAtivaSuper === 'gerenciar_usuarios' && (
           <div style={card}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', paddingBottom: '10px', borderBottom: `2px solid ${TSEA.cinzaClaro}` }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', paddingBottom: '10px', borderBottom: `2px solid ${GOF_PROJECT.azulMuitoClaro}` }}>
               <h3 style={{ margin: 0 }}>Usuários Cadastrados</h3>
               <button
                 onClick={buscarUsuarios}
-                style={{ padding: '8px 16px', background: TSEA.cinzaClaro, border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}
+                style={{ padding: '8px 16px', background: GOF_PROJECT.azulMuitoClaro, border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}
               >
                 Atualizar
               </button>
@@ -615,7 +616,7 @@ export default function PainelMaster({
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
-                    <tr style={{ backgroundColor: TSEA.cinzaClaro }}>
+                    <tr style={{ backgroundColor: GOF_PROJECT.azulMuitoClaro }}>
                       <th style={thStyle}>Nome</th>
                       <th style={thStyle}>CPF</th>
                       <th style={thStyle}>Setor</th>
@@ -625,18 +626,18 @@ export default function PainelMaster({
                   </thead>
                   <tbody>
                     {usuarios.map((u, i) => (
-                      <tr key={i} style={{ background: i % 2 === 0 ? TSEA.branco : '#fafafa' }}>
+                      <tr key={i} style={{ background: i % 2 === 0 ? GOF_PROJECT.branco : '#F7FBFF' }}>
                         <td style={tdStyle}><strong>{u.nome}</strong></td>
-                        <td style={{ ...tdStyle, fontFamily: 'monospace', color: TSEA.cinzaEscuro }}>{u.cpf}</td>
+                        <td style={{ ...tdStyle, fontFamily: 'monospace', color: GOF_PROJECT.azulProfundo }}>{u.cpf}</td>
                         <td style={tdStyle}>{u.setor ?? '—'}</td>
                         <td style={tdStyle}>{roleBadge(u.tipo)}</td>
                         <td style={tdStyle}>
                           {u.cartao_operador ? (
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#2e7d32', fontWeight: 'bold', fontSize: '13px' }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0057B8', fontWeight: 'bold', fontSize: '13px' }}>
                               {Icons.check} Vinculado
                             </span>
                           ) : (
-                            <span style={{ color: TSEA.cinzaBorda, fontSize: '13px' }}>Sem cartão</span>
+                            <span style={{ color: GOF_PROJECT.azulAcinzentado, fontSize: '13px' }}>Sem cartão</span>
                           )}
                         </td>
                       </tr>
@@ -651,7 +652,7 @@ export default function PainelMaster({
         {abaAtivaSuper === 'cartoes_nfc' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={card}>
-              <h3 style={{ margin: '0 0 20px 0', paddingBottom: '10px', borderBottom: `2px solid ${TSEA.cinzaClaro}` }}>
+              <h3 style={{ margin: '0 0 20px 0', paddingBottom: '10px', borderBottom: `2px solid ${GOF_PROJECT.azulMuitoClaro}` }}>
                 Vincular Cartão NFC a Usuário
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', maxWidth: '600px' }}>
@@ -683,7 +684,7 @@ export default function PainelMaster({
 
         {abaAtivaSuper === 'm_ativas' && (
           <div style={card}>
-            <h3 style={{ margin: '0 0 18px 0', paddingBottom: '10px', borderBottom: `2px solid ${TSEA.cinzaClaro}` }}>
+            <h3 style={{ margin: '0 0 18px 0', paddingBottom: '10px', borderBottom: `2px solid ${GOF_PROJECT.azulMuitoClaro}` }}>
               Monitor de Ferramentas Ativas
             </h3>
             {ativosAbertos.length === 0 ? (
@@ -692,7 +693,7 @@ export default function PainelMaster({
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
-                    <tr style={{ backgroundColor: TSEA.cinzaClaro }}>
+                    <tr style={{ backgroundColor: GOF_PROJECT.azulMuitoClaro }}>
                       <th style={thStyle}>Funcionario</th>
                       <th style={thStyle}>Ferramenta</th>
                       <th style={thStyle}>Qtd</th>
@@ -702,7 +703,7 @@ export default function PainelMaster({
                   </thead>
                   <tbody>
                     {ativosAbertos.map((item, idx) => (
-                      <tr key={`${item.emprestimo_id}-${idx}`} style={{ background: idx % 2 === 0 ? TSEA.branco : '#fafafa' }}>
+                      <tr key={`${item.emprestimo_id}-${idx}`} style={{ background: idx % 2 === 0 ? GOF_PROJECT.branco : '#F7FBFF' }}>
                         <td style={tdStyle}><strong>{item.funcionario}</strong></td>
                         <td style={tdStyle}>{item.ferramenta}</td>
                         <td style={tdStyle}>{item.qtd}x</td>
@@ -719,7 +720,7 @@ export default function PainelMaster({
 
         {abaAtivaSuper === 'm_estoque' && (
           <div style={card}>
-            <h3 style={{ margin: '0 0 18px 0', paddingBottom: '10px', borderBottom: `2px solid ${TSEA.cinzaClaro}` }}>
+            <h3 style={{ margin: '0 0 18px 0', paddingBottom: '10px', borderBottom: `2px solid ${GOF_PROJECT.azulMuitoClaro}` }}>
               Monitor de Estoque
             </h3>
             {catalogoFerramentas.length === 0 ? (
@@ -728,7 +729,7 @@ export default function PainelMaster({
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
-                    <tr style={{ backgroundColor: TSEA.cinzaClaro }}>
+                    <tr style={{ backgroundColor: GOF_PROJECT.azulMuitoClaro }}>
                       <th style={thStyle}>Ferramenta</th>
                       <th style={thStyle}>Categoria</th>
                       <th style={thStyle}>Disponivel</th>
@@ -737,10 +738,10 @@ export default function PainelMaster({
                   </thead>
                   <tbody>
                     {catalogoFerramentas.map((item, idx) => (
-                      <tr key={`${item.id}-${idx}`} style={{ background: idx % 2 === 0 ? TSEA.branco : '#fafafa' }}>
+                      <tr key={`${item.id}-${idx}`} style={{ background: idx % 2 === 0 ? GOF_PROJECT.branco : '#F7FBFF' }}>
                         <td style={tdStyle}><strong>{item.nome}</strong></td>
                         <td style={tdStyle}>{item.categoria}</td>
-                        <td style={{ ...tdStyle, color: item.disponivel === 0 ? TSEA.vermelho : '#2e7d32', fontWeight: 'bold' }}>{item.disponivel}</td>
+                        <td style={{ ...tdStyle, color: item.disponivel === 0 ? GOF_PROJECT.azul : '#0057B8', fontWeight: 'bold' }}>{item.disponivel}</td>
                         <td style={tdStyle}>{item.total}</td>
                       </tr>
                     ))}

@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { apiRequest, clearStoredToken, extractToken, readJson, setStoredToken } from '../services/api';
 
-const SESSION_KEY = 'tsea_session';
+const SESSION_KEY = 'gof_project_session';
 const AuthContext = createContext(null);
 
 const readStoredSession = () => {

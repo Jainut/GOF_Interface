@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppData } from '../hooks/useAppData';
 import { useAuth } from '../hooks/useAuth';
-import { TSEA } from '../utils/theme';
+import { GOF_PROJECT } from '../utils/theme';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -125,7 +125,7 @@ export default function LoginPage() {
         height: '34px',
         border: 'none',
         background: 'transparent',
-        color: TSEA.cinzaEscuro,
+        color: GOF_PROJECT.azulProfundo,
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
@@ -151,22 +151,22 @@ export default function LoginPage() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: 'sans-serif' }}>
-      <header style={{ backgroundColor: TSEA.vermelho, padding: '20px', textAlign: 'center', color: 'white' }}>
-        <h2 style={{ margin: 0, letterSpacing: '1px' }}>TSEA ENERGIA</h2>
+      <header style={{ backgroundColor: GOF_PROJECT.azul, padding: '20px', textAlign: 'center', color: 'white', borderBottom: `4px solid ${GOF_PROJECT.amarelo}` }}>
+        <h2 style={{ margin: 0, letterSpacing: '1px' }}>GOF Project</h2>
       </header>
 
-      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '15px', backgroundColor: '#f0f2f5' }}>
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '15px', backgroundColor: '#F1F7FD' }}>
         <div style={{
           backgroundColor: '#fff', padding: '30px', borderRadius: '8px',
           boxShadow: '0 4px 20px rgba(0,0,0,0.08)', width: '100%', maxWidth: '380px',
-          borderTop: `5px solid ${TSEA.vermelho}`, textAlign: 'center'
+          borderTop: `5px solid ${GOF_PROJECT.azul}`, textAlign: 'center'
         }}>
           {mensagemSistema && (
             <div style={{
               padding: '10px 14px', borderRadius: '6px', marginBottom: '15px', fontSize: '13px', fontWeight: 'bold',
-              backgroundColor: mensagemSistema.tipo === 'erro' ? '#ffebee' : mensagemSistema.tipo === 'sucesso' ? '#e8f5e9' : '#fff8e1',
-              color: mensagemSistema.tipo === 'erro' ? TSEA.vermelho : mensagemSistema.tipo === 'sucesso' ? '#2e7d32' : '#f57f17',
-              border: `1px solid ${mensagemSistema.tipo === 'erro' ? '#ffcdd2' : mensagemSistema.tipo === 'sucesso' ? '#c8e6c9' : '#ffecb3'}`,
+              backgroundColor: mensagemSistema.tipo === 'erro' ? '#FFF4CC' : mensagemSistema.tipo === 'sucesso' ? '#E6F1FF' : '#FFF8D6',
+              color: mensagemSistema.tipo === 'erro' ? GOF_PROJECT.azul : mensagemSistema.tipo === 'sucesso' ? '#0057B8' : '#A36F00',
+              border: `1px solid ${mensagemSistema.tipo === 'erro' ? '#FFE69A' : mensagemSistema.tipo === 'sucesso' ? '#B8CBE3' : '#FFE69A'}`,
               cursor: 'pointer'
             }} onClick={() => setMensagemSistema(null)}>
               {mensagemSistema.texto} ×
@@ -175,15 +175,15 @@ export default function LoginPage() {
 
           {!perfil && (
             <>
-              <h4 style={{ margin: '0 0 20px 0', color: TSEA.preto }}>CONTROLE DE ACESSO MÓVEL</h4>
+              <h4 style={{ margin: '0 0 20px 0', color: GOF_PROJECT.azulEscuro }}>CONTROLE DE ACESSO MÓVEL</h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <button onClick={() => setPerfil('func')} style={{ padding: '15px', background: TSEA.vermelho, color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>
+                <button onClick={() => setPerfil('func')} style={{ padding: '15px', background: GOF_PROJECT.azul, color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>
                   Acessar Totem Operacional
                 </button>
-                <button onClick={() => setPerfil('adm')} style={{ padding: '15px', background: TSEA.cinzaEscuro, color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>
+                <button onClick={() => setPerfil('adm')} style={{ padding: '15px', background: GOF_PROJECT.azulProfundo, color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>
                   Área do Almoxarife (ADM)
                 </button>
-                <button onClick={() => setPerfil('superadmin')} style={{ padding: '15px', background: TSEA.preto, color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>
+                <button onClick={() => setPerfil('superadmin')} style={{ padding: '15px', background: GOF_PROJECT.azulEscuro, color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>
                   Administrador Geral (MASTER)
                 </button>
               </div>
@@ -196,7 +196,7 @@ export default function LoginPage() {
               <div style={{
                 width: '200px', height: '200px', backgroundColor: '#111', borderRadius: '50%',
                 margin: '0 auto 20px auto', position: 'relative', overflow: 'hidden',
-                border: `4px solid ${statusBiometria === 'sucesso' ? '#2e7d32' : TSEA.vermelho}`,
+                border: `4px solid ${statusBiometria === 'sucesso' ? '#0057B8' : GOF_PROJECT.azul}`,
                 display: 'flex', justifyContent: 'center', alignItems: 'center'
               }}>
                 {statusBiometria === 'desligado' && <div style={{ color: '#666', fontSize: '14px' }}>Câmera Inativa</div>}
@@ -211,7 +211,7 @@ export default function LoginPage() {
                 />
                 {statusBiometria === 'escanear' && (
                   <>
-                    <div style={{ position: 'absolute', width: '100%', height: '4px', backgroundColor: TSEA.vermelho, top: `${progressoEscaneamento}%`, left: 0, boxShadow: '0 0 8px red' }} />
+                    <div style={{ position: 'absolute', width: '100%', height: '4px', backgroundColor: GOF_PROJECT.azul, top: `${progressoEscaneamento}%`, left: 0, boxShadow: '0 0 8px #0057B8' }} />
                     <div style={{ position: 'absolute', bottom: '5px', color: '#fff', fontSize: '11px', background: 'rgba(0,0,0,0.7)', padding: '2px 6px', borderRadius: '4px' }}>
                       Análise: {progressoEscaneamento}%
                     </div>
@@ -224,17 +224,17 @@ export default function LoginPage() {
                 )}
               </div>
               {statusBiometria === 'desligado' && (
-                <button onClick={ligarWebcamReal} style={{ width: '100%', padding: '12px', background: TSEA.vermelho, color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Habilitar Câmera</button>
+                <button onClick={ligarWebcamReal} style={{ width: '100%', padding: '12px', background: GOF_PROJECT.azul, color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Habilitar Câmera</button>
               )}
               {statusBiometria === 'camera_ativa' && (
-                <button onClick={() => setStatusBiometria('escanear')} style={{ width: '100%', padding: '12px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Escanear Face</button>
+                <button onClick={() => setStatusBiometria('escanear')} style={{ width: '100%', padding: '12px', background: '#0057B8', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Escanear Face</button>
               )}
               {statusBiometria === 'sucesso' && (
-                <button onClick={entrarNoPainelManualmente} style={{ width: '100%', padding: '14px', background: 'green', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Entrar no Totem</button>
+                <button onClick={entrarNoPainelManualmente} style={{ width: '100%', padding: '14px', background: '#0057B8', color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Entrar no Totem</button>
               )}
               <button
                 onClick={voltarParaSelecao}
-                style={{ marginTop: '15px', background: 'none', border: 'none', color: TSEA.vermelho, fontWeight: 'bold', cursor: 'pointer' }}
+                style={{ marginTop: '15px', background: 'none', border: 'none', color: GOF_PROJECT.azul, fontWeight: 'bold', cursor: 'pointer' }}
               >
                 Cancelar e Voltar
               </button>
@@ -251,7 +251,7 @@ export default function LoginPage() {
                 name="almoxarife-cpf"
                 value={idAlmoxarife}
                 onChange={(e) => setIdAlmoxarife(e.target.value)}
-                style={{ width: '100%', padding: '12px', borderRadius: '6px', border: `1px solid ${TSEA.cinzaMedio}`, textAlign: 'center', marginBottom: '10px', boxSizing: 'border-box' }}
+                style={{ width: '100%', padding: '12px', borderRadius: '6px', border: `1px solid ${GOF_PROJECT.azulClaro}`, textAlign: 'center', marginBottom: '10px', boxSizing: 'border-box' }}
               />
               <div style={{ position: 'relative', marginBottom: '15px' }}>
                 <input
@@ -261,15 +261,15 @@ export default function LoginPage() {
                   name="almoxarife-password"
                   value={senhaLoginAlmoxarife}
                   onChange={(e) => setSenhaLoginAlmoxarife(e.target.value)}
-                  style={{ width: '100%', padding: '12px 44px 12px 12px', borderRadius: '6px', border: `1px solid ${TSEA.cinzaMedio}`, textAlign: 'center', boxSizing: 'border-box' }}
+                  style={{ width: '100%', padding: '12px 44px 12px 12px', borderRadius: '6px', border: `1px solid ${GOF_PROJECT.azulClaro}`, textAlign: 'center', boxSizing: 'border-box' }}
                 />
                 <BotaoVisualizarSenha
                   ativo={mostrarSenhaAlmoxarife}
                   onClick={() => setMostrarSenhaAlmoxarife(prev => !prev)}
                 />
               </div>
-              <button onClick={entrarComoAlmoxarife} style={{ width: '100%', padding: '12px', background: TSEA.vermelho, color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Acessar Painel</button>
-              <button onClick={voltarParaSelecao} style={{ marginTop: '15px', background: 'none', border: 'none', color: TSEA.vermelho, fontWeight: 'bold', cursor: 'pointer' }}>Voltar</button>
+              <button onClick={entrarComoAlmoxarife} style={{ width: '100%', padding: '12px', background: GOF_PROJECT.azul, color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Acessar Painel</button>
+              <button onClick={voltarParaSelecao} style={{ marginTop: '15px', background: 'none', border: 'none', color: GOF_PROJECT.azul, fontWeight: 'bold', cursor: 'pointer' }}>Voltar</button>
             </div>
           )}
 
@@ -283,7 +283,7 @@ export default function LoginPage() {
                 name="master-cpf"
                 value={cpfSuperAdmin}
                 onChange={(e) => setCpfSuperAdmin(e.target.value)}
-                style={{ width: '100%', padding: '12px', borderRadius: '6px', border: `1px solid ${TSEA.cinzaMedio}`, textAlign: 'center', marginBottom: '10px', boxSizing: 'border-box' }}
+                style={{ width: '100%', padding: '12px', borderRadius: '6px', border: `1px solid ${GOF_PROJECT.azulClaro}`, textAlign: 'center', marginBottom: '10px', boxSizing: 'border-box' }}
               />
               <div style={{ position: 'relative', marginBottom: '15px' }}>
                 <input
@@ -293,15 +293,15 @@ export default function LoginPage() {
                   name="master-password"
                   value={senhaSuperAdmin}
                   onChange={(e) => setSenhaSuperAdmin(e.target.value)}
-                  style={{ width: '100%', padding: '12px 44px 12px 12px', borderRadius: '6px', border: `1px solid ${TSEA.cinzaMedio}`, textAlign: 'center', boxSizing: 'border-box' }}
+                  style={{ width: '100%', padding: '12px 44px 12px 12px', borderRadius: '6px', border: `1px solid ${GOF_PROJECT.azulClaro}`, textAlign: 'center', boxSizing: 'border-box' }}
                 />
                 <BotaoVisualizarSenha
                   ativo={mostrarSenhaMaster}
                   onClick={() => setMostrarSenhaMaster(prev => !prev)}
                 />
               </div>
-              <button onClick={entrarComoSuperAdmin} style={{ width: '100%', padding: '12px', background: TSEA.vermelho, color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Entrar como Admin</button>
-              <button onClick={voltarParaSelecao} style={{ marginTop: '15px', background: 'none', border: 'none', color: TSEA.vermelho, fontWeight: 'bold', cursor: 'pointer' }}>Voltar</button>
+              <button onClick={entrarComoSuperAdmin} style={{ width: '100%', padding: '12px', background: GOF_PROJECT.azul, color: 'white', border: 'none', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer' }}>Entrar como Admin</button>
+              <button onClick={voltarParaSelecao} style={{ marginTop: '15px', background: 'none', border: 'none', color: GOF_PROJECT.azul, fontWeight: 'bold', cursor: 'pointer' }}>Voltar</button>
             </div>
           )}
         </div>

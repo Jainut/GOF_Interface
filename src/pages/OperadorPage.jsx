@@ -1,7 +1,7 @@
 import PainelOperador from '../components/PainelOperador';
 import { useAppData } from '../hooks/useAppData';
 import { useAuth } from '../hooks/useAuth';
-import { TSEA } from '../utils/theme';
+import { GOF_PROJECT } from '../utils/theme';
 
 export default function OperadorPage() {
   const { logout } = useAuth();
@@ -9,7 +9,7 @@ export default function OperadorPage() {
     abaAtiva,
     setAbaAtiva,
     operador,
-    ativosEmCustodiaTSEA,
+    ativosEmCustodiaGofProject,
     limparSessaoVisual
   } = useAppData();
 
@@ -20,11 +20,11 @@ export default function OperadorPage() {
 
   return (
     <PainelOperador
-      TSEA={TSEA}
+      GOF_PROJECT={GOF_PROJECT}
       abaAtiva={abaAtiva}
       setAbaAtiva={setAbaAtiva}
       operador={operador}
-      ativosEmCustodiaTSEA={ativosEmCustodiaTSEA}
+      ativosEmCustodiaGofProject={ativosEmCustodiaGofProject}
       logout={sair}
     />
   );

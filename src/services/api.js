@@ -1,5 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL ?? '';
-const TOKEN_KEY = 'tsea_token';
+const TOKEN_KEY = 'gof_project_token';
 
 export const getStoredToken = () => localStorage.getItem(TOKEN_KEY);
 

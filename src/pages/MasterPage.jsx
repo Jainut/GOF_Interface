@@ -8,7 +8,7 @@ export default function MasterPage() {
   const {
     abaAtivaSuper,
     setAbaAtivaSuper,
-    ativosEmCustodiaTSEA,
+    ativosEmCustodiaGofProject,
     catalogoFerramentas,
     ultimasRetiradas,
     ultimasDevolucoes,
@@ -29,7 +29,7 @@ export default function MasterPage() {
     <PainelMaster
       abaAtivaSuper={abaAtivaSuper}
       setAbaAtivaSuper={setAbaAtivaSuper}
-      ativosEmCustodiaTSEA={ativosEmCustodiaTSEA}
+      ativosEmCustodiaGofProject={ativosEmCustodiaGofProject}
       catalogoFerramentas={catalogoFerramentas}
       ultimasRetiradas={ultimasRetiradas}
       ultimasDevolucoes={ultimasDevolucoes}

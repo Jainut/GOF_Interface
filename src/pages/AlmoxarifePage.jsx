@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import PainelAlmoxarife from '../components/PainelAlmoxarife';
 import { useAppData } from '../hooks/useAppData';
 import { useAuth } from '../hooks/useAuth';
-import { TSEA } from '../utils/theme';
+import { GOF_PROJECT } from '../utils/theme';
 
 export default function AlmoxarifePage() {
   const { logout, usuarioLogado } = useAuth();
@@ -18,7 +18,7 @@ export default function AlmoxarifePage() {
     setMensagemSistema,
     abaAtivaAdm,
     setAbaAtivaAdm,
-    ativosEmCustodiaTSEA,
+    ativosEmCustodiaGofProject,
     catalogoFerramentas,
     ultimasRetiradas,
     ultimasDevolucoes,
@@ -37,7 +37,7 @@ export default function AlmoxarifePage() {
 
   return (
     <PainelAlmoxarife
-      TSEA={TSEA}
+      GOF_PROJECT={GOF_PROJECT}
       nfcLiberado={nfcLiberado}
       tempoRestante={tempoRestante}
       operadorNFC={operadorNFC}
@@ -49,7 +49,7 @@ export default function AlmoxarifePage() {
       setMensagemSistema={setMensagemSistema}
       abaAtivaAdm={abaAtivaAdm}
       setAbaAtivaAdm={setAbaAtivaAdm}
-      ativosEmCustodiaTSEA={ativosEmCustodiaTSEA}
+      ativosEmCustodiaGofProject={ativosEmCustodiaGofProject}
       catalogoFerramentas={catalogoFerramentas}
       ultimasRetiradas={ultimasRetiradas}
       ultimasDevolucoes={ultimasDevolucoes}

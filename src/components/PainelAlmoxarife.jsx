@@ -109,7 +109,7 @@ const Icons = {
 };
 
 export default function PainelAlmoxarife({
-  TSEA,
+  GOF_PROJECT,
   nfcLiberado,
   tempoRestante,
   operadorNFC,
@@ -120,7 +120,7 @@ export default function PainelAlmoxarife({
   setMensagemSistema,
   abaAtivaAdm,
   setAbaAtivaAdm,
-  ativosEmCustodiaTSEA,
+  ativosEmCustodiaGofProject,
   catalogoFerramentas,
   ultimasRetiradas,
   ultimasDevolucoes,
@@ -159,19 +159,19 @@ export default function PainelAlmoxarife({
 
   // ── Cores das mensagens ──────────────────────────────────────────────────
   const corMensagem =
-    mensagemSistema?.tipo === 'sucesso' ? '#2e7d32'
-    : mensagemSistema?.tipo === 'erro'  ? '#c62828'
-    : mensagemSistema?.tipo === 'aviso' ? '#e65100'
-    : '#1565c0';
+    mensagemSistema?.tipo === 'sucesso' ? '#0057B8'
+    : mensagemSistema?.tipo === 'erro'  ? '#A36F00'
+    : mensagemSistema?.tipo === 'aviso' ? '#A36F00'
+    : '#0057B8';
 
   const bgMensagem =
-    mensagemSistema?.tipo === 'sucesso' ? '#e8f5e9'
-    : mensagemSistema?.tipo === 'erro'  ? '#ffebee'
-    : mensagemSistema?.tipo === 'aviso' ? '#fff3e0'
-    : '#e3f2fd';
+    mensagemSistema?.tipo === 'sucesso' ? '#E6F1FF'
+    : mensagemSistema?.tipo === 'erro'  ? '#FFF4CC'
+    : mensagemSistema?.tipo === 'aviso' ? '#FFF8D6'
+    : '#E6F1FF';
 
   // ── Métricas para os cards do dashboard ─────────────────────────────────
-  const totalEmCustodia = ativosEmCustodiaTSEA.filter(a => a.status !== 'DEVOLVIDO').length;
+  const totalEmCustodia = ativosEmCustodiaGofProject.filter(a => a.status !== 'DEVOLVIDO').length;
   const totalFerramentas = catalogoFerramentas.reduce((s, f) => s + f.total, 0);
   const disponiveis = catalogoFerramentas.reduce((s, f) => s + f.disponivel, 0);
   const emprestadas = Math.max(totalFerramentas - disponiveis, totalEmCustodia);
@@ -180,13 +180,13 @@ export default function PainelAlmoxarife({
   // ── Tela bloqueada aguardando NFC ────────────────────────────────────────
   const telaBloqueada = (
     <div style={{
-      backgroundColor: TSEA.branco, padding: '60px 40px', borderRadius: '8px',
+      backgroundColor: GOF_PROJECT.branco, padding: '60px 40px', borderRadius: '8px',
       textAlign: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
     }}>
-      <div style={{ color: TSEA.cinzaBorda, marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
+      <div style={{ color: GOF_PROJECT.azulAcinzentado, marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
         {Icons.nfc}
       </div>
-      <h2 style={{ color: TSEA.preto, margin: '0 0 10px 0' }}>Aguardando Cartão NFC</h2>
+      <h2 style={{ color: GOF_PROJECT.azulEscuro, margin: '0 0 10px 0' }}>Aguardando Cartão NFC</h2>
       <p style={{ color: '#666', margin: 0, fontSize: '15px' }}>
         Peça ao operador para aproximar o cartão no totem para identificação automática.
       </p>
@@ -196,12 +196,12 @@ export default function PainelAlmoxarife({
   // ── Banner do operador identificado ─────────────────────────────────────
   const bannerOperador = nfcLiberado && (
     <div style={{
-      padding: '12px 16px', background: '#e8f5e9', borderRadius: '6px',
+      padding: '12px 16px', background: '#E6F1FF', borderRadius: '6px',
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      border: '1px solid #a5d6a7', flexWrap: 'wrap', gap: '10px'
+      border: '1px solid #B8CBE3', flexWrap: 'wrap', gap: '10px'
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <span style={{ color: '#2e7d32' }}>{Icons.user}</span>
+        <span style={{ color: '#0057B8' }}>{Icons.user}</span>
         <div>
           <strong style={{ fontSize: '15px' }}>{operadorNFC?.nome}</strong>
           {operadorNFC?.cpf && (
@@ -220,7 +220,7 @@ export default function PainelAlmoxarife({
         <span style={{
           display: 'flex', alignItems: 'center', gap: '5px',
           fontFamily: 'monospace', fontWeight: 'bold',
-          color: tempoRestante < 60 ? '#c62828' : '#2e7d32'
+          color: tempoRestante < 60 ? '#A36F00' : '#0057B8'
         }}>
           {Icons.clock}
           {Math.floor(tempoRestante / 60)}:{(tempoRestante % 60).toString().padStart(2, '0')}
@@ -232,7 +232,7 @@ export default function PainelAlmoxarife({
             title="Encerrar sessão do operador"
             style={{
               display: 'flex', alignItems: 'center', gap: '6px',
-              padding: '7px 14px', background: '#c62828',
+              padding: '7px 14px', background: '#A36F00',
               color: 'white', border: 'none', borderRadius: '4px',
               fontWeight: 'bold', fontSize: '13px', cursor: 'pointer'
             }}
@@ -248,7 +248,7 @@ export default function PainelAlmoxarife({
   // ── Card de métrica ──────────────────────────────────────────────────────
   const MetricCard = ({ icon, label, value, color, bg }) => (
     <div style={{
-      background: TSEA.branco, borderRadius: '8px', padding: '20px 24px',
+      background: GOF_PROJECT.branco, borderRadius: '8px', padding: '20px 24px',
       boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
       borderLeft: `4px solid ${color}`,
       display: 'flex', alignItems: 'center', gap: '18px', flex: '1 1 180px'
@@ -261,8 +261,8 @@ export default function PainelAlmoxarife({
         {icon}
       </div>
       <div>
-        <div style={{ fontSize: '28px', fontWeight: '800', color: TSEA.preto, lineHeight: 1 }}>{value}</div>
-        <div style={{ fontSize: '12px', color: TSEA.cinzaBorda, marginTop: '4px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
+        <div style={{ fontSize: '28px', fontWeight: '800', color: GOF_PROJECT.azulEscuro, lineHeight: 1 }}>{value}</div>
+        <div style={{ fontSize: '12px', color: GOF_PROJECT.azulAcinzentado, marginTop: '4px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
       </div>
     </div>
   );
@@ -273,13 +273,13 @@ export default function PainelAlmoxarife({
       {/* ── SIDEBAR ── */}
       <aside className="sidebar no-print">
         <div style={{
-          textAlign: 'center', borderBottom: `3px solid ${TSEA.vermelho}`,
+          textAlign: 'center', borderBottom: `3px solid ${GOF_PROJECT.azul}`,
           paddingBottom: '15px', marginBottom: '20px'
         }}>
           <h3 style={{ margin: 0, fontSize: '20px' }}>
-            TSEA <span style={{ color: TSEA.vermelho }}>ADM</span>
+            GOF <span style={{ color: GOF_PROJECT.amarelo }}>PROJECT</span> ADM
           </h3>
-          <small style={{ color: TSEA.cinzaBorda, fontSize: '10px' }}>ALMOXARIFADO GESTÃO</small>
+          <small style={{ color: GOF_PROJECT.azulAcinzentado, fontSize: '10px' }}>ALMOXARIFADO GESTÃO</small>
         </div>
 
         <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
@@ -297,7 +297,7 @@ export default function PainelAlmoxarife({
               onClick={() => setAbaAtivaAdm(key)}
               className="btn-sidebar"
               style={{
-                backgroundColor: abaAtivaAdm === key ? TSEA.vermelho : 'transparent',
+                backgroundColor: abaAtivaAdm === key ? GOF_PROJECT.azul : 'transparent',
                 display: 'flex', alignItems: 'center', gap: '10px'
               }}
             >
@@ -310,7 +310,7 @@ export default function PainelAlmoxarife({
         <button
           onClick={logout}
           style={{
-            width: '100%', padding: '12px', background: TSEA.vermelho,
+            width: '100%', padding: '12px', background: GOF_PROJECT.azul,
             color: 'white', border: 'none', borderRadius: '4px',
             fontWeight: 'bold', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
@@ -330,29 +330,29 @@ export default function PainelAlmoxarife({
             icon={Icons.loan}
             label="Em custódia"
             value={totalEmCustodia}
-            color={TSEA.vermelho}
-            bg="#fff0f0"
+            color={GOF_PROJECT.azul}
+            bg="#FFF8D6"
           />
           <MetricCard
             icon={Icons.package()}
             label="Total de ferramentas"
             value={totalFerramentas}
-            color="#1565c0"
-            bg="#e3f2fd"
+            color="#0057B8"
+            bg="#E6F1FF"
           />
           <MetricCard
             icon={Icons.stockLg}
             label="Disponíveis"
             value={disponiveis}
-            color="#2e7d32"
-            bg="#e8f5e9"
+            color="#0057B8"
+            bg="#E6F1FF"
           />
           <MetricCard
             icon={Icons.returned}
             label="Devoluções"
             value={totalDevolucoes}
-            color="#6a1b9a"
-            bg="#f3e5f5"
+            color="#003B7A"
+            bg="#F1F7FD"
           />
         </div>
 
@@ -382,25 +382,25 @@ export default function PainelAlmoxarife({
         {abaAtivaAdm === 'dashboard' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div style={{
-              backgroundColor: TSEA.branco, padding: '25px',
+              backgroundColor: GOF_PROJECT.branco, padding: '25px',
               borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
             }}>
-              <h2 style={{ margin: '0 0 6px 0', color: TSEA.preto }}>Bem-vindo(a), {usuarioLogado}!</h2>
-              <p style={{ margin: 0, color: TSEA.cinzaEscuro, fontSize: '14px' }}>
+              <h2 style={{ margin: '0 0 6px 0', color: GOF_PROJECT.azulEscuro }}>Bem-vindo(a), {usuarioLogado}!</h2>
+              <p style={{ margin: 0, color: GOF_PROJECT.azulProfundo, fontSize: '14px' }}>
                 Acompanhamento rapido do estoque e da operacao diaria.
               </p>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
-              <div style={{ backgroundColor: TSEA.branco, padding: '18px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', borderLeft: `4px solid ${TSEA.vermelho}` }}>
+              <div style={{ backgroundColor: GOF_PROJECT.branco, padding: '18px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', borderLeft: `4px solid ${GOF_PROJECT.azul}` }}>
                 <strong>Ferramentas emprestadas</strong>
                 <div style={{ fontSize: '30px', fontWeight: 800, marginTop: '8px' }}>{emprestadas}</div>
               </div>
-              <div style={{ backgroundColor: TSEA.branco, padding: '18px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', borderLeft: '4px solid #2e7d32' }}>
+              <div style={{ backgroundColor: GOF_PROJECT.branco, padding: '18px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', borderLeft: '4px solid #0057B8' }}>
                 <strong>Ferramentas disponiveis</strong>
                 <div style={{ fontSize: '30px', fontWeight: 800, marginTop: '8px' }}>{disponiveis}</div>
               </div>
-              <div style={{ backgroundColor: TSEA.branco, padding: '18px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', borderLeft: '4px solid #e65100' }}>
+              <div style={{ backgroundColor: GOF_PROJECT.branco, padding: '18px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', borderLeft: '4px solid #A36F00' }}>
                 <strong>Estoque zerado</strong>
                 <div style={{ fontSize: '30px', fontWeight: 800, marginTop: '8px' }}>
                   {catalogoFerramentas.filter(item => item.disponivel === 0).length}
@@ -410,21 +410,21 @@ export default function PainelAlmoxarife({
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
               <div style={{
-                backgroundColor: TSEA.branco, padding: '20px',
+                backgroundColor: GOF_PROJECT.branco, padding: '20px',
                 borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
               }}>
                 <h4 style={{ marginTop: 0 }}>Alertas de estoque</h4>
                 {catalogoFerramentas.filter(item => item.disponivel <= 1).length === 0 ? (
                   <p style={{ color: '#888', margin: 0 }}>Nenhum alerta no momento.</p>
                 ) : catalogoFerramentas.filter(item => item.disponivel <= 1).slice(0, 5).map(item => (
-                  <div key={item.id} style={{ padding: '10px 0', borderBottom: `1px solid ${TSEA.cinzaClaro}` }}>
+                  <div key={item.id} style={{ padding: '10px 0', borderBottom: `1px solid ${GOF_PROJECT.azulMuitoClaro}` }}>
                     <strong>{item.nome}</strong> - disponivel: {item.disponivel}/{item.total}
                   </div>
                 ))}
               </div>
 
               <div style={{
-                backgroundColor: TSEA.branco, padding: '20px',
+                backgroundColor: GOF_PROJECT.branco, padding: '20px',
                 borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
               }}>
                 <h4 style={{ marginTop: 0 }}>Ultimas movimentacoes</h4>
@@ -432,7 +432,7 @@ export default function PainelAlmoxarife({
                   .sort((a, b) => (b.timestamp ?? 0) - (a.timestamp ?? 0))
                   .slice(0, 5)
                   .map((mov, idx) => (
-                    <div key={idx} style={{ padding: '10px 0', borderBottom: `1px solid ${TSEA.cinzaClaro}` }}>
+                    <div key={idx} style={{ padding: '10px 0', borderBottom: `1px solid ${GOF_PROJECT.azulMuitoClaro}` }}>
                       <strong>{mov.funcionario}</strong> - {mov.ferramenta} - {mov.data ?? mov.dataDevolucao}
                     </div>
                   ))}
@@ -447,12 +447,12 @@ export default function PainelAlmoxarife({
               {bannerOperador}
 
               <div style={{
-                backgroundColor: TSEA.branco, padding: '20px',
+                backgroundColor: GOF_PROJECT.branco, padding: '20px',
                 borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
               }}>
                 <h3 style={{
                   margin: '0 0 15px 0',
-                  borderBottom: `2px solid ${TSEA.cinzaClaro}`,
+                  borderBottom: `2px solid ${GOF_PROJECT.azulMuitoClaro}`,
                   paddingBottom: '8px'
                 }}>
                   Ferramentas Disponíveis
@@ -477,7 +477,7 @@ export default function PainelAlmoxarife({
                             <h4 style={{ margin: '10px 0 5px 0', fontSize: '14px' }}>{item.nome}</h4>
                             <p style={{ margin: '0 0 12px 0', fontSize: '11px', color: '#666' }}>
                               Disponível:{' '}
-                              <strong style={{ color: esgotado ? 'red' : 'green' }}>
+                              <strong style={{ color: esgotado ? '#0057B8' : '#0057B8' }}>
                                 {item.disponivel}
                               </strong>{' '}
                               / {item.total}
@@ -487,14 +487,14 @@ export default function PainelAlmoxarife({
                           <div style={{
                             display: 'flex', alignItems: 'center',
                             justifyContent: 'space-between',
-                            background: TSEA.cinzaClaro, padding: '5px', borderRadius: '4px'
+                            background: GOF_PROJECT.azulMuitoClaro, padding: '5px', borderRadius: '4px'
                           }}>
                             <button
                               onClick={() => alterarQtd(item, -1)}
                               disabled={qtdSelecionada === 0}
                               style={{
                                 width: '30px', height: '30px',
-                                background: qtdSelecionada === 0 ? '#ccc' : TSEA.cinzaEscuro,
+                                background: qtdSelecionada === 0 ? '#B8CBE3' : GOF_PROJECT.azulProfundo,
                                 color: 'white', border: 'none', borderRadius: '4px',
                                 cursor: qtdSelecionada === 0 ? 'default' : 'pointer',
                                 fontWeight: 'bold', fontSize: '16px'
@@ -510,7 +510,7 @@ export default function PainelAlmoxarife({
                               disabled={esgotado || noMaximo}
                               style={{
                                 width: '30px', height: '30px',
-                                background: (esgotado || noMaximo) ? '#ccc' : TSEA.vermelho,
+                                background: (esgotado || noMaximo) ? '#B8CBE3' : GOF_PROJECT.azul,
                                 color: 'white', border: 'none', borderRadius: '4px',
                                 cursor: (esgotado || noMaximo) ? 'default' : 'pointer',
                                 fontWeight: 'bold', fontSize: '16px'
@@ -526,11 +526,11 @@ export default function PainelAlmoxarife({
 
               {itensCarrinho.length > 0 && (
                 <div style={{
-                  backgroundColor: TSEA.branco, padding: '20px', borderRadius: '8px',
+                  backgroundColor: GOF_PROJECT.branco, padding: '20px', borderRadius: '8px',
                   boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
-                  borderTop: `4px solid ${TSEA.vermelho}`
+                  borderTop: `4px solid ${GOF_PROJECT.azul}`
                 }}>
-                  <h4 style={{ margin: '0 0 12px 0', color: TSEA.vermelho }}>Resumo do Empréstimo</h4>
+                  <h4 style={{ margin: '0 0 12px 0', color: GOF_PROJECT.azul }}>Resumo do Empréstimo</h4>
                   <ul style={{ margin: '0 0 16px 0', paddingLeft: '20px' }}>
                     {itensCarrinho.map((c, i) => (
                       <li key={i} style={{ fontSize: '14px', marginBottom: '4px' }}>
@@ -541,7 +541,7 @@ export default function PainelAlmoxarife({
                   <button
                     onClick={finalizarEmprestimo}
                     style={{
-                      padding: '12px 28px', background: '#2e7d32',
+                      padding: '12px 28px', background: '#0057B8',
                       color: 'white', border: 'none', borderRadius: '4px',
                       fontWeight: 'bold', fontSize: '15px', cursor: 'pointer'
                     }}
@@ -565,12 +565,12 @@ export default function PainelAlmoxarife({
               {bannerOperador}
 
               <div style={{
-                backgroundColor: TSEA.branco, padding: '20px',
+                backgroundColor: GOF_PROJECT.branco, padding: '20px',
                 borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
               }}>
                 <h3 style={{
                   margin: '0 0 15px 0',
-                  borderBottom: `2px solid ${TSEA.cinzaClaro}`,
+                  borderBottom: `2px solid ${GOF_PROJECT.azulMuitoClaro}`,
                   paddingBottom: '8px'
                 }}>
                   Ferramentas em Empréstimo
@@ -588,8 +588,8 @@ export default function PainelAlmoxarife({
                         style={{
                           display: 'flex', justifyContent: 'space-between',
                           alignItems: 'center', padding: '14px 16px',
-                          border: `1px solid ${TSEA.cinzaMedio}`,
-                          borderRadius: '6px', backgroundColor: TSEA.branco
+                          border: `1px solid ${GOF_PROJECT.azulClaro}`,
+                          borderRadius: '6px', backgroundColor: GOF_PROJECT.branco
                         }}
                       >
                         <div>
@@ -602,7 +602,7 @@ export default function PainelAlmoxarife({
                           onClick={() => devolverFerramenta(item.emprestimo_id)}
                           style={{
                             display: 'flex', alignItems: 'center', gap: '7px',
-                            padding: '9px 18px', background: '#2e7d32',
+                            padding: '9px 18px', background: '#0057B8',
                             color: 'white', border: 'none', borderRadius: '4px',
                             fontWeight: 'bold', cursor: 'pointer', fontSize: '13px'
                           }}
@@ -624,16 +624,16 @@ export default function PainelAlmoxarife({
         ══════════════════════════════════════ */}
         {abaAtivaAdm === 'monitor_ativas' && (
           <div style={{
-            backgroundColor: TSEA.branco, padding: '25px',
+            backgroundColor: GOF_PROJECT.branco, padding: '25px',
             borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
           }}>
             <h4>Monitor Geral de Ferramentas Ativas</h4>
-            {ativosEmCustodiaTSEA.filter(a => a.status !== 'DEVOLVIDO').length === 0 ? (
+            {ativosEmCustodiaGofProject.filter(a => a.status !== 'DEVOLVIDO').length === 0 ? (
               <p style={{ color: '#888' }}>Nenhuma ferramenta em custódia no momento.</p>
             ) : (
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
-                  <tr style={{ backgroundColor: TSEA.cinzaClaro }}>
+                  <tr style={{ backgroundColor: GOF_PROJECT.azulMuitoClaro }}>
                     <th style={{ padding: '12px' }}>Funcionário</th>
                     <th style={{ padding: '12px' }}>Ferramenta</th>
                     <th style={{ padding: '12px' }}>Qtd</th>
@@ -642,8 +642,8 @@ export default function PainelAlmoxarife({
                   </tr>
                 </thead>
                 <tbody>
-                  {ativosEmCustodiaTSEA.filter(a => a.status !== 'DEVOLVIDO').map((item, idx) => (
-                    <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
+                  {ativosEmCustodiaGofProject.filter(a => a.status !== 'DEVOLVIDO').map((item, idx) => (
+                    <tr key={idx} style={{ borderBottom: '1px solid #E6F1FF' }}>
                       <td style={{ padding: '12px' }}>{item.funcionario} ({item.matricula})</td>
                       <td style={{ padding: '12px' }}>{item.ferramenta}</td>
                       <td style={{ padding: '12px' }}>{item.qtd}x</td>
@@ -651,8 +651,8 @@ export default function PainelAlmoxarife({
                       <td style={{ padding: '12px' }}>
                         <span style={{
                           padding: '4px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold',
-                          background: item.status === 'EM CUSTÓDIA' ? '#ffebee' : '#fff3e0',
-                          color: item.status === 'EM CUSTÓDIA' ? TSEA.vermelho : '#ef6c00'
+                          background: item.status === 'EM CUSTÓDIA' ? '#FFF4CC' : '#FFF8D6',
+                          color: item.status === 'EM CUSTÓDIA' ? GOF_PROJECT.azul : '#A36F00'
                         }}>
                           {item.status}
                         </span>
@@ -670,13 +670,13 @@ export default function PainelAlmoxarife({
         ══════════════════════════════════════ */}
         {abaAtivaAdm === 'monitor_estoque' && (
           <div style={{
-            backgroundColor: TSEA.branco, padding: '25px',
+            backgroundColor: GOF_PROJECT.branco, padding: '25px',
             borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
           }}>
             <h4>Inventário Físico do Almoxarifado</h4>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
-                <tr style={{ backgroundColor: TSEA.cinzaClaro }}>
+                <tr style={{ backgroundColor: GOF_PROJECT.azulMuitoClaro }}>
                   <th style={{ padding: '12px' }}>Ferramenta</th>
                   <th style={{ padding: '12px' }}>Categoria</th>
                   <th style={{ padding: '12px' }}>Disponível</th>
@@ -685,10 +685,10 @@ export default function PainelAlmoxarife({
               </thead>
               <tbody>
                 {catalogoFerramentas.map((item, idx) => (
-                  <tr key={`${item.id}-${idx}`} style={{ borderBottom: '1px solid #eee' }}>
+                  <tr key={`${item.id}-${idx}`} style={{ borderBottom: '1px solid #E6F1FF' }}>
                     <td style={{ padding: '12px' }}><strong>{item.nome}</strong></td>
                     <td style={{ padding: '12px' }}>{item.categoria}</td>
-                    <td style={{ padding: '12px', color: item.disponivel === 0 ? 'red' : 'green', fontWeight: 'bold' }}>
+                    <td style={{ padding: '12px', color: item.disponivel === 0 ? '#0057B8' : '#0057B8', fontWeight: 'bold' }}>
                       {item.disponivel}
                     </td>
                     <td style={{ padding: '12px' }}>{item.total}</td>
@@ -704,7 +704,7 @@ export default function PainelAlmoxarife({
         ══════════════════════════════════════ */}
         {abaAtivaAdm === 'historico_retiradas' && (
           <div style={{
-            backgroundColor: TSEA.branco, padding: '25px',
+            backgroundColor: GOF_PROJECT.branco, padding: '25px',
             borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
           }}>
             <h4>Histórico de Últimas Retiradas</h4>
@@ -712,7 +712,7 @@ export default function PainelAlmoxarife({
               <p style={{ color: '#888' }}>Nenhuma retirada registrada.</p>
             ) : (
               ultimasRetiradas.map((r, i) => (
-                <div key={i} style={{ padding: '10px', borderBottom: '1px solid #eee' }}>
+                <div key={i} style={{ padding: '10px', borderBottom: '1px solid #E6F1FF' }}>
                   {r.data} — <strong>{r.funcionario}</strong> retirou {r.qtd}x {r.ferramenta}
                 </div>
               ))
@@ -725,7 +725,7 @@ export default function PainelAlmoxarife({
         ══════════════════════════════════════ */}
         {abaAtivaAdm === 'historico_devolucoes' && (
           <div style={{
-            backgroundColor: TSEA.branco, padding: '25px',
+            backgroundColor: GOF_PROJECT.branco, padding: '25px',
             borderRadius: '8px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
           }}>
             <h4>Histórico de Últimas Devoluções</h4>
@@ -733,7 +733,7 @@ export default function PainelAlmoxarife({
               <p style={{ color: '#888' }}>Nenhuma devolução registrada.</p>
             ) : (
               ultimasDevolucoes.map((d, i) => (
-                <div key={i} style={{ padding: '10px', borderBottom: '1px solid #eee', color: '#2e7d32' }}>
+                <div key={i} style={{ padding: '10px', borderBottom: '1px solid #E6F1FF', color: '#0057B8' }}>
                   {d.dataDevolucao} — <strong>{d.funcionario}</strong> devolveu {d.qtd}x {d.ferramenta}
                 </div>
               ))
