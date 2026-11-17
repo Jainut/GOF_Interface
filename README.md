@@ -1,99 +1,93 @@
-# GOF Project
+# GOF Interface
 
-Frontend web para controle de empréstimo, devolução e acompanhamento de ferramentas. A aplicação oferece interfaces separadas para operador, almoxarife e administrador geral, com integração à API e eventos NFC em tempo real.
+React frontend for tracking tool checkouts, returns, and inventory in industrial storerooms. It provides separate views for operators, storeroom attendants, and administrators, and receives NFC card events in real time from the [GOF API](https://github.com/Jainut/GOF_API).
 
-## Demonstração
+## Demo
 
-**[Abrir a demo no navegador](https://jainut.github.io/GOF_Interface/)**
+**[Try the interactive demo (in Portuguese)](https://jainut.github.io/GOF_Interface/)**
 
-Escolha **Almoxarife**, clique em **Simular cartão NFC** e registre a retirada ou a devolução de uma ferramenta. Troque para **Operador** para ver os itens em custódia ou **Administrador** para consultar o estoque. A demo usa dados fictícios e simula a [GOF_API](https://github.com/Jainut/GOF_API) no navegador.
+Choose **Almoxarife** (storeroom attendant), click **Simular cartão NFC** (simulate NFC card), and check out or return a tool. Switch to **Operador** (operator) to see checked-out tools or **Administrador** (administrator) to check inventory. The demo simulates the GOF API in the browser using fictional data.
 
-## Tecnologias
+## Tech stack
 
-- React 18 e Vite
+- React 18 and Vite
 - React Router
 - Socket.IO Client
 - ESLint
 
-## Perfis de acesso
+## User roles
 
-| Perfil | Rota | Responsabilidade |
+| Role | Route | Responsibilities |
 | --- | --- | --- |
-| Operador | `/operador` | Consulta itens sob custódia e confirma ações pelo totem. |
-| Almoxarife | `/almoxarife` | Registra empréstimos e devoluções após identificação NFC. |
-| Administrador geral | `/master` | Acompanha dados, usuários, cartões NFC e estoque. |
+| Operator | `/operador` | Views tools checked out to them and confirms actions at the kiosk. |
+| Storeroom attendant | `/almoxarife` | Records checkouts and returns after identifying the operator by NFC. |
+| Administrator | `/master` | Monitors activity, users, NFC cards, and inventory. |
 
-## Pré-requisitos
+## Prerequisites
 
-- Node.js 18 ou superior
-- npm 9 ou superior
-- API GOF Project disponível
+- Node.js 18 or later
+- npm 9 or later
+- A running instance of the [GOF API](https://github.com/Jainut/GOF_API)
 
-## Instalação
+## Installation
 
 ```bash
-git clone <url-do-repositorio>
+git clone https://github.com/Jainut/GOF_Interface.git
 cd GOF_Interface
 npm ci
 ```
 
-## Configuração
+## Configuration
 
-Crie um arquivo `.env` na raiz do projeto:
+Create a `.env` file in the project root.
 
 ```env
-VITE_API_URL=https://sua-api.exemplo.com
+VITE_API_URL=https://your-api.example.com
 ```
 
-`VITE_API_URL` define a URL-base das requisições HTTP e da conexão Socket.IO. Quando omitida, as requisições são feitas para a mesma origem da aplicação.
+`VITE_API_URL` sets the base URL for HTTP requests and the Socket.IO connection. If it is omitted, the frontend connects to its own origin.
 
-## Executando localmente
+## Run locally
 
 ```bash
 npm run dev
 ```
 
-O Vite exibirá no terminal o endereço local da aplicação, normalmente `http://localhost:5173`.
+Vite prints the local URL in the terminal, typically `http://localhost:5173`.
 
-## Scripts disponíveis
+## Available scripts
 
-| Comando | Descrição |
+| Command | Description |
 | --- | --- |
-| `npm run dev` | Inicia o servidor de desenvolvimento. |
-| `npm run build` | Gera o build de produção em `dist/`. |
-| `npm run preview` | Serve localmente o build de produção. |
-| `npm run lint` | Executa a validação de código com ESLint. |
+| `npm run dev` | Starts the development server. |
+| `npm run build` | Builds the production app into `dist/`. |
+| `npm run preview` | Serves the production build locally. |
+| `npm run lint` | Checks the source code with ESLint. |
 
-## Estrutura do projeto
+## Project structure
 
 ```text
 src/
-├── components/   # Painéis e componentes visuais por perfil
-├── contexts/     # Estado de autenticação e dados da aplicação
-├── hooks/        # Hooks para consumo dos contexts
-├── layouts/      # Layouts compartilhados
-├── pages/        # Páginas associadas às rotas
-├── routes/       # Rotas e proteção por perfil
-├── services/     # Cliente HTTP e conexão Socket.IO
-└── utils/        # Tema e utilitários visuais
+├── components/   # Dashboards and UI components for each role
+├── contexts/     # Authentication and application state
+├── hooks/        # Hooks for consuming React contexts
+├── layouts/      # Shared layouts
+├── pages/        # Page components
+├── routes/       # Routing and role-based access
+├── services/     # HTTP client and Socket.IO connection
+└── utils/        # Theme and UI utilities
 ```
 
-## Integrações
+## Integrations
 
-O frontend consome a API para autenticação, catálogo de ferramentas, empréstimos, devoluções, ativos, usuários e cartões NFC. O Socket.IO é utilizado para receber a identificação NFC do operador em tempo real.
+The frontend calls the API for authentication, the tool catalog, checkouts, returns, open checkouts, users, and NFC cards. It uses Socket.IO to receive operator identification events in real time.
 
-O token de autenticação é enviado como `Bearer token` nas requisições protegidas. Ao alterar a URL da API, confirme que CORS e credenciais estejam liberados pelo backend.
+The frontend includes credentials on HTTP requests and sends an `Authorization: Bearer <token>` header when a token is available. When the API runs on a different origin, configure the backend to allow the frontend origin and credentialed requests.
 
 ## Design
 
-A identidade visual utiliza a paleta GOF Project:
+The GOF Project palette uses blue for navigation and primary actions, yellow for brand accents, and white and light blue for surfaces and backgrounds. The colors are defined in `src/utils/theme.js`.
 
-- Azul: ações principais e navegação
-- Amarelo: destaques da marca
-- Branco e tons claros de azul: superfícies e fundos
+## Deployment
 
-As cores estão centralizadas em `src/utils/theme.js`.
-
-## Deploy
-
-O projeto inclui `vercel.json` com fallback para `index.html`, necessário para que as rotas do React Router funcionem em produção. Antes de publicar, configure `VITE_API_URL` nas variáveis de ambiente do provedor de hospedagem.
+The repository includes a `vercel.json` file that rewrites routes to `index.html` so React Router can handle direct visits to frontend routes. Set `VITE_API_URL` in the hosting provider’s environment before building the app.
