@@ -2,6 +2,12 @@
 
 Frontend web para controle de empréstimo, devolução e acompanhamento de ferramentas. A aplicação oferece interfaces separadas para operador, almoxarife e administrador geral, com integração à API e eventos NFC em tempo real.
 
+## Demonstração
+
+**[Abrir a demo no navegador](https://jainut.github.io/GOF_Interface/)**
+
+Escolha **Almoxarife**, clique em **Simular cartão NFC** e registre a retirada ou a devolução de uma ferramenta. Troque para **Operador** para ver os itens em custódia ou **Administrador** para consultar o estoque. A demo usa dados fictícios e simula a [GOF_API](https://github.com/Jainut/GOF_API) no navegador.
+
 ## Tecnologias
 
 - React 18 e Vite
