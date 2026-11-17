@@ -1,4 +1,5 @@
 import { io } from 'socket.io-client';
+import { demoEnabled } from '../demo/demoApi';
 import { getStoredToken } from './api';
 
 const API_URL = import.meta.env.VITE_API_URL ?? window.location.origin;
@@ -16,11 +17,13 @@ const socket = io(API_URL, {
 });
 
 export const connectSocket = () => {
+  if (demoEnabled) return;
   socket.auth = buildAuth();
   if (!socket.connected) socket.connect();
 };
 
 export const refreshSocketAuth = () => {
+  if (demoEnabled) return;
   socket.auth = buildAuth();
   if (socket.connected) {
     socket.disconnect();

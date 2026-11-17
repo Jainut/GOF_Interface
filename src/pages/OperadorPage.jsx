@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import PainelOperador from '../components/PainelOperador';
+import { demoEnabled } from '../demo/demoApi';
 import { useAppData } from '../hooks/useAppData';
 import { useAuth } from '../hooks/useAuth';
 import { GOF_PROJECT } from '../utils/theme';
@@ -10,8 +12,12 @@ export default function OperadorPage() {
     setAbaAtiva,
     operador,
     ativosEmCustodiaGofProject,
+    carregarDadosProtegidos,
     limparSessaoVisual
   } = useAppData();
+  useEffect(() => {
+    if (demoEnabled) carregarDadosProtegidos();
+  }, [carregarDadosProtegidos]);
 
   const sair = () => {
     limparSessaoVisual();

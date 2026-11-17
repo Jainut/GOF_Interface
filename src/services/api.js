@@ -1,5 +1,7 @@
+import { demoEnabled, demoRequest } from '../demo/demoApi';
+
 const API_URL = import.meta.env.VITE_API_URL ?? '';
-const TOKEN_KEY = 'gof_project_token';
+const TOKEN_KEY = demoEnabled ? 'gof_demo_token' : 'gof_project_token';
 
 export const getStoredToken = () => localStorage.getItem(TOKEN_KEY);
 
@@ -25,6 +27,8 @@ export const extractToken = (data) => {
 };
 
 export async function apiRequest(path, options = {}) {
+  if (demoEnabled) return demoRequest(path, options);
+
   const token = getStoredToken();
   const headers = new Headers(options.headers ?? {});
 

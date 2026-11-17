@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { demoEnabled } from '../demo/demoApi';
 import { apiRequest, clearStoredToken, extractToken, readJson, setStoredToken } from '../services/api';
 
-const SESSION_KEY = 'gof_project_session';
+const SESSION_KEY = demoEnabled ? 'gof_demo_session' : 'gof_project_session';
 const AuthContext = createContext(null);
 
 const readStoredSession = () => {
@@ -71,7 +72,7 @@ export function AuthProvider({ children }) {
   const logout = useCallback(() => {
     clearStoredToken();
     localStorage.removeItem(SESSION_KEY);
-    sessionStorage.clear();
+    if (!demoEnabled) sessionStorage.clear();
     setSession({ perfil: null });
   }, []);
 

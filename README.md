@@ -2,6 +2,14 @@
 
 Frontend web para controle de empréstimo, devolução e acompanhamento de ferramentas. A aplicação oferece interfaces separadas para operador, almoxarife e administrador geral, com integração à API e eventos NFC em tempo real.
 
+## Demonstração
+
+[Abrir a demo no navegador](https://jainut.github.io/GOF_Interface/)
+
+O modo de demonstração usa as telas React com dados fictícios e simula as rotas HTTP e o evento NFC no navegador. Na demo, escolha **Almoxarife** e clique em **Simular cartão NFC** para registrar um empréstimo. O painel **Eventos e API simulada** mostra as requisições, as respostas e o evento.
+
+Para desenvolver nesta branch, execute `npm ci` e `npm run dev -- --mode demo`. Para atualizar o GitHub Pages, execute `npm run build -- --mode demo --outDir docs --emptyOutDir`, recrie o arquivo vazio `docs/.nojekyll` e versione a pasta `docs`.
+
 ## Tecnologias
 
 - React 18 e Vite

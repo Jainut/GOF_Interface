@@ -1,8 +1,12 @@
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, HashRouter } from 'react-router-dom';
 import { AppDataProvider } from './contexts/AppDataContext';
 import { AuthProvider } from './contexts/AuthContext';
 import AppRoutes from './routes/AppRoutes';
 import { GOF_PROJECT } from './utils/theme';
+import { DemoBar } from './demo/DemoPanel';
+import { demoEnabled } from './demo/demoApi';
+
+const Router = demoEnabled ? HashRouter : BrowserRouter;
 
 function App() {
   return (
@@ -36,9 +40,10 @@ function App() {
             .grid-catalogo { grid-template-columns: 1fr; }
           }
         `}</style>
-        <BrowserRouter>
+        <Router>
+          {demoEnabled && <DemoBar />}
           <AppRoutes />
-        </BrowserRouter>
+        </Router>
       </AppDataProvider>
     </AuthProvider>
   );

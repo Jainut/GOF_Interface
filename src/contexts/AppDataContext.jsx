@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { demoEnabled, demoOperator, demoSocket } from '../demo/demoApi';
 import { apiRequest, readJson } from '../services/api';
 import socket, { connectSocket, refreshSocketAuth } from '../services/socket';
 
@@ -23,7 +24,7 @@ const normalizeNfcPayload = (payload) => {
 export function AppDataProvider({ children }) {
   const [perfil, setPerfil] = useState(null);
 
-  const [operador] = useState({
+  const [operador] = useState(demoEnabled ? demoOperator : {
     nome: 'Carlos Eduardo Santos',
     matricula: 'RE-40922',
     setor: 'Bobinagem de Transformadores',
@@ -65,7 +66,7 @@ export function AppDataProvider({ children }) {
           id: f.id,
           nome: f.tipo,
           categoria: f.categoria ?? 'Geral',
-          total: f.ferramenta_estoque?.[0]?.quantidade ?? 0,
+          total: (demoEnabled ? f.total : f.ferramenta_estoque?.[0]?.quantidade) ?? 0,
           disponivel: f.ferramenta_estoque?.[0]?.quantidade ?? 0
         })));
       }
@@ -204,6 +205,7 @@ export function AppDataProvider({ children }) {
         setMensagemSistema({ tipo: 'sucesso', texto: 'Empréstimo registrado com sucesso!' });
         carregarAtivos();
         carregarEmprestimos();
+        if (demoEnabled) carregarFerramentas();
         setNfcLiberado(false);
         setOperadorNFC(null);
         setTempoRestante(0);
@@ -216,7 +218,7 @@ export function AppDataProvider({ children }) {
       console.error('Erro ao realizar empréstimo:', erro);
       setMensagemSistema({ tipo: 'erro', texto: 'Falha de comunicação com o servidor.' });
     }
-  }, [carregarAtivos, carregarEmprestimos, operadorNFC]);
+  }, [carregarAtivos, carregarEmprestimos, carregarFerramentas, operadorNFC]);
 
   const devolverFerramenta = useCallback(async (emprestimoId) => {
     if (!operadorNFC?.cpf) {
@@ -240,6 +242,7 @@ export function AppDataProvider({ children }) {
         carregarAtivos();
         carregarDevolucoes();
         carregarFerramentas();
+        if (demoEnabled) carregarEmprestimos();
       } else {
         setMensagemSistema({ tipo: 'erro', texto: data?.message ?? 'Erro ao registrar devolução.' });
       }
@@ -247,7 +250,7 @@ export function AppDataProvider({ children }) {
       console.error('Erro ao devolver ferramenta:', e);
       setMensagemSistema({ tipo: 'erro', texto: 'Erro de conexão ao registrar devolução.' });
     }
-  }, [carregarAtivos, carregarDevolucoes, carregarFerramentas, operadorNFC]);
+  }, [carregarAtivos, carregarDevolucoes, carregarEmprestimos, carregarFerramentas, operadorNFC]);
 
   const cancelarAcessoNFC = useCallback(() => {
     setNfcLiberado(false);
@@ -308,6 +311,12 @@ export function AppDataProvider({ children }) {
       setAbaAtivaAdm('solicitar_emprestimo');
       if (op.cpf) carregarEmprestimosDoOperador(op.cpf);
     };
+
+    if (demoEnabled) {
+      const handleDemoCard = (event) => handleNfcAuth(event.detail);
+      demoSocket.addEventListener('nfcAuth', handleDemoCard);
+      return () => demoSocket.removeEventListener('nfcAuth', handleDemoCard);
+    }
 
     const handleConnectError = (erro) => {
       console.error('Erro no socket NFC:', erro);

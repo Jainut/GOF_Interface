@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { demoEnabled } from '../demo/demoApi';
 
 export default function PainelOperador({
   GOF_PROJECT, abaAtiva, setAbaAtiva, operador, ativosEmCustodiaGofProject, solicitarDevolucaoImediata = () => {},
@@ -15,7 +16,7 @@ export default function PainelOperador({
         </div>
         
         <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <button onClick={() => setAbaAtiva('confirme_cartao')} className="btn-sidebar" style={{ backgroundColor: abaAtiva === 'confirme_cartao' ? GOF_PROJECT.azul : 'transparent' }}>Confirme seu Cartão</button>
+          {!demoEnabled && <button onClick={() => setAbaAtiva('confirme_cartao')} className="btn-sidebar" style={{ backgroundColor: abaAtiva === 'confirme_cartao' ? GOF_PROJECT.azul : 'transparent' }}>Confirme seu Cartão</button>}
           <button onClick={() => setAbaAtiva('custodia')} className="btn-sidebar" style={{ backgroundColor: abaAtiva === 'custodia' ? GOF_PROJECT.azul : 'transparent' }}>Minha Custódia ({ativosEmCustodiaGofProject.filter(a => a.matricula === operador.matricula && a.status === "EM CUSTÓDIA").length})</button>
           <button onClick={() => setAbaAtiva('info')} className="btn-sidebar" style={{ backgroundColor: abaAtiva === 'info' ? GOF_PROJECT.azul : 'transparent' }}>Minhas Infos</button>
         </nav>
@@ -94,7 +95,7 @@ export default function PainelOperador({
                         </span>
                       </div>
                     </div>
-                    {item.status === "EM CUSTÓDIA" && (
+                    {!demoEnabled && item.status === "EM CUSTÓDIA" && (
                       <button onClick={() => solicitarDevolucaoImediata(item)} style={{ padding: '8px 12px', background: GOF_PROJECT.azulProfundo, color: 'white', border: 'none', borderRadius: '4px', fontSize: '12px', cursor: 'pointer', fontWeight: 'bold' }}>Solicitar Devolução</button>
                     )}
                   </div>

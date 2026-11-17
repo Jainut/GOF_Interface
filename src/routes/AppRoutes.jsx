@@ -1,4 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
+import { DemoHome } from '../demo/DemoPanel';
+import { demoEnabled } from '../demo/demoApi';
 import AppLayout from '../layouts/AppLayout';
 import AlmoxarifePage from '../pages/AlmoxarifePage';
 import LoginPage from '../pages/LoginPage';
@@ -10,7 +12,7 @@ export default function AppRoutes() {
   return (
     <Routes>
       <Route element={<AppLayout />}>
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/login" element={demoEnabled ? <DemoHome /> : <LoginPage />} />
         <Route element={<ProtectedRoute allowedProfiles={['func']} />}>
           <Route path="/operador" element={<OperadorPage />} />
         </Route>
