@@ -1,13 +1,20 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useLayoutEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppData } from '../hooks/useAppData';
 import { useAuth } from '../hooks/useAuth';
 import { demoActivity, simulateCard } from './demoApi';
+import homeStyles from './demoHome.css?raw';
 
 const profiles = [
-  { id: 'adm', route: '/almoxarife', label: 'Almoxarife', description: 'Simule a leitura do cartão, escolha uma ferramenta e registre a saída e a devolução.' },
-  { id: 'func', route: '/operador', label: 'Operador', description: 'Consulte as ferramentas em sua custódia e confira o que mudou após uma retirada.' },
-  { id: 'superadmin', route: '/master', label: 'Administrador', description: 'Acompanhe estoque, empréstimos ativos, usuários e cartões vinculados.' }
+  { id: 'adm', route: '/almoxarife', label: 'Almoxarife' },
+  { id: 'func', route: '/operador', label: 'Operador', description: 'Veja as ferramentas que estão sob sua responsabilidade.' },
+  { id: 'superadmin', route: '/master', label: 'Administrador', description: 'Consulte o estoque, os empréstimos ativos e os cartões vinculados.' }
+];
+
+const workflow = [
+  { title: 'Identificar o operador', description: 'O operador aproxima o cartão NFC do leitor. O nome dele aparece no painel do almoxarife.' },
+  { title: 'Registrar a retirada', description: 'O almoxarife seleciona a ferramenta e a quantidade. A retirada entra no histórico e reduz o saldo disponível.' },
+  { title: 'Registrar a devolução', description: 'Quando a ferramenta volta, o almoxarife encerra o empréstimo e a unidade retorna ao estoque.' }
 ];
 
 function useDemoProfiles() {
@@ -33,7 +40,12 @@ function useDemoProfiles() {
 
 export function DemoBar() {
   const { enter, perfilLogado } = useDemoProfiles();
+  const { pathname } = useLocation();
   const [activity, setActivity] = useState([]);
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   useEffect(() => {
     const remember = ({ detail }) => setActivity((previous) => [detail, ...previous].slice(0, 30));
@@ -75,42 +87,83 @@ export function DemoBar() {
 
 export function DemoHome() {
   const { enter } = useDemoProfiles();
+  const [almoxarife, ...otherProfiles] = profiles;
+
   return (
     <main className="gof-demo-home">
-      <header>
-        <p className="gof-demo-kicker">TCC · GESTÃO DE FERRAMENTAS</p>
-        <h1>Da retirada à devolução.</h1>
-        <p>Explore como um almoxarifado industrial identifica operadores por NFC, registra empréstimos e acompanha ferramentas em estoque.</p>
-      </header>
-      <div className="gof-demo-profiles">
-        {profiles.map((profile) => (
-          <section key={profile.id}>
-            <h2>{profile.label}</h2>
-            <p>{profile.description}</p>
-            <button type="button" className={profile.id === 'adm' ? 'gof-demo-primary' : ''} onClick={() => enter(profile)}>
-              Entrar como {profile.label.toLowerCase()} <span aria-hidden="true">→</span>
+      <style>{homeStyles}</style>
+      <div className="gof-home-sheet">
+        <header className="gof-home-intro">
+          <div className="gof-home-overview">
+            <p className="gof-home-label">Projeto de conclusão de curso</p>
+            <h1>Controle de ferramentas no almoxarifado</h1>
+            <p className="gof-home-lead">Quando as retiradas são anotadas no papel, descobrir com quem está uma ferramenta ou quantas ainda estão disponíveis exige conferir os registros à mão.</p>
+            <p className="gof-home-lead">O GOF reúne empréstimos, devoluções e estoque em um só sistema. Cada retirada fica vinculada ao operador que levou a ferramenta.</p>
+            <button className="gof-home-enter" type="button" onClick={() => enter(almoxarife)}>
+              Entrar como almoxarife <span aria-hidden="true">→</span>
             </button>
+            <p className="gof-home-hint">Na demo, use o botão <strong>Simular cartão NFC</strong> para iniciar uma retirada.</p>
+          </div>
+          <figure className="gof-home-record">
+            <figcaption>Exemplo de empréstimo</figcaption>
+            <div className="gof-home-tool">
+              <img src={`${import.meta.env.BASE_URL}imagens/torquimetro.png`} width="193" height="198" alt="" />
+            </div>
+            <dl>
+              <div><dt>Ferramenta</dt><dd>Torquímetro</dd></div>
+              <div><dt>Operadora</dt><dd>Marina Costa</dd></div>
+              <div><dt>Quantidade</dt><dd>1 unidade</dd></div>
+              <div><dt>Situação</dt><dd className="gof-home-status">Em custódia</dd></div>
+            </dl>
+          </figure>
+        </header>
+
+        <section className="gof-home-flow" aria-labelledby="gof-home-flow-title">
+          <h2 id="gof-home-flow-title">Como funciona</h2>
+          <ol>
+            {workflow.map((step) => (
+              <li key={step.title}>
+                <h3>{step.title}</h3>
+                <p>{step.description}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <div className="gof-home-details">
+          <section className="gof-home-profiles" aria-labelledby="gof-home-profiles-title">
+            <h2 id="gof-home-profiles-title">Outros perfis na demo</h2>
+            {otherProfiles.map((profile) => (
+              <button key={profile.id} type="button" onClick={() => enter(profile)} aria-label={`Entrar como ${profile.label.toLowerCase()}`}>
+                <span><strong>{profile.label}</strong><small>{profile.description}</small></span>
+                <span aria-hidden="true">→</span>
+              </button>
+            ))}
           </section>
-        ))}
+          <section className="gof-home-code" aria-labelledby="gof-home-code-title">
+            <h2 id="gof-home-code-title">Por trás da tela</h2>
+            <p>No projeto, a API Express registra as movimentações no PostgreSQL e envia a identificação do cartão à interface React em tempo real. Na demo, o painel <strong>Eventos e API simulada</strong> mostra essas interações com dados fictícios.</p>
+            <div className="gof-home-links">
+              <a href="https://github.com/Jainut/GOF_Interface">GOF_Interface <span aria-hidden="true">↗</span></a>
+              <a href="https://github.com/Jainut/GOF_API">GOF_API <span aria-hidden="true">↗</span></a>
+            </div>
+          </section>
+        </div>
       </div>
-      <footer>
-        <a href="https://github.com/Jainut/GOF_Interface">GOF_Interface · React e Vite ↗</a>
-        <a href="https://github.com/Jainut/GOF_API">GOF_API · Express, Prisma e PostgreSQL ↗</a>
-      </footer>
     </main>
   );
 }
 
 const styles = `
-  .gof-demo, .gof-demo-home { font-family: Inter, system-ui, sans-serif; }
+  .gof-demo { font-family: Inter, system-ui, sans-serif; }
   .gof-demo { position: sticky; top: 0; z-index: 10; color: #fff; background: #102841; border-bottom: 1px solid #38516b; }
   .gof-demo-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem 1.25rem; padding: .8rem clamp(1rem, 3vw, 2.25rem); }
   .gof-demo-toolbar small { display: block; margin-top: .25rem; color: #bfcee0; font-size: .65rem; letter-spacing: .085em; }
   .gof-demo-actions { flex: 1; display: flex; flex-wrap: wrap; gap: .4rem; }
-  .gof-demo button, .gof-demo-home button { border: 1px solid #6285aa; color: inherit; background: transparent; border-radius: .4rem; cursor: pointer; padding: .55rem .8rem; font-size: .85rem; font-weight: 650; }
+  .gof-demo button { border: 1px solid #6285aa; color: inherit; background: transparent; border-radius: .4rem; cursor: pointer; padding: .55rem .8rem; font-size: .85rem; font-weight: 650; }
   .gof-demo button[aria-pressed="true"] { border-color: #a1c9ff; background: #224770; }
-  .gof-demo .gof-demo-primary, .gof-demo-home .gof-demo-primary { color: #162338; background: #ffd35e; border-color: #ffd35e; }
-  .gof-demo button:hover, .gof-demo-home button:hover { box-shadow: 0 0 0 2px #82b6eb; }
+  .gof-demo .gof-demo-primary { color: #162338; background: #ffd35e; border-color: #ffd35e; }
+  .gof-demo button:hover { box-shadow: 0 0 0 2px #82b6eb; }
   .gof-demo-inspector { margin-left: auto; font-size: .85rem; }
   .gof-demo-inspector > :not(summary) { margin-left: .3rem; }
   .gof-demo-inspector[open] { width: 100%; max-height: 40vh; overflow: auto; border-top: 1px solid #6285aa; padding: .7rem 0; }
@@ -118,17 +171,6 @@ const styles = `
   .gof-demo-inspector summary { cursor: pointer; }
   .gof-demo-inspector pre { overflow: auto; max-height: 15rem; background: #081d31; border-radius: .4rem; padding: .6rem; }
   .gof-demo-inspector a { color: #cfe6ff; }
-  .gof-demo-home { max-width: 78rem; margin: auto; padding: clamp(2.2rem, 7vw, 6.75rem) clamp(1rem, 5vw, 4.5rem); color: #142b43; }
-  .gof-demo-home header { max-width: 49rem; }
-  .gof-demo-home h1 { font-size: clamp(2.8rem, 7.5vw, 5.25rem); line-height: .99; letter-spacing: -.055em; margin: .6rem 0 1.3rem; }
-  .gof-demo-home header p:last-child { max-width: 38rem; font-size: clamp(1rem, 2.3vw, 1.26rem); line-height: 1.55; color: #395774; }
-  .gof-demo-kicker { font-weight: 750; color: #21578c; letter-spacing: .11em; font-size: .75rem; }
-  .gof-demo-profiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 1rem; margin: 2.1rem 0 1.5rem; }
-  .gof-demo-profiles section { display: flex; flex-direction: column; align-items: flex-start; background: #fff; border: 1px solid #c9ddef; border-radius: .65rem; padding: 1.35rem; }
-  .gof-demo-profiles h2 { margin: 0; font-size: 1.27rem; }
-  .gof-demo-profiles p { flex: 1; color: #395774; line-height: 1.5; margin: .75rem 0 1.15rem; }
-  .gof-demo-home footer { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; font-size: .86rem; }
-  .gof-demo-home footer a { color: #164d85; text-underline-offset: .2rem; }
   @media (max-width: 680px) {
     .gof-demo-toolbar { gap: .55rem; }
     .gof-demo-actions { flex-basis: 100%; order: 1; }

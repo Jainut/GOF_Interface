@@ -1,0 +1,217 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600;700&display=swap');
+
+.gof-demo-home {
+  --paper: #f6f3eb;
+  --ink: #14283b;
+  --muted: #425466;
+  --line: #b6b8b0;
+  --heading: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  min-height: calc(100svh - 60px);
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 1.0625rem / 1.5 Barlow, system-ui, sans-serif;
+}
+
+.gof-home-sheet {
+  width: min(100% - 2.5rem, 72rem);
+  margin-inline: auto;
+  padding: clamp(2rem, 5vw, 4.5rem) 0 clamp(2.5rem, 6vw, 4rem);
+}
+
+.gof-home-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: clamp(2.5rem, 6vw, 5.5rem);
+  align-items: center;
+  padding-bottom: clamp(2rem, 4.5vw, 3.75rem);
+  border-bottom: 2px solid var(--ink);
+}
+
+.gof-home-label,
+.gof-home-record figcaption,
+.gof-home-record dt,
+.gof-home-flow li::before {
+  font: 600 .73rem / 1.2 'IBM Plex Mono', Consolas, monospace;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.gof-home-label {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin: 0 0 1rem;
+}
+
+.gof-home-label::before {
+  content: '';
+  width: 1.6rem;
+  height: .4rem;
+  background: #e6ae00;
+}
+
+.gof-home-overview h1 {
+  margin: 0 0 1.45rem;
+  font: 700 clamp(3rem, 5.7vw, 5.65rem) / .9 var(--heading);
+  letter-spacing: -.025em;
+  text-wrap: balance;
+  text-align: left;
+}
+
+.gof-home-lead {
+  max-width: 34rem;
+  margin: 0 0 .75rem;
+  color: var(--muted);
+}
+
+.gof-home-enter {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: .8rem;
+  padding: .7rem 1rem;
+  border: 1px solid var(--ink);
+  background: #ffca29;
+  color: var(--ink);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.gof-home-enter:hover { background: #ffda5d; }
+.gof-home-enter span { font-size: 1.2rem; }
+
+.gof-home-hint {
+  margin: .65rem 0 0;
+  color: var(--muted);
+  font-size: .9rem;
+}
+
+.gof-home-record {
+  margin: 0;
+  background: #faf8f0;
+  border: 1px solid var(--ink);
+  box-shadow: 7px 7px 0 #e2dfd3;
+}
+
+.gof-home-record figcaption {
+  padding: .85rem 1rem;
+  border-bottom: 1px solid var(--ink);
+}
+
+.gof-home-tool {
+  display: grid;
+  place-items: center;
+  padding: .85rem;
+  background-color: #dce5eb;
+  background-image:
+    linear-gradient(to right, #14283b18 1px, transparent 1px),
+    linear-gradient(to bottom, #14283b18 1px, transparent 1px);
+  background-size: 18px 18px;
+  border-bottom: 1px solid var(--ink);
+}
+
+.gof-home-tool img {
+  width: min(100%, 12rem);
+  height: auto;
+  mix-blend-mode: multiply;
+}
+
+.gof-home-record dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+}
+
+.gof-home-record dl div {
+  min-width: 0;
+  padding: .7rem 1rem .8rem;
+}
+
+.gof-home-record dl div:nth-child(even) { border-left: 1px solid #c8c9c1; }
+.gof-home-record dl div:nth-child(n + 3) { border-top: 1px solid #c8c9c1; }
+.gof-home-record dt { color: var(--muted); font-size: .66rem; }
+.gof-home-record dd { margin: .3rem 0 0; font-weight: 700; overflow-wrap: anywhere; }
+
+.gof-home-record .gof-home-status {
+  display: inline-block;
+  padding: 0 .35rem .08rem;
+  background: #f7dea1;
+  font-size: .89rem;
+}
+
+.gof-home-flow { padding: 1.3rem 0 1.7rem; }
+
+.gof-demo-home h2 {
+  margin: 0 0 .9rem;
+  font: 700 1.8rem / 1.1 var(--heading);
+}
+
+.gof-home-flow ol {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1.1rem, 3vw, 2.7rem);
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  counter-reset: gof-workflow;
+}
+
+.gof-home-flow li {
+  border-top: 1px solid var(--line);
+  padding-top: .8rem;
+  counter-increment: gof-workflow;
+}
+
+.gof-home-flow li::before {
+  content: counter(gof-workflow, decimal-leading-zero);
+  color: #455e72;
+}
+
+.gof-home-flow h3 { margin: .25rem 0; font-size: 1.05rem; }
+.gof-home-flow li p, .gof-home-code p { margin: 0; color: var(--muted); }
+
+.gof-home-details {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(2rem, 6vw, 5.5rem);
+  padding-top: 1.6rem;
+  border-top: 1px solid var(--line);
+}
+
+.gof-home-profiles button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: .75rem;
+  width: 100%;
+  min-height: 3.2rem;
+  padding: .55rem .35rem;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.gof-home-profiles button:first-of-type { border-top: 1px solid var(--line); }
+.gof-home-profiles button:hover { background: #ebe8dd; }
+.gof-home-profiles small { display: block; color: var(--muted); font-size: .9rem; }
+.gof-home-links { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; margin-top: 1rem; }
+.gof-home-links a { color: #004b88; font-weight: 700; text-underline-offset: .2rem; }
+.gof-demo-home :is(button, a):focus-visible { outline: 2px solid #0057b8; outline-offset: 3px; }
+
+@media (max-width: 750px) {
+  .gof-home-intro, .gof-home-details { grid-template-columns: 1fr; }
+  .gof-home-intro { gap: 1.65rem; }
+  .gof-home-overview h1 { max-width: 14ch; text-wrap: initial; }
+  .gof-home-record { width: min(100% - 7px, 28rem); }
+}
+
+@media (max-width: 520px) {
+  .gof-home-sheet { width: calc(100% - 2rem); }
+  .gof-home-flow ol { grid-template-columns: 1fr; gap: .9rem; }
+  .gof-home-flow li { display: grid; grid-template-columns: 2rem 1fr; align-items: baseline; }
+  .gof-home-flow h3 { margin: 0 0 .25rem; }
+  .gof-home-flow li p { grid-column: 2; }
+}
